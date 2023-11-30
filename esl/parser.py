@@ -1,19 +1,53 @@
 parsed_program = []
+parsed_data = []
 
+# function to check if string represents hex value
+# used in parsing .elf files
+def is_hex(string):
+    try:
+        int(string, 16)
+        return True
+    except ValueError:
+        return False
+
+# opening .txt section
 with open("text.dump", "r") as file:
     for line in file:
         parsed_program.append(line)
 
+# processign .txt section
 parsed_program = [s for s in parsed_program if s != '\n']
+parsed_program = [s for s in parsed_program if "<" not in s] # remove lines containing labels
 parsed_program = [s.replace('\n','') for s in parsed_program]
 parsed_program = [s.replace('\t','') for s in parsed_program]
 parsed_program = parsed_program[3:]
 parsed_program = [s.split() for s in parsed_program]
 parsed_program = [s[0] for s in parsed_program]
 parsed_program = [s.split(':')[1] for s in parsed_program]
-parsed_program = [bin(int(s, 16))[2:].zfill(32) for s in parsed_program]
+parsed_program = [bin(int(s, 16))[2:].zfill(32) for s in parsed_program] # convert to 32 bit binary string
 
-with open("text_binary.txt", "w") as file:
+# opening .data section
+with open("data.dump", 'r') as file:
+    for line in file:
+        parsed_data.append(line)
+
+#processing .data section
+parsed_data = [s for s in parsed_data if s != '\n']
+parsed_data = parsed_data[2:]
+parsed_data = [s.split()[1:] for s in parsed_data]
+parsed_data = [item for sublist in parsed_data for item in sublist] # flatten into one big list
+parsed_data = [item for i, item in enumerate(parsed_data) if i % 5 != 4] # take 4 elements and skip one, repeat unitll end of list
+parsed_data = [s for s in parsed_data if is_hex(s)]
+parsed_data = [bin(int(s, 16))[2:].zfill(32) for s in parsed_data] # convert to 32 bit binary string
+
+# writing to data memory file
+with open("data_mem.txt", 'w') as file:
+    for line in parsed_data:
+        file.write(line)
+        file.write('\n')
+
+# writing to instruction memory file
+with open("instr_mem.txt", "w") as file:
     for line in parsed_program:
         file.write(line)
         file.write('\n')
