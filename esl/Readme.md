@@ -5,13 +5,13 @@
     sudo apt-get install autoconf automake autotools-dev curl python3 libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev
 
 ### Install riscv-gnu-toolchain
-	git clone --recursive https://github.com/riscv/riscv-gnu-toolchain 
+	git clone --recursive https://github.com/riscv/riscv-gnu-toolchain
 	cd riscv-gnu-toolchain
 	export RISCV=/path/to/installation/directory 
 	./configure --prefix=$RISCV --with-arch=rv32i --with-abi=ilp32
 	make
 	export PATH=$PATH:$RISCV/bin
-### Verify toolchain instalation
+### Verify toolchain installation
 
     riscv32-unknown-elf-gcc --version
 ## Running virtual platform
