@@ -4,8 +4,10 @@
 #include <bitset>
 #include <systemc>
 
-#define INSTRMEM_SIZE 1000
-#define DATAMEM_SIZE 1000
+#define INSTRMEM_SIZE 4000
+#define DATAMEM_SIZE 4000
+
+//#define MEMORY_PRINT //defined to print contents of instruction and data memory
 
 using namespace std;
 using namespace sc_core;
@@ -15,8 +17,13 @@ int sc_main (int argc, char* argv[])
 	//CPU cpu("CPU");
 	
 	//Dynamically allocated arrays for instruction and data memory
-	sc_dt::sc_lv<32> *instr_mem = new sc_dt::sc_lv<32>[INSTRMEM_SIZE];  
-	sc_dt::sc_lv<32> *data_mem = new sc_dt::sc_lv<32>[DATAMEM_SIZE];
+	sc_dt::sc_lv<8> *instr_mem = new sc_dt::sc_lv<8>[INSTRMEM_SIZE];  
+	sc_dt::sc_lv<8> *data_mem = new sc_dt::sc_lv<8>[DATAMEM_SIZE];
+	
+	#ifdef MEMORY_PRINT
+		int instr_amt = 0;
+		int data_amt = 0;
+	#endif
 	
 	for(int i = 0; i < INSTRMEM_SIZE; i++) {
 		instr_mem[i] = 0;
@@ -32,14 +39,23 @@ int sc_main (int argc, char* argv[])
 	if(instrs.is_open()) {
 		
 		int cnt = 0;
+		sc_dt::sc_lv<32> instr;
 		string line;
 		
 		while(instrs.good()) {
 			getline(instrs, line);
 			bitset<32> bits(line);
-			instr_mem[cnt] = bits.to_ulong();
-			cnt++;
+			instr = bits.to_ulong();
+			instr_mem[cnt + 3] = instr & 0xFF;
+			instr_mem[cnt + 2] = (instr >> 8) & 0xFF;
+			instr_mem[cnt + 1] = (instr >> 16) & 0xFF;
+			instr_mem[cnt] = (instr >> 24) & 0xFF;
+			cnt += 4;
 		}
+		
+		#ifdef MEMORY_PRINT
+			instr_amt = cnt-4;
+		#endif
 		
 		instrs.close();
 		
@@ -53,20 +69,53 @@ int sc_main (int argc, char* argv[])
 	if(data.is_open()) {
 		
 		int cnt = 0;
+		sc_dt::sc_lv<32> bit_line;
 		string line;
 		
 		while(data.good()) {
 			getline(data, line);
 			bitset<32> bits(line);
-			data_mem[cnt] = bits.to_ulong();
-			cnt++;
+			bit_line = bits.to_ulong();
+			data_mem[cnt + 3] = bit_line & 0xFF;
+			data_mem[cnt + 2] = (bit_line >> 8) & 0xFF;
+			data_mem[cnt + 1] = (bit_line >> 16) & 0xFF;
+			data_mem[cnt] = (bit_line >> 24) & 0xFF;
+			cnt += 4;
 		}
+		
+		#ifdef MEMORY_PRINT
+			data_amt = cnt-4;
+		#endif
 		
 		data.close();
 		
 	} else {
 		cout << "Unable to open file data_mem.txt" << endl;
 	}
+	
+	#ifdef MEMORY_PRINT
+	cout << "===========INSTRUCTION MEMORY===========" << endl;
+	for(int i = 0; i < instr_amt; i++) {
+		if(i%4==0) {
+			cout << endl;
+			cout << i << ":\t";
+		}
+		
+		cout << instr_mem[i];
+	}
+	cout << endl;
+	
+	cout << endl << "=============DATA MEMORY=============" << endl;
+	for(int i = 0; i < data_amt; i++) {
+		if(i%4==0) {
+			cout << endl;
+			cout << i << ":\t";
+		}
+		
+		cout << data_mem[i];
+	}
+	cout << endl;
+	#endif
 	
 	//sc_start(10, SC_MS);
 	
