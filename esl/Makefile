@@ -1,12 +1,11 @@
 CC =  riscv32-unknown-elf-gcc 
 DUMP = riscv32-unknown-elf-objdump 
 
-CFLAGS = -march=rv32i -mabi=ilp32 -static -mcmodel=small -nostdlib -nostartfiles -fvisibility=hidden 
+CFLAGS = -march=rv32i -mabi=ilp32 -static -nostdlib -mcmodel=medlow -nostartfiles -fvisibility=hidden 
 
 # -march=rv32i -> compiling for RV32I subset
 # -mabi-ilp32 -> ABI specs - integers,longs and pointers are 32 bits
 # -static -> all necessary stuff is contained in our elf, no need for exernal libraries
-# -mcmodel=small -> medium code model. Less than 2GB addressable virtual memory
 # -nostdlib -> no standard library is linked into our executable
 # -nostartfiles -> no standard system startup files from linking process
 # -fvisibility=hidden -> symbols in shared library are hidden
@@ -17,6 +16,7 @@ all: program.elf text.dump data.dump
 	rm text.dump
 	rm data.dump
 	rm program.elf
+
 
 program.elf: program.c
 	$(CC) $(CFLAGS) -c program.c -o program.elf
