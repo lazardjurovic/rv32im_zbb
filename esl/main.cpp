@@ -7,7 +7,7 @@
 #define INSTRMEM_SIZE 4000
 #define DATAMEM_SIZE 4000
 
-//#define MEMORY_PRINT
+//#define MEMORY_PRINT //defined to print contents of instruction and data memory
 
 using namespace std;
 using namespace sc_core;
@@ -19,6 +19,11 @@ int sc_main (int argc, char* argv[])
 	//Dynamically allocated arrays for instruction and data memory
 	sc_dt::sc_lv<8> *instr_mem = new sc_dt::sc_lv<8>[INSTRMEM_SIZE];  
 	sc_dt::sc_lv<8> *data_mem = new sc_dt::sc_lv<8>[DATAMEM_SIZE];
+	
+	#ifdef MEMORY_PRINT
+		int instr_amt = 0;
+		int data_amt = 0;
+	#endif
 	
 	for(int i = 0; i < INSTRMEM_SIZE; i++) {
 		instr_mem[i] = 0;
@@ -48,6 +53,10 @@ int sc_main (int argc, char* argv[])
 			cnt += 4;
 		}
 		
+		#ifdef MEMORY_PRINT
+			instr_amt = cnt-4;
+		#endif
+		
 		instrs.close();
 		
 	} else {
@@ -74,16 +83,19 @@ int sc_main (int argc, char* argv[])
 			cnt += 4;
 		}
 		
+		#ifdef MEMORY_PRINT
+			data_amt = cnt-4;
+		#endif
+		
 		data.close();
 		
 	} else {
 		cout << "Unable to open file data_mem.txt" << endl;
 	}
 	
-	//defined to print contents of instruction and data memory
 	#ifdef MEMORY_PRINT
 	cout << "===========INSTRUCTION MEMORY===========" << endl;
-	for(int i = 0; i < 59*4; i++) {
+	for(int i = 0; i < instr_amt; i++) {
 		if(i%4==0) {
 			cout << endl;
 			cout << i << ":\t";
@@ -94,7 +106,7 @@ int sc_main (int argc, char* argv[])
 	cout << endl;
 	
 	cout << endl << "=============DATA MEMORY=============" << endl;
-	for(int i = 0; i < 10*4; i++) {
+	for(int i = 0; i < data_amt; i++) {
 		if(i%4==0) {
 			cout << endl;
 			cout << i << ":\t";
