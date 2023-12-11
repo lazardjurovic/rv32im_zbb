@@ -20,7 +20,7 @@ protected:
 	sc_dt::sc_uint<32> pc;				//Program counter
 	
 	//Pipeline registers
-	sc_signal<sc_dt::sc_lv<32>> if_id;
+	sc_signal<sc_dt::sc_lv<64>> if_id;
 	sc_signal<sc_dt::sc_lv<32>> id_ex;
 	sc_signal<sc_dt::sc_lv<32>> ex_mem;
 	sc_signal<sc_dt::sc_lv<32>> mem_wb;
@@ -44,11 +44,14 @@ public:
 	void executeInstruction();
 	void memoryAccess();
 	void writeBack();
+	void timeHandle();
+	/*
 	void timeHandleIF();
 	void timeHandleID();
 	void timeHandleEX();
 	void timeHandleMEM();
 	void timeHandleWB();
+	*/
 	sc_dt::sc_uint<32> getPC();
 	void setPC(sc_dt::sc_uint<32> val);
 };

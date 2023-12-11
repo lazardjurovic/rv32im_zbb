@@ -9,7 +9,7 @@ int sc_main (int argc, char* argv[])
 {
 	CPU cpu("CPU", "instr_mem.txt", "data_mem.txt");
 	
-	sc_start(10, SC_MS);
+	sc_start(1000, SC_NS);
 	
 	return 0;
 }
