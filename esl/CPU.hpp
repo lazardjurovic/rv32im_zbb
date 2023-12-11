@@ -28,7 +28,11 @@ protected:
 public:
 	//Dynamically allocated arrays for instruction and data memory
 	sc_dt::sc_lv<8> *instr_mem = new sc_dt::sc_lv<8>[INSTRMEM_SIZE];  
-	sc_dt::sc_lv<8> *data_mem = new sc_dt::sc_lv<8>[DATAMEM_SIZE];	
+	sc_dt::sc_lv<8> *data_mem = new sc_dt::sc_lv<8>[DATAMEM_SIZE];
+	
+	//Number of 8 bit locations in memory taken after initial loading
+	int instr_amt;
+	int data_amt;
 	
 	//Events for method timeHandle() to simulate time in a pipeline architecture
 	sc_event IF_s, ID_s, EX_s, MEM_s, WB_s;
@@ -45,13 +49,6 @@ public:
 	void memoryAccess();
 	void writeBack();
 	void timeHandle();
-	/*
-	void timeHandleIF();
-	void timeHandleID();
-	void timeHandleEX();
-	void timeHandleMEM();
-	void timeHandleWB();
-	*/
 	sc_dt::sc_uint<32> getPC();
 	void setPC(sc_dt::sc_uint<32> val);
 };

@@ -10,10 +10,8 @@
 CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 	cout << "Creating a CPU object named " << name() << "." << endl;
 	
-	#ifdef MEMORY_PRINT
-		int instr_amt = 0;
-		int data_amt = 0;
-	#endif
+	instr_amt = 0;
+	data_amt = 0;
 	
 	for(int i = 0; i < INSTRMEM_SIZE; i++) {
 		instr_mem[i] = 0;
@@ -22,6 +20,8 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 	for(int i = 0; i < DATAMEM_SIZE; i++) {
 		data_mem[i] = 0;
 	}
+	
+	cout << "Filling instruction memory." << endl;
 	
 	//filling instruction memory with instruction from a file
 	ifstream instrs(insMem);
@@ -42,16 +42,15 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 			instr_mem[cnt] = (instr >> 24) & 0xFF;
 			cnt += 4;
 		}
-		
-		#ifdef MEMORY_PRINT
-			instr_amt = cnt-4;
-		#endif
+		instr_amt = cnt-4;
 		
 		instrs.close();
 		
 	} else {
 		cout << "Unable to open file" << insMem << "." << endl;
 	}
+	
+	cout << "Filling data memory." << endl;
 	
 	//filling data memory with data from a file
 	ifstream data(datMem);
@@ -72,10 +71,7 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 			data_mem[cnt] = (bit_line >> 24) & 0xFF;
 			cnt += 4;
 		}
-		
-		#ifdef MEMORY_PRINT
-			data_amt = cnt-4;
-		#endif
+		data_amt = cnt-4;
 		
 		data.close();
 		
@@ -165,7 +161,32 @@ void CPU::instructionFetch() {
 void CPU::instructionDecode() {
 	next_trigger(ID_s);
 	
-	cout << pc << "\tInstruction fetched:\t" << if_id << "  [time: " << sc_time_stamp() << "]" << endl;
+	//cout << pc << "\tInstruction fetched:\t" << if_id << "  [time: " << sc_time_stamp() << "]" << endl;
+	sc_dt::sc_lv<64> if_id_tmp;
+	sc_dt::sc_lv<32> pc_local;
+	sc_dt::sc_lv<7> opcode;
+	sc_dt::sc_lv<5> rd;
+	sc_dt::sc_lv<5> rs1;
+	sc_dt::sc_lv<5> rs2;
+	sc_dt::sc_lv<3> funct3;
+	sc_dt::sc_lv<7> funct7;						//0000.0000-0000.0000-0000.0000-0000.0000
+	sc_dt::sc_lv<12> imm_I;						//0000.0000-0000.0000-0000.0000-0000.0000
+	sc_dt::sc_lv<12> imm_S;
+	sc_dt::sc_lv<12> imm_B;
+	sc_dt::sc_lv<20> imm_U;
+	sc_dt::sc_lv<20> imm_J;
+	
+	if_id_tmp = if_id;
+	
+	pc_local = if_id_tmp & 0xFFFFFFFF;
+	opcode = (if_id_tmp >> 32) & 0x7F;
+	rd = (if_id_tmp >> 39) & 0x1F;
+	rs1 = (if_id_tmp >> 47) & 0x1F;
+	rs2 = (if_id_tmp >> 52) & 0x1F;
+	funct3 = (if_id_tmp >> 44) & 0x7;
+	funct7 = (if_id_tmp >> 57) & 0x7F;
+	
+	cout << funct7 << endl;
 	
 	ID_r.notify();		
 }
