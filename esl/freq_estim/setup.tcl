@@ -2,7 +2,7 @@ start_gui
 create_project frequency_estimation ./projects -part xc7z010clg400-1
 #set_property board_part digilentinc.com:zybo:part0:2.0
 
-add_files -norecurse alu.v
+add_files -norecurse execute_phase.v
 add_files -norecurse constraints.xdc
 
 update_compile_order -fileset sources_1
