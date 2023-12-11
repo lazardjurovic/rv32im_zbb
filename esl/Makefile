@@ -3,9 +3,6 @@ DUMP = riscv32-unknown-elf-objdump
 
 CFLAGS = -march=rv32i -mabi=ilp32 -static -nostdlib -mcmodel=medlow -nostartfiles -fvisibility=hidden 
 
-FREQ_ESTIM_PARAMS = /frequency_estimation/alu.v /frequency_estimation/constraints.xdc /frequency_estimation/setup.tcl
-VIVADO = /tools/Xilinx/Vivado/2022.2/bin/vivado
-
 # -march=rv32i -> compiling for RV32I subset
 # -mabi-ilp32 -> ABI specs - integers,longs and pointers are 32 bits
 # -static -> all necessary stuff is contained in our elf, no need for exernal libraries
@@ -32,5 +29,5 @@ text.dump: program.elf
 data.dump: program.elf
 	$(DUMP) -j .data -s program.elf > data.dump
 
-freq: $(FREQ_ESTIM_PARAMS)
-	$(VIVADO) -mode tcl -source /frequency_estimation/setup.tcl 
+freq: 
+	$(MAKE) -C freq_estim
