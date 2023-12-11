@@ -21,7 +21,7 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 		data_mem[i] = 0;
 	}
 	
-	cout << "Filling instruction memory." << endl;
+	cout << "Filling instruction memory..." << endl;
 	
 	//filling instruction memory with instruction from a file
 	ifstream instrs(insMem);
@@ -50,7 +50,7 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 		cout << "Unable to open file" << insMem << "." << endl;
 	}
 	
-	cout << "Filling data memory." << endl;
+	cout << "Filling data memory..." << endl;
 	
 	//filling data memory with data from a file
 	ifstream data(datMem);
@@ -169,12 +169,12 @@ void CPU::instructionDecode() {
 	sc_dt::sc_lv<5> rs1;
 	sc_dt::sc_lv<5> rs2;
 	sc_dt::sc_lv<3> funct3;
-	sc_dt::sc_lv<7> funct7;						//0000.0000-0000.0000-0000.0000-0000.0000
-	sc_dt::sc_lv<12> imm_I;						//0000.0000-0000.0000-0000.0000-0000.0000
-	sc_dt::sc_lv<12> imm_S;
-	sc_dt::sc_lv<12> imm_B;
-	sc_dt::sc_lv<20> imm_U;
-	sc_dt::sc_lv<20> imm_J;
+	sc_dt::sc_lv<7> funct7;			
+	sc_dt::sc_lv<12> imm_I;						
+	sc_dt::sc_lv<12> imm_S;				
+	sc_dt::sc_lv<13> imm_B;
+	sc_dt::sc_lv<32> imm_U;
+	sc_dt::sc_lv<21> imm_J;
 	
 	if_id_tmp = if_id;
 	
@@ -185,8 +185,32 @@ void CPU::instructionDecode() {
 	rs2 = (if_id_tmp >> 52) & 0x1F;
 	funct3 = (if_id_tmp >> 44) & 0x7;
 	funct7 = (if_id_tmp >> 57) & 0x7F;
+	imm_I = (if_id_tmp >> 52) & 0xFFF;
+	imm_S = funct7;
+	imm_S <<= 5;
+	imm_S = imm_S | rd;
+	imm_B = (if_id_tmp >> 63) & 0x1;
+	imm_B <<= 1;
+	imm_B = imm_B | ((if_id_tmp >> 39) & 0x1);
+	imm_B <<= 6;
+	imm_B = imm_B | ((if_id_tmp >> 57) & 0x3F);
+	imm_B <<= 4;
+	imm_B = imm_B | ((if_id_tmp >> 40) & 0xF);
+	imm_B <<= 1;
+	imm_U = (if_id_tmp >> 44) & 0xFFFFF;
+	imm_U <<= 12;
+	imm_J = (if_id_tmp >> 63) & 0x1;
+	imm_J <<= 8;
+	imm_J = (if_id_tmp >> 44) & 0xFF;
+	imm_J <<= 1;
+	imm_J = (if_id_tmp >> 52) & 0x1;
+	imm_J <<= 10;
+	imm_J = (if_id_tmp >> 53) & 0x3FF;
+	imm_J <<= 1;
 	
-	cout << funct7 << endl;
+	//cout << imm_U << endl;
+	
+	//TODO parsing Imm and filling id_ex reg
 	
 	ID_r.notify();		
 }
