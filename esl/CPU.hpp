@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 #include <bitset>
+#include <vector>
 
 #define INSTRMEM_SIZE 4000
 #define DATAMEM_SIZE 4000
@@ -15,13 +16,21 @@ using namespace sc_core;
 
 SC_MODULE(CPU) {
 protected:
-	sc_dt::sc_uint<32> registers[32];
-	sc_dt::sc_uint<32> pc;
+	sc_dt::sc_uint<32> registers[32];	//Register bank
+	sc_dt::sc_uint<32> pc;				//Program counter
+	
+	//Pipeline registers
+	sc_signal<sc_dt::sc_lv<32>> if_id;
+	sc_signal<sc_dt::sc_lv<32>> id_ex;
+	sc_signal<sc_dt::sc_lv<32>> ex_mem;
+	sc_signal<sc_dt::sc_lv<32>> mem_wb;
+	
 public:
 	//Dynamically allocated arrays for instruction and data memory
 	sc_dt::sc_lv<8> *instr_mem = new sc_dt::sc_lv<8>[INSTRMEM_SIZE];  
 	sc_dt::sc_lv<8> *data_mem = new sc_dt::sc_lv<8>[DATAMEM_SIZE];	
 	
+	//Events for method timeHandle() to simulate time in a pipeline architecture
 	sc_event IF_s, ID_s, EX_s, MEM_s, WB_s;
 	sc_event IF_r, ID_r, EX_r, MEM_r, WB_r;	
 	
@@ -35,7 +44,11 @@ public:
 	void executeInstruction();
 	void memoryAccess();
 	void writeBack();
-	void timeHandle();
+	void timeHandleIF();
+	void timeHandleID();
+	void timeHandleEX();
+	void timeHandleMEM();
+	void timeHandleWB();
 	sc_dt::sc_uint<32> getPC();
 	void setPC(sc_dt::sc_uint<32> val);
 };

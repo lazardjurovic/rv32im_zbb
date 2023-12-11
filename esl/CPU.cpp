@@ -1,5 +1,7 @@
 #include "CPU.hpp"
 
+#define STAGE_DELAY 5
+
 //#define MEMORY_PRINT //defined to print contents of instruction and data memory
 
 CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
@@ -45,7 +47,7 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 		instrs.close();
 		
 	} else {
-		cout << "Unable to open file instr_mem.txt" << endl;
+		cout << "Unable to open file" << insMem << "." << endl;
 	}
 	
 	//filling data memory with data from a file
@@ -75,7 +77,7 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 		data.close();
 		
 	} else {
-		cout << "Unable to open file data_mem.txt" << endl;
+		cout << "Unable to open file" << datMem << "." << endl;
 	}
 	
 	#ifdef MEMORY_PRINT
@@ -102,7 +104,16 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 	cout << endl;
 	#endif
 	
-	SC_THREAD(timeHandle);
+	if_id.write(0x0);
+	id_ex.write(0x0);
+	ex_mem.write(0x0);
+	mem_wb.write(0x0);
+	
+	SC_THREAD(timeHandleIF);
+	SC_THREAD(timeHandleID);
+	SC_THREAD(timeHandleEX);
+	SC_THREAD(timeHandleMEM);
+	SC_THREAD(timeHandleWB);
 	
 	SC_METHOD(instructionFetch);
 	sensitive << IF_s;
@@ -122,8 +133,8 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 	pc = 0;
 }
 	
-void CPU::instructionFetch() { //0000.0000-0000.0000-0000.0000-0000.0000
-	wait(IF_s);			  	   //0000.0000-0000.0000-0000.0000-0111.1111
+void CPU::instructionFetch() {
+	next_trigger(IF_s);
 	
 	sc_dt::sc_lv<32> instr;
 	
@@ -135,56 +146,79 @@ void CPU::instructionFetch() { //0000.0000-0000.0000-0000.0000-0000.0000
 	instr <<= 8;
 	instr = instr | instr_mem[pc+3];
 	
+	if_id.write(instr);
+	cout << pc << "\tInstruction fetched:\t" << instr << "  [time: " << sc_time_stamp() << "]" << endl;
+	
 	pc += 4;
 	
 	IF_r.notify();
 }
 	
 void CPU::instructionDecode() {
-	wait(ID_s);
-		
+	next_trigger(ID_s);
+	
+	
+	
 	ID_r.notify();		
 }
 	
 void CPU::executeInstruction() {
-	wait(EX_s);
+	next_trigger(EX_s);
 	
 	EX_r.notify();
 }
 	
 void CPU::memoryAccess() {
-	wait(MEM_s);
+	next_trigger(MEM_s);
 		
 	MEM_r.notify();
 }
 	
 void CPU::writeBack() {
-	wait(WB_s);
+	next_trigger(WB_s);
 		
 	WB_r.notify();
 }
-	
-void CPU::timeHandle() {
+
+void CPU::timeHandleIF() {
 	while(true) {
 		IF_s.notify();
 		wait(IF_r);
-		wait(5, SC_NS);
-			
+		wait(STAGE_DELAY, SC_NS);
+	}
+}
+
+void CPU::timeHandleID() {
+	while(true) {
+		wait(IF_r);
 		ID_s.notify();
+		wait(STAGE_DELAY, SC_NS);
+			
+	}
+}
+
+void CPU::timeHandleEX() {
+	while(true) {
 		wait(ID_r);
-		wait(5, SC_NS);
-			
 		EX_s.notify();
+		wait(STAGE_DELAY, SC_NS);
+			
+	}
+}
+
+void CPU::timeHandleMEM() {
+	while(true) {
 		wait(EX_r);
-		wait(5, SC_NS);
-			
 		MEM_s.notify();
+		wait(STAGE_DELAY, SC_NS);
+	}
+}
+
+void CPU::timeHandleWB() {
+	while(true) {
 		wait(MEM_r);
-		wait(5, SC_NS);
-			
 		WB_s.notify();
-		wait(WB_r);
-		wait(5, SC_NS);
+		wait(STAGE_DELAY, SC_NS);
 	}
 }
 	
