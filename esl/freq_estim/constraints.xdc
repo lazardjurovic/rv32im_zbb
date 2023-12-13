@@ -1,1 +1,1 @@
-set_max_delay 7.00 -from * -to *
+create_clock -name clk -period 7 -waveform {0 3.5} [get_ports clk]

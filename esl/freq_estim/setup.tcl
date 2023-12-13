@@ -11,5 +11,5 @@ set_property strategy Flow_PerfOptimized_high [get_runs synth_1]
 set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} -value {-mode out_of_context} -objects [get_runs synth_1]
 launch_runs synth_1 -jobs 6
 
-set_property strategy Performance_Explore [get_runs impl_1]
+set_property strategy Performance_NetDelay_high [get_runs impl_1]
 launch_runs impl_1 -jobs 6
