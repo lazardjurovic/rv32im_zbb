@@ -22,4 +22,4 @@ make clean
 ```
 
 ## Results
-After finished implementation results can be seen. Tool managed to pack design in a way that longest combinational path is less than 7ns. Worst Negative Slack (WNS) on setup is 0.655ns (my be different from run to run since tool uses heuristic algorithms). Longest time of 7ns corresponds to frequency of roughly 143MHz. Having in mind that a lot of logic will be build around our ALU we propose frequency of 100MHz for full design.
+After finished implementation results can be seen. Tool managed to pack design in a way that longest combinational path is less than 7ns. Worst Negative Slack (WNS) on setup is 0.173ns (my be different from run to run since tool uses heuristic algorithms). Longest time of 7ns corresponds to frequency of roughly 143MHz. Having in mind that a lot of logic will be build around our ALU we propose frequency of 100MHz for full design.

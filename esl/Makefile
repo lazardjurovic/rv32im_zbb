@@ -28,6 +28,3 @@ text.dump: program.elf
 # disassemble .data section
 data.dump: program.elf
 	$(DUMP) -j .data -s program.elf > data.dump
-
-freq: 
-	$(MAKE) -C freq_estim

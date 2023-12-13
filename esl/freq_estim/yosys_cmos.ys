@@ -1,0 +1,8 @@
+read_verilog execute_phase.v
+read_verilog -lib cmos_cells.v
+
+synth
+dfflibmap -liberty cmos_cells.lib
+abc -liberty cmos_cells.lib
+opt_clean
+stat -liberty cmos_cells.lib
