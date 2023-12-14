@@ -10,6 +10,8 @@ yosys_xil: yosys_xil.ys
 	yosys yosys_xil.ys
 
 clean: 
+	rm netlist.v
+	rm netlist.json
 	rm -rf projects
 	rm -rf .Xil/
 	rm vivado*

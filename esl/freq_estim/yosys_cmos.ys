@@ -1,8 +1,11 @@
 read_verilog execute_phase.v
-read_verilog -lib cmos_cells.v
 
 synth
-dfflibmap -liberty cmos_cells.lib
-abc -liberty cmos_cells.lib
+
+dfflibmap -liberty sky.lib
+abc -D 5000 -liberty sky.lib
 opt_clean
-stat -liberty cmos_cells.lib
+stat -liberty sky.lib
+
+write_verilog netlist.v
+write_json netlist.json
