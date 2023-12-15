@@ -24,14 +24,14 @@ module execute_phase(
     reg[31:0] rs2_s;
     reg[31:0] imm_s;
     reg[4:0] alu_op_s;
-    reg[31:0] res_o_s;
     reg[31:0] ex_mem_s;
     reg[31:0] mem_wb_s;
+    reg[31:0] res_o_s;
     
     reg[7:0] byte0,byte1,byte2,byte3;
     
-    reg[31:0] operand1;
-    reg[31:0] operand2_tmp, operand2;
+    reg[31:0] operand1 = 32'b00000000000000000000000000000000;
+    reg[31:0] operand2_tmp  =32'b00000000000000000000000000000000, operand2 = 32'b00000000000000000000000000000000;
     
     reg[4:0] pop_cnt;
     reg[4:0] leading_zeros;
@@ -45,10 +45,13 @@ module execute_phase(
          rs2_s = rs2_i;
          imm_s = imm_i;
          alu_op_s = alu_op_i;
-         res_o = res_o_s;
          ex_mem_s = ex_mem_i;
          mem_wb_s = mem_wb_i;
-        
+         res_o = res_o_s;
+    end
+
+    always @(operand1)
+    begin
          byte0 = operand1[7:0];
          byte1 = operand1[15:8];
          byte2 = operand1[23:16];
@@ -76,7 +79,7 @@ module execute_phase(
     
     // two muxes to determine second input of ALU
     
-    always @(mux2_i)
+    always @(mux2_i, rs2_s,mem_wb_s,ex_mem_s)
     begin
         if(mux2_i == 2'b00)
         begin
@@ -323,7 +326,7 @@ end
      
     // combinational logic of ALU
     
-    always @(operand1 or operand2 or alu_op_s)
+    always @(operand1 or operand2 or alu_op_s or leading_zeros or trailing_zeros or pop_cnt)
     begin
         
         case(alu_op_s)
@@ -375,7 +378,7 @@ end
             */
             5'b01110: //orc.b
                res_o_s = { 8'b00000000 ? byte3 == 0 : 8'b11111111,8'b00000000 ? byte2 == 0 : 8'b11111111,8'b00000000 ? byte1 == 0 : 8'b11111111,8'b00000000 ? byte0 == 0 : 8'b11111111};
-            5'b01111:
+            5'b01111: // rev8
                 res_o_s = {byte0,byte1,byte2,byte3};
                        
             default : res_o_s = 32'b00000000000000000000000000000000;
