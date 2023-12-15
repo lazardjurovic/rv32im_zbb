@@ -131,6 +131,11 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 	dont_initialize();
 		
 	pc = 0;
+	pc_next_sel = 0;
+	
+	for(int i = 0; i < 31; i++) {
+		registers[i] = 0x0;
+	}
 }
 	
 void CPU::instructionFetch() {
@@ -153,7 +158,11 @@ void CPU::instructionFetch() {
 	
 	if_id = tmp;
 	
-	pc += 4;
+	if(pc_next_sel == 0) {
+		pc += 4;
+	} else {
+		
+	}
 	
 	IF_r.notify();
 }
@@ -170,11 +179,12 @@ void CPU::instructionDecode() {
 	sc_dt::sc_lv<5> rs2;
 	sc_dt::sc_lv<3> funct3;
 	sc_dt::sc_lv<7> funct7;			
-	sc_dt::sc_lv<12> imm_I;						
-	sc_dt::sc_lv<12> imm_S;				
-	sc_dt::sc_lv<13> imm_B;
+	sc_dt::sc_lv<32> imm_I;						
+	sc_dt::sc_lv<32> imm_S;				
+	sc_dt::sc_lv<32> imm_B;
 	sc_dt::sc_lv<32> imm_U;
-	sc_dt::sc_lv<21> imm_J;
+	sc_dt::sc_lv<32> imm_J;
+	sc_dt::sc_lv<32> mask;
 	
 	if_id_tmp = if_id;
 	
@@ -208,9 +218,40 @@ void CPU::instructionDecode() {
 	imm_J = (if_id_tmp >> 53) & 0x3FF;
 	imm_J <<= 1;
 	
-	//cout << imm_U << endl;
 	
-	//TODO parsing Imm and filling id_ex reg
+	//Sign extend value of immediate for I type instructions
+	if((imm_I >> 11) == 1) {
+		mask = 0x0;
+		mask = mask | 0xFFFFF;
+		mask <<= 12;
+		imm_I = imm_I | mask;					
+	}
+	
+	//Sign extend value of immediate for S type instructions
+	if((imm_S >> 11) == 1) {	
+		mask = 0x0;
+		mask = mask | 0xFFFFF;
+		mask <<= 12;
+		imm_S = imm_S | mask;					
+	}
+	
+	//Sign extend value of immediate for B type instructions
+	if((imm_B >> 12) == 1) {	
+		mask = 0x0;
+		mask = mask | 0x7FFFF;
+		mask <<= 13;
+		imm_B = imm_B | mask;					
+	}
+	
+	//Sign extend value of immediate for J type instructions
+	if((imm_J >> 20) == 1) {	
+		mask = 0x0;
+		mask = mask | 0x7FF;
+		mask <<= 21;
+		imm_J = imm_J | mask;					
+	}
+	
+	
 	
 	ID_r.notify();		
 }

@@ -16,8 +16,11 @@ using namespace sc_core;
 
 SC_MODULE(CPU) {
 protected:
-	sc_dt::sc_uint<32> registers[32];	//Register bank
+	sc_dt::sc_lv<32> registers[32];		//Register bank
 	sc_dt::sc_uint<32> pc;				//Program counter
+	
+	sc_signal<bool> pc_next_sel;
+	sc_signal<sc_dt::sc_lv<32>> jump_address;
 	
 	//Pipeline registers
 	sc_signal<sc_dt::sc_lv<64>> if_id;
