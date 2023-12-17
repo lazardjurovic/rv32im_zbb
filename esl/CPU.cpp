@@ -137,7 +137,8 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 		registers[i] = 0x0;
 	}
 }
-	
+
+//Method for fetching instuctions from instruction memory
 void CPU::instructionFetch() {
 	next_trigger(IF_s); 
 	
@@ -161,7 +162,7 @@ void CPU::instructionFetch() {
 	if(pc_next_sel == 0) {
 		pc += 4;
 	} else {
-		
+		pc = jump_address;
 	}
 	
 	IF_r.notify();
@@ -218,7 +219,6 @@ void CPU::instructionDecode() {
 	imm_J = (if_id_tmp >> 53) & 0x3FF;
 	imm_J <<= 1;
 	
-	
 	//Sign extend value of immediate for I type instructions
 	if((imm_I >> 11) == 1) {
 		mask = 0x0;
@@ -251,13 +251,95 @@ void CPU::instructionDecode() {
 		imm_J = imm_J | mask;					
 	}
 	
+	if(opcode == 0b1101111) {	//JAL
+		sc_dt::sc_uint<32> pc_tmp, imm_tmp, jmp_tmp;
+		
+		pc_tmp = pc_local;
+		imm_tmp = (imm_J << 1);
+		jmp_tmp = pc_tmp + imm_tmp;
+		
+		jump_address = jmp_tmp;
+		
+		pc_next_sel = 1;
+		
+	} else if(opcode == 0b1100111) {	//JALR
+		sc_dt::sc_uint<32> pc_tmp, imm_tmp, jmp_tmp;
+		
+		pc_tmp = pc_local;
+		imm_tmp = (imm_I << 1);
+		jmp_tmp = pc_tmp + imm_tmp;
+		
+		jump_address = jmp_tmp;
+		
+		pc_next_sel = 1;
+		
+	} else if(opcode == 0b1100011) {	//BEQ, BNE, BLT, BGE, BLTU, BGEU
+		sc_dt::sc_uint<32> pc_tmp, imm_tmp, jmp_tmp;
+		
+		pc_tmp = pc_local;
+		imm_tmp = (imm_B << 1);
+		jmp_tmp = pc_tmp + imm_tmp;
+		
+		jump_address = jmp_tmp;
+		
+		pc_next_sel = 1;
+	} else {
+		pc_next_sel = 0;
+	}
 	
+	if(opcode == 0b11001111) {
+	
+	} else if() {
+	
+	} else if() {
+	
+	} else if() {
+	
+	} else {
+	
+	}			/// NAPRAVI IF ELSE I U NJIMA PARSIRAJ IMM I URADI SIGN EXTEND
+	
+	sc_dt::sc_lv<182> tmp = 0x0;
+	sc_dt::sc_uint<5> rs1_uint, rs2_uint;
+	
+	rs1_uint = rs1;
+	rs2_uint = rs2;
+	
+	tmp = registers[rs1_uint];
+	tmp <<= 32;
+	
+	tmp = tmp | registers[rs2_uint];
+	tmp <<= 32;
+	
+	tmp = tmp | imm_I;
+	tmp <<= 32;
+	
+	tmp = tmp | imm_S;
+	tmp <<= 32;
+	
+	tmp = tmp | imm_U;
+	tmp <<= 5;
+	
+	tmp = tmp | rd;
+	tmp <<= 7;
+	
+	tmp = tmp | funct7;
+	tmp <<= 3;
+	
+	tmp = tmp | funct3;
+	tmp <<= 7;
+	
+	tmp = tmp | opcode;
+	
+	id_ex = tmp;
 	
 	ID_r.notify();		
 }
 	
 void CPU::executeInstruction() {
 	next_trigger(EX_s);
+	
+	//cout << id_ex << "  [time: " << sc_time_stamp() << "]" << endl;
 	
 	EX_r.notify();
 }
@@ -281,24 +363,35 @@ void CPU::timeHandle() {
 		
 		ID_s.notify();
 		wait(ID_r);
+		wait(SC_ZERO_TIME);
+		
 		IF_s.notify();
 		wait(IF_r);
 		wait(STAGE_DELAY, SC_NS);
 		
 		EX_s.notify();
 		wait(EX_r);
+		wait(SC_ZERO_TIME);
+		
 		ID_s.notify();
 		wait(ID_r);
+		wait(SC_ZERO_TIME);
 		IF_s.notify();
 		wait(IF_r);
 		wait(STAGE_DELAY, SC_NS);
 		
 		MEM_s.notify();
 		wait(MEM_r);
+		wait(SC_ZERO_TIME);
+		
 		EX_s.notify();
 		wait(EX_r);
+		wait(SC_ZERO_TIME);
+		
 		ID_s.notify();
 		wait(ID_r);
+		wait(SC_ZERO_TIME);
+		
 		IF_s.notify();
 		wait(IF_r);
 		wait(STAGE_DELAY, SC_NS);
@@ -306,12 +399,20 @@ void CPU::timeHandle() {
 	while(true) {
 		WB_s.notify();
 		wait(WB_r);
+		wait(SC_ZERO_TIME);
+		
 		MEM_s.notify();
 		wait(MEM_r);
+		wait(SC_ZERO_TIME);
+		
 		EX_s.notify();
 		wait(EX_r);
+		wait(SC_ZERO_TIME);
+		
 		ID_s.notify();
 		wait(ID_r);
+		wait(SC_ZERO_TIME);
+		
 		IF_s.notify();
 		wait(IF_r);
 		wait(STAGE_DELAY, SC_NS);
