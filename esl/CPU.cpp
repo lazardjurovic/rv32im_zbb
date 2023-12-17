@@ -14,11 +14,11 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 	data_amt = 0;
 	
 	for(int i = 0; i < INSTRMEM_SIZE; i++) {
-		instr_mem[i] = 0;
+		instr_mem[i] = 0x0;
 	}
 	
 	for(int i = 0; i < DATAMEM_SIZE; i++) {
-		data_mem[i] = 0;
+		data_mem[i] = 0x0;
 	}
 	
 	cout << "Filling instruction memory..." << endl;
@@ -130,7 +130,7 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 	sensitive << WB_s;
 	dont_initialize();
 		
-	pc = 0;
+	pc = -4;
 	pc_next_sel = 0;
 	
 	for(int i = 0; i < 31; i++) {
@@ -144,6 +144,12 @@ void CPU::instructionFetch() {
 	
 	sc_dt::sc_lv<32> instr;
 	sc_dt::sc_lv<64> tmp;
+	
+	if(pc_next_sel == 0) {
+		pc += 4;
+	} else {
+		pc = jump_address;
+	}
 	
 	instr = instr_mem[pc];
 	instr <<= 8;
@@ -159,19 +165,12 @@ void CPU::instructionFetch() {
 	
 	if_id = tmp;
 	
-	if(pc_next_sel == 0) {
-		pc += 4;
-	} else {
-		pc = jump_address;
-	}
-	
 	IF_r.notify();
 }
 	
 void CPU::instructionDecode() {
 	next_trigger(ID_s);
 	
-	//cout << pc << "\tInstruction fetched:\t" << if_id << "  [time: " << sc_time_stamp() << "]" << endl;
 	sc_dt::sc_lv<64> if_id_tmp;
 	sc_dt::sc_lv<32> pc_local;
 	sc_dt::sc_lv<7> opcode;
@@ -184,6 +183,7 @@ void CPU::instructionDecode() {
 	sc_dt::sc_lv<32> mask;
 	
 	if_id_tmp = if_id;
+	cout << pc << "\tInstruction decode:\t" << if_id_tmp << "  [time: " << sc_time_stamp() << "]" << endl;
 	
 	//Extracting information from IF_ID register
 	pc_local = if_id_tmp & 0xFFFFFFFF;
@@ -289,10 +289,13 @@ void CPU::instructionDecode() {
 			mask <<= 12;
 			imm = imm | mask;					
 		}
+	} else {
+	
+		imm = 0x0;
 	}
 	
 	//Generating jump address to forward to instructionFetch()
-	if(opcode == 0b1101111 || opcode == 0b1100111 || opcode == 0b1100011) {	//JAL, JALR, BEQ, BNE, BLT, BGE, BLTU, BGEU
+	if(opcode == 0b1101111 || opcode == 0b1100011) {	//JAL, BEQ, BNE, BLT, BGE, BLTU, BGEU
 		sc_dt::sc_uint<32> pc_tmp, imm_tmp, jmp_tmp;
 		
 		pc_tmp = pc_local;
@@ -303,11 +306,24 @@ void CPU::instructionDecode() {
 		
 		pc_next_sel = 1;
 		
+	} else if(opcode == 0b1100111) {	//JALR
+		sc_dt::sc_uint<32> imm_tmp, jmp_tmp, rs1_data;
+		sc_dt::sc_uint<5> rs1_address;
+	
+		rs1_address = rs1;
+		
+		imm_tmp = imm;
+		rs1_data = registers[rs1_address];
+		jmp_tmp = imm_tmp + rs1_data;
+		
+		jump_address = jmp_tmp;
+		
+		pc_next_sel = 1;
 	} else {
 		pc_next_sel = 0;
 	}
 	
-	sc_dt::sc_lv<118> tmp = 0x0;
+	sc_dt::sc_lv<150> tmp = 0x0;
 	sc_dt::sc_uint<5> rs1_uint, rs2_uint;
 	
 	rs1_uint = rs1;
@@ -333,6 +349,9 @@ void CPU::instructionDecode() {
 	tmp <<= 7;
 	
 	tmp = tmp | opcode;
+	tmp <<= 32;
+	
+	tmp = tmp | pc_local;
 	
 	id_ex = tmp;
 	
@@ -342,7 +361,66 @@ void CPU::instructionDecode() {
 void CPU::executeInstruction() {
 	next_trigger(EX_s);
 	
-	//cout << id_ex << "  [time: " << sc_time_stamp() << "]" << endl;
+	sc_dt::sc_lv<150> id_ex_tmp;
+	sc_dt::sc_lv<32> pc_local;
+	sc_dt::sc_lv<7> opcode;
+	sc_dt::sc_lv<5> rd;
+	sc_dt::sc_lv<32> rs1;
+	sc_dt::sc_lv<32> rs2;
+	sc_dt::sc_lv<3> funct3;
+	sc_dt::sc_lv<7> funct7;
+	sc_dt::sc_lv<32> imm;
+	
+	id_ex_tmp = id_ex;
+	
+	pc_local = id_ex_tmp & 0xFFFFFFFF;
+	opcode = (id_ex_tmp >> 32) & 0x7F;
+	funct3 = (id_ex_tmp >> 39) & 0x7;
+	funct7 = (id_ex_tmp >> 42) & 0x7F;
+	rd = (id_ex_tmp >> 49) & 0x1F;
+	imm = (id_ex_tmp >> 54) & 0xFFFFFFFF;
+	rs2 = (id_ex_tmp >> 86) & 0xFFFFFFFF;
+	rs1 = (id_ex_tmp >> 118) & 0xFFFFFFFF;
+	/*
+	switch(opcode) {
+		case 0b0110111:	//LUI
+			break;
+		case 0b0010111:	//AUIPC
+			break;
+		case 0b1101111:	//JAL
+			break;
+		case 0b1100111:	//JALR
+			break;
+		case 0b1100011:	//BRANCH
+			switch(funct3) {
+			
+			}
+			break;
+		case 0b0000011:	//LOAD
+			switch(funct3) {
+			
+			}
+			break;
+		case 0b0100011:	//STORE
+			switch(funct3) {
+			
+			}
+			break;
+		case 0b0010011:	//IMM
+			switch() {
+			
+			}
+			break;
+		case 0b0110011:	//REG
+			break;
+		case 0b0001111:	//FENCE
+			break;
+		case 0b1110011:	//ECALL
+			break;
+		case 0b1110011:	//EBREAK
+			break;
+	}*/
+	//cout << id_ex_tmp << "  [time: " << sc_time_stamp() << "]" << endl;
 	
 	EX_r.notify();
 }
