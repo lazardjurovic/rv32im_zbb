@@ -178,12 +178,13 @@ void CPU::instructionDecode() {
 	sc_dt::sc_lv<5> rs1;
 	sc_dt::sc_lv<5> rs2;
 	sc_dt::sc_lv<3> funct3;
+	sc_dt::sc_uint<3> funct3_u;
 	sc_dt::sc_lv<7> funct7;
 	sc_dt::sc_lv<32> imm;	
 	sc_dt::sc_lv<32> mask;
 	
 	if_id_tmp = if_id;
-	cout << pc << "\tInstruction decode:\t" << if_id_tmp << "  [time: " << sc_time_stamp() << "]" << endl;
+	//cout << pc << "\tInstruction decode:\t" << if_id_tmp << "  [time: " << sc_time_stamp() << "]" << endl;
 	
 	//Extracting information from IF_ID register
 	pc_local = if_id_tmp & 0xFFFFFFFF;
@@ -193,6 +194,8 @@ void CPU::instructionDecode() {
 	rs2 = (if_id_tmp >> 52) & 0x1F;
 	funct3 = (if_id_tmp >> 44) & 0x7;
 	funct7 = (if_id_tmp >> 57) & 0x7F;
+	
+	funct3_u = funct3;
 	
 	//Extracting immediate from IF_ID register 
 	if(opcode == 0b1101111) {	//JAL -> J type
@@ -289,13 +292,18 @@ void CPU::instructionDecode() {
 			mask <<= 12;
 			imm = imm | mask;					
 		}
+	
+	} else if(opcode == 0b1110011) {	//ECALL, EBREAK -> I type
+	
+		imm = (if_id_tmp >> 52) & 0xFFF;
+	
 	} else {
 	
 		imm = 0x0;
 	}
 	
 	//Generating jump address to forward to instructionFetch()
-	if(opcode == 0b1101111 || opcode == 0b1100011) {	//JAL, BEQ, BNE, BLT, BGE, BLTU, BGEU
+	if(opcode == 0b1101111) {	//JAL
 		sc_dt::sc_uint<32> pc_tmp, imm_tmp, jmp_tmp;
 		
 		pc_tmp = pc_local;
@@ -319,9 +327,87 @@ void CPU::instructionDecode() {
 		jump_address = jmp_tmp;
 		
 		pc_next_sel = 1;
+		
+	} else if(opcode == 0b1100011) {	//BRANCH
+		sc_dt::sc_uint<5> rs1_address;
+		sc_dt::sc_uint<5> rs2_address;
+		sc_dt::sc_uint<32> rs1_data_u;
+		sc_dt::sc_uint<32> rs2_data_u;
+		sc_dt::sc_int<32> rs1_data;
+		sc_dt::sc_int<32> rs2_data;
+		sc_dt::sc_uint<32> pc_tmp, imm_tmp, jmp_tmp;
+		
+		pc_tmp = pc_local;
+		imm_tmp = (imm << 1);
+		jmp_tmp = pc_tmp + imm_tmp;
+		
+		jump_address = jmp_tmp;
+		
+		rs1_address = rs1;
+		rs2_address = rs2;
+		
+		switch(funct3_u) {
+			case 0b000:	//BEQ
+				if(registers[rs1_address] == registers[rs2_address]) {
+					pc_next_sel = 1;
+				} else {
+					pc_next_sel = 0;
+				}
+				break;
+			case 0b001:	//BNE
+				if(registers[rs1_address] != registers[rs2_address]) {
+					pc_next_sel = 1;
+				} else {
+					pc_next_sel = 0;
+				}
+				break;
+			case 0b100:	//BLT
+				rs1_data = registers[rs1_address];
+				rs2_data = registers[rs2_address];
+				
+				if(rs1_data < rs2_data) {	//Signed operands
+					pc_next_sel = 1;
+				} else {
+					pc_next_sel = 0;
+				}
+				break;
+			case 0b101:	//BGE
+				rs1_data = registers[rs1_address];
+				rs2_data = registers[rs2_address];
+				
+				if(rs1_data > rs2_data) {	//Signed operands
+					pc_next_sel = 1;
+				} else {
+					pc_next_sel = 0;
+				}
+				break;
+			case 0b110:	//BLTU
+				rs1_data_u = registers[rs1_address];
+				rs2_data_u = registers[rs2_address];
+				
+				if(rs1_data_u < rs2_data_u) {	//Unsigned operands
+					pc_next_sel = 1;
+				} else {
+					pc_next_sel = 0;
+				}
+				break;
+			case 0b111:	//BGTU
+				rs1_data_u = registers[rs1_address];
+				rs2_data_u = registers[rs2_address];
+				
+				if(rs1_data_u > rs2_data_u) {	//Unsigned operands
+					pc_next_sel = 1;
+				} else {
+					pc_next_sel = 0;
+				}
+				break;
+			default:
+				cout << "Invalid funct3 field." << endl;
+		}
 	} else {
 		pc_next_sel = 0;
 	}
+	
 	
 	sc_dt::sc_lv<150> tmp = 0x0;
 	sc_dt::sc_uint<5> rs1_uint, rs2_uint;
@@ -363,63 +449,196 @@ void CPU::executeInstruction() {
 	
 	sc_dt::sc_lv<150> id_ex_tmp;
 	sc_dt::sc_lv<32> pc_local;
-	sc_dt::sc_lv<7> opcode;
+	sc_dt::sc_lv<7> opcode_lv;
+	sc_dt::sc_uint<7> opcode;
 	sc_dt::sc_lv<5> rd;
 	sc_dt::sc_lv<32> rs1;
 	sc_dt::sc_lv<32> rs2;
-	sc_dt::sc_lv<3> funct3;
-	sc_dt::sc_lv<7> funct7;
+	sc_dt::sc_lv<3> funct3_lv;
+	sc_dt::sc_lv<7> funct7_lv;
+	sc_dt::sc_uint<3> funct3;
+	sc_dt::sc_uint<7> funct7;
 	sc_dt::sc_lv<32> imm;
+	sc_dt::sc_lv<32> alu_result;
 	
 	id_ex_tmp = id_ex;
 	
 	pc_local = id_ex_tmp & 0xFFFFFFFF;
-	opcode = (id_ex_tmp >> 32) & 0x7F;
-	funct3 = (id_ex_tmp >> 39) & 0x7;
-	funct7 = (id_ex_tmp >> 42) & 0x7F;
+	opcode_lv = (id_ex_tmp >> 32) & 0x7F;
+	funct3_lv = (id_ex_tmp >> 39) & 0x7;
+	funct7_lv = (id_ex_tmp >> 42) & 0x7F;
 	rd = (id_ex_tmp >> 49) & 0x1F;
 	imm = (id_ex_tmp >> 54) & 0xFFFFFFFF;
 	rs2 = (id_ex_tmp >> 86) & 0xFFFFFFFF;
 	rs1 = (id_ex_tmp >> 118) & 0xFFFFFFFF;
-	/*
+	
+	opcode = opcode_lv;
+	funct3 = funct3_lv;
+	funct7 = funct7_lv;
+	
+	sc_dt::sc_uint<32> pc_tmp, imm_tmp, alu_tmp;
+	sc_dt::sc_uint<32> rs1_data;
+	sc_dt::sc_uint<32> rs2_data;
+	sc_dt::sc_int<32> rs1_data_signed;
+	sc_dt::sc_int<32> rs2_data_signed;
+	sc_dt::sc_uint<5> shamt;
+	
+	rs1_data = rs1;
+	rs2_data = rs2;
+	
+	rs1_data_signed = rs1;
+	rs2_data_signed = rs2;
+	
+	imm_tmp = imm;
+	pc_tmp = pc_local;
+	
+	//ALU unit implementation
 	switch(opcode) {
 		case 0b0110111:	//LUI
+			alu_result = imm;
 			break;
 		case 0b0010111:	//AUIPC
+			alu_tmp = imm_tmp + pc_tmp;
+			alu_result = alu_tmp;
 			break;
 		case 0b1101111:	//JAL
+			pc_tmp += 4;
+			alu_result = pc_tmp;
 			break;
 		case 0b1100111:	//JALR
+			pc_tmp += 4;
+			alu_result = pc_tmp;
 			break;
-		case 0b1100011:	//BRANCH
-			switch(funct3) {
-			
-			}
-			break;
-		case 0b0000011:	//LOAD
-			switch(funct3) {
-			
-			}
+		case 0b0000011:	//LOAD		
+			alu_tmp = imm_tmp + rs1_data;
+			alu_result = alu_tmp;
 			break;
 		case 0b0100011:	//STORE
-			switch(funct3) {
-			
-			}
+			alu_result = rs2;
 			break;
 		case 0b0010011:	//IMM
-			switch() {
-			
+			switch(funct3) {
+				case 0b000:	//ADDI
+					alu_tmp = imm_tmp + rs1_data;
+					alu_result = alu_tmp;
+					break;
+				case 0b010:	//SLTI
+					if(rs1_data_signed < imm_tmp) {
+						alu_result = 0x1;
+					} else {
+						alu_result = 0x0;
+					}
+					break;
+				case 0b011:	//SLTIU
+					if(rs1_data < imm_tmp) {
+						alu_result = 0x1;
+					} else {
+						alu_result = 0x0;
+					}
+					break;
+				case 0b100:	//XORI
+					alu_result = rs1 ^ imm;
+					break;
+				case 0b110:	//ORI
+					alu_result = rs1 | imm;
+					break;
+				case 0b111:	//ANDI
+					alu_result = rs1 & imm;
+					break;
+				case 0b001:	//SLLI
+					shamt = imm & 0x1F;
+					alu_result = rs1 << shamt;
+					break;
+				case 0b101:	
+					if(funct7 == 0) { //SRLI
+						shamt = imm & 0x1F;
+						alu_result = rs1 >> shamt;
+					} else if(funct7 == 0b0100000) { //SRAI
+						sc_dt::sc_uint<1> carry;
+						sc_dt::sc_lv<32> tmp;
+						
+						shamt = imm & 0x1F;
+						
+						for(int i = 0; i < shamt; i++) {
+							carry = rs1 & 0x1;
+							tmp = (carry << 31);
+							alu_result = tmp | (rs1 >> 1);
+						}
+					} else {
+						cout << "Invalid funct7 field." << endl;
+					}
+					break;
+				default:
+					cout << "Invalid funct3 field." << endl;
 			}
 			break;
 		case 0b0110011:	//REG
+			switch(funct3) {
+				case 0b000:
+					if(funct7 == 0x0) {	//ADD
+						alu_tmp = imm_tmp + rs1_data;
+						alu_result = alu_tmp;
+					} else if(funct7 == 0b0100000) { //SUB
+						alu_tmp = imm_tmp - rs1_data;
+						alu_result = alu_tmp;
+					} 
+					break;
+				case 0b001:	//SLL
+					alu_result = rs1 << rs2_data;
+					break;
+				case 0b010:	//SLT 
+					if(rs1_data_signed < rs2_data_signed) {
+						alu_result = 0x1;
+					} else {
+						alu_result = 0x0;
+					}
+					break;
+				case 0b011:	//SLTU
+					if(rs1_data < rs2_data) {
+						alu_result = 0x1;
+					} else {
+						alu_result = 0x0;
+					}
+					break;
+				case 0b100: //XOR
+					alu_result = rs1 ^ rs2;
+					break;
+				case 0b101:
+					if(funct7 == 0x0) {	//SRL
+						alu_result = rs1 >> rs2_data;
+					} else if(funct7 == 0b0100000) { //SRA
+						sc_dt::sc_uint<1> carry;
+						sc_dt::sc_lv<32> tmp;
+						
+						for(int i = 0; i < rs2_data; i++) {
+							carry = rs1 & 0x1;
+							tmp = (carry << 31);
+							alu_result = tmp | (rs1 >> 1);
+						}
+					} 
+					break;
+				case 0b110:	//OR 
+					alu_result = rs1 | rs2;
+					break;
+				case 0b111:	//AND
+					alu_result = rs1 & rs2;
+					break;
+				default:
+					cout << "Invalid funct3 field." << endl;
+			}
 			break;
 		case 0b0001111:	//FENCE
 			break;
-		case 0b1110011:	//ECALL
+		case 0b1110011:	
+			if(imm == 0) { //ECALL
+
+			} else if(imm == 1){ //EBREAK
+			
+			} else {
+				cout << "Invalid ECALL/EBREAK instruction." << endl;
+			}
 			break;
-		case 0b1110011:	//EBREAK
-			break;
-	}*/
+	}
 	//cout << id_ex_tmp << "  [time: " << sc_time_stamp() << "]" << endl;
 	
 	EX_r.notify();
