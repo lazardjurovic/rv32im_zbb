@@ -29,7 +29,7 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 	if(instrs.is_open()) {
 		
 		int cnt = 0;
-		sc_dt::sc_lv<32> instr;
+		sc_dt::sc_bv<32> instr;
 		string line;
 		
 		while(instrs.good()) {
@@ -58,7 +58,7 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 	if(data.is_open()) {
 		
 		int cnt = 0;
-		sc_dt::sc_lv<32> bit_line;
+		sc_dt::sc_bv<32> bit_line;
 		string line;
 		
 		while(data.good()) {
@@ -142,8 +142,8 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 void CPU::instructionFetch() {
 	next_trigger(IF_s); 
 	
-	sc_dt::sc_lv<32> instr;
-	sc_dt::sc_lv<64> tmp;
+	sc_dt::sc_bv<32> instr;
+	sc_dt::sc_bv<64> tmp;
 	
 	if(pc_next_sel == 0) {
 		pc += 4;
@@ -171,17 +171,17 @@ void CPU::instructionFetch() {
 void CPU::instructionDecode() {
 	next_trigger(ID_s);
 	
-	sc_dt::sc_lv<64> if_id_tmp;
-	sc_dt::sc_lv<32> pc_local;
-	sc_dt::sc_lv<7> opcode;
-	sc_dt::sc_lv<5> rd;
-	sc_dt::sc_lv<5> rs1;
-	sc_dt::sc_lv<5> rs2;
-	sc_dt::sc_lv<3> funct3;
+	sc_dt::sc_bv<64> if_id_tmp;
+	sc_dt::sc_bv<32> pc_local;
+	sc_dt::sc_bv<7> opcode;
+	sc_dt::sc_bv<5> rd;
+	sc_dt::sc_bv<5> rs1;
+	sc_dt::sc_bv<5> rs2;
+	sc_dt::sc_bv<3> funct3;
 	sc_dt::sc_uint<3> funct3_u;
-	sc_dt::sc_lv<7> funct7;
-	sc_dt::sc_lv<32> imm;	
-	sc_dt::sc_lv<32> mask;
+	sc_dt::sc_bv<7> funct7;
+	sc_dt::sc_bv<32> imm;	
+	sc_dt::sc_bv<32> mask;
 	
 	if_id_tmp = if_id;
 	//cout << pc << "\tInstruction decode:\t" << if_id_tmp << "  [time: " << sc_time_stamp() << "]" << endl;
@@ -302,6 +302,19 @@ void CPU::instructionDecode() {
 		imm = 0x0;
 	}
 	
+	//Storing values in registers from WRITE-BACK phase
+	sc_dt::sc_bv<32> wb_data;
+	sc_dt::sc_uint<5> wb_address;
+	
+	wb_data = rd_data_wb;
+	wb_address = rd_address_wb;
+	
+	if(wb_address != 0) {
+		registers[wb_address] = wb_data;
+	} else {
+		registers[0] = 0;
+	}
+	
 	//Generating jump address to forward to instructionFetch()
 	if(opcode == 0b1101111) {	//JAL
 		sc_dt::sc_uint<32> pc_tmp, imm_tmp, jmp_tmp;
@@ -408,8 +421,14 @@ void CPU::instructionDecode() {
 		pc_next_sel = 0;
 	}
 	
+	sc_dt::sc_uint<32> temp;
+	cout << "-------------------------------  " << sc_time_stamp() << endl;
+	for(int i = 0; i < 32; i++) {
+		temp = registers[i];
+		cout << "reg[" << i << "] = \t" << temp << endl;
+	}
 	
-	sc_dt::sc_lv<150> tmp = 0x0;
+	sc_dt::sc_bv<150> tmp = 0x0;
 	sc_dt::sc_uint<5> rs1_uint, rs2_uint;
 	
 	rs1_uint = rs1;
@@ -447,19 +466,19 @@ void CPU::instructionDecode() {
 void CPU::executeInstruction() {
 	next_trigger(EX_s);
 	
-	sc_dt::sc_lv<150> id_ex_tmp;
-	sc_dt::sc_lv<32> pc_local;
-	sc_dt::sc_lv<7> opcode_lv;
+	sc_dt::sc_bv<150> id_ex_tmp;
+	sc_dt::sc_bv<32> pc_local;
+	sc_dt::sc_bv<7> opcode_lv;
 	sc_dt::sc_uint<7> opcode;
-	sc_dt::sc_lv<5> rd;
-	sc_dt::sc_lv<32> rs1;
-	sc_dt::sc_lv<32> rs2;
-	sc_dt::sc_lv<3> funct3_lv;
-	sc_dt::sc_lv<7> funct7_lv;
+	sc_dt::sc_bv<5> rd;
+	sc_dt::sc_bv<32> rs1;
+	sc_dt::sc_bv<32> rs2;
+	sc_dt::sc_bv<3> funct3_lv;
+	sc_dt::sc_bv<7> funct7_lv;
 	sc_dt::sc_uint<3> funct3;
 	sc_dt::sc_uint<7> funct7;
-	sc_dt::sc_lv<32> imm;
-	sc_dt::sc_lv<32> alu_result;
+	sc_dt::sc_bv<32> imm;
+	sc_dt::sc_bv<32> alu_result;
 	
 	id_ex_tmp = id_ex;
 	
@@ -558,7 +577,7 @@ void CPU::executeInstruction() {
 						alu_result = rs1 >> shamt;
 					} else if(funct7 == 0b0100000) { //SRAI
 						sc_dt::sc_uint<1> carry;
-						sc_dt::sc_lv<32> tmp;
+						sc_dt::sc_bv<32> tmp;
 						
 						shamt = imm & 0x1F;
 						
@@ -613,7 +632,7 @@ void CPU::executeInstruction() {
 						alu_result = rs1 >> rs2_data;
 					} else if(funct7 == 0b0100000) { //SRA
 						sc_dt::sc_uint<1> carry;
-						sc_dt::sc_lv<32> tmp;
+						sc_dt::sc_bv<32> tmp;
 						
 						for(int i = 0; i < rs2_data; i++) {
 							carry = rs1 & 0x1;
@@ -648,7 +667,7 @@ void CPU::executeInstruction() {
 			break;
 	}
 	
-	sc_dt::sc_lv<79> ex_mem_tmp;
+	sc_dt::sc_bv<79> ex_mem_tmp;
 	
 	ex_mem_tmp = alu_result;
 	ex_mem_tmp <<= 32;
@@ -675,15 +694,15 @@ void CPU::memoryAccess() {
 	next_trigger(MEM_s);
 	
 	//Logic vector values
-	sc_dt::sc_lv<79> ex_mem_tmp;
-	sc_dt::sc_lv<32> alu_result;
-	sc_dt::sc_lv<32> rs2;
-	sc_dt::sc_lv<5> rd_address;
-	sc_dt::sc_lv<3> funct3;
-	sc_dt::sc_lv<7> opcode;
+	sc_dt::sc_bv<79> ex_mem_tmp;
+	sc_dt::sc_bv<32> alu_result;
+	sc_dt::sc_bv<32> rs2;
+	sc_dt::sc_bv<5> rd_address;
+	sc_dt::sc_bv<3> funct3;
+	sc_dt::sc_bv<7> opcode;
 	
-	sc_dt::sc_lv<32> mem_out;
-	sc_dt::sc_lv<32> mask;
+	sc_dt::sc_bv<32> mem_out;
+	sc_dt::sc_bv<32> mask;
 	
 	//Unsigned int values
 	sc_dt::sc_uint<32> address;
@@ -721,9 +740,9 @@ void CPU::memoryAccess() {
 				mem_out = mem_out | mask;					
 			}
 		} else if(funct3 == 0b001) {	//LH
-			mem_out = data_mem[address + 3];
+			mem_out = data_mem[address + 2];
 			mem_out <<= 8;
-			mem_out = mem_out | data_mem[address + 2];
+			mem_out = mem_out | data_mem[address + 3];
 			
 			//Sign extend
 			if((mem_out >> 15) == 1) {
@@ -733,19 +752,19 @@ void CPU::memoryAccess() {
 				mem_out = mem_out | mask;					
 			}
 		} else if(funct3 == 0b010) {	//LW
-			mem_out = data_mem[address + 3];
-			mem_out <<= 8;
-			mem_out = mem_out | data_mem[address + 2];
+			mem_out = data_mem[address];
 			mem_out <<= 8;
 			mem_out = mem_out | data_mem[address + 1];
 			mem_out <<= 8;
-			mem_out = mem_out | data_mem[address];
+			mem_out = mem_out | data_mem[address + 2];
+			mem_out <<= 8;
+			mem_out = mem_out | data_mem[address + 3];
 		} else if(funct3 == 0b100) {	//LBU
 			mem_out = data_mem[address + 3];
 		} else if(funct3 == 0b101) {	//LHU
-			mem_out = data_mem[address + 3];
+			mem_out = data_mem[address + 2];
 			mem_out <<= 8;
-			mem_out = mem_out | data_mem[address + 2];
+			mem_out = mem_out | data_mem[address + 3];
 		} else {
 			cout << "Invalid funct3 field in LOAD instruction." << endl;
 			mem_out = 0x0;
@@ -772,7 +791,7 @@ void CPU::memoryAccess() {
 		mem_out = 0x0;
 	}
 	
-	sc_dt::sc_lv<76> mem_wb_tmp;
+	sc_dt::sc_bv<76> mem_wb_tmp;
 	
 	mem_wb_tmp = alu_result;
 	mem_wb_tmp <<= 32;
@@ -793,7 +812,29 @@ void CPU::memoryAccess() {
 void CPU::writeBack() {
 	next_trigger(WB_s);
 	
+	sc_dt::sc_bv<76> mem_wb_tmp;
+	sc_dt::sc_bv<32> alu_result;
+	sc_dt::sc_bv<32> mem_out;
+	sc_dt::sc_bv<5> rd_address;
+	sc_dt::sc_bv<7> opcode;
 	
+	mem_wb_tmp = mem_wb;
+	
+	opcode = mem_wb_tmp & 0x7F;
+	rd_address = (mem_wb_tmp >> 7) & 0x1F;
+	mem_out = (mem_wb_tmp >> 12) & 0xFFFFFFFF;
+	alu_result = (mem_wb_tmp >> 44) & 0xFFFFFFFF;
+	
+	sc_dt::sc_bv<32> wb_out;
+	
+	if(opcode == 0b0000011 || opcode == 0b0100011) {
+		wb_out = mem_out;
+	} else {
+		wb_out = alu_result;
+	}
+	
+	rd_address_wb = rd_address;
+	rd_data_wb = wb_out;
 	
 	WB_r.notify();
 }
@@ -860,7 +901,20 @@ void CPU::timeHandle() {
 		wait(STAGE_DELAY, SC_NS);
 	}
 }
-	
+
+void CPU::print_data_mem() {	
+	cout << endl << "==============DATA MEMORY==============" << endl;
+	for(int i = 0; i < 2000; i++) {
+		if(i%4==0) {
+			cout << endl;
+			cout << i << ":\t";
+		}
+		
+		cout << data_mem[i];
+	}
+	cout << endl;
+}
+
 sc_dt::sc_uint<32> CPU::getPC() {
 	return pc;
 }

@@ -11,5 +11,7 @@ int sc_main (int argc, char* argv[])
 	
 	sc_start(1000, SC_NS);
 	
+	//cpu.print_data_mem();
+	
 	return 0;
 }
