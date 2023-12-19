@@ -1,8 +1,14 @@
-/* link.ld */
-ENTRY(main)
+SECTIONS
+{
+    .text 0 : ALIGN(4)
+    {
+        *(.text)
+    }
 
-SECTIONS {
-    . = 0;
-    .text : { *(.text) }
-    .data : { *(.data) }
+    .data 0 : ALIGN(4)
+    {
+        *(.data)
+        *(.rodata)
+        *(.sdata)
+    }
 }

@@ -18,8 +18,6 @@ def reverse_endian(s):
         substrings[i], substrings[i+1] = substrings[i+1], substrings[i]
     
     merged_string = ''.join(substrings)
- 
-    print(merged_string)
     return merged_string
 
 # opening .txt section
@@ -51,7 +49,6 @@ parsed_data = [item for sublist in parsed_data for item in sublist] # flatten in
 parsed_data = [item for i, item in enumerate(parsed_data) if i % 5 != 4] # take 4 elements and skip one, repeat unitll end of list
 parsed_data = [s for s in parsed_data if is_hex(s)]
 parsed_data = [bin(int(s, 16))[2:].zfill(32) for s in parsed_data] # convert to 32 bit binary string
-print(parsed_data)
 parsed_data = [reverse_endian(s) for s in parsed_data]
 
 # writing to data memory file
