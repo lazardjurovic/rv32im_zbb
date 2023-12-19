@@ -676,14 +676,17 @@ void CPU::memoryAccess() {
 	
 	//Logic vector values
 	sc_dt::sc_lv<79> ex_mem_tmp;
-	sc_dt::sc_lv<32> mem_address;
+	sc_dt::sc_lv<32> alu_result;
 	sc_dt::sc_lv<32> rs2;
 	sc_dt::sc_lv<5> rd_address;
 	sc_dt::sc_lv<3> funct3;
 	sc_dt::sc_lv<7> opcode;
 	
+	sc_dt::sc_lv<32> mem_out;
+	sc_dt::sc_lv<32> mask;
+	
 	//Unsigned int values
-	sc_dt::sc_int<32> address;
+	sc_dt::sc_uint<32> address;
 	sc_dt::sc_uint<32> rs2_data;
 	sc_dt::sc_uint<5> rd;
 	
@@ -693,23 +696,105 @@ void CPU::memoryAccess() {
 	funct3 = (ex_mem_tmp >> 7) & 0x7;
 	rd_address = (ex_mem_tmp >> 10) & 0x1F;
 	rs2 = (ex_mem_tmp >> 15) & 0xFFFFFFFF;
-	mem_address = (ex_mem_tmp >> 47) & 0xFFFFFFFF;
+	alu_result = (ex_mem_tmp >> 47) & 0xFFFFFFFF;
 	
 	rs2_data = rs2;
-	address = mem_address;
+	address = alu_result;
 	rd = rd_address;
-	
+	/*
 	cout << "opcode: " << opcode << endl;
 	cout << "rs2_data: " << rs2_data << endl;
 	cout << "mem_address: " << address << endl;
 	cout << "rd_address: " << rd << "\t[time: " << sc_time_stamp() << "]" << endl;
+	*/
+	
+	if(opcode == 0b0000011) {
+	
+		if(funct3 == 0b000) {	//LB
+			mem_out = data_mem[address + 3];
+			
+			//Sign extend
+			if((mem_out >> 7) == 1) {
+				mask = 0x0;
+				mask = mask | 0xFFFFFF;
+				mask <<= 8;
+				mem_out = mem_out | mask;					
+			}
+		} else if(funct3 == 0b001) {	//LH
+			mem_out = data_mem[address + 3];
+			mem_out <<= 8;
+			mem_out = mem_out | data_mem[address + 2];
+			
+			//Sign extend
+			if((mem_out >> 15) == 1) {
+				mask = 0x0;
+				mask = mask | 0xFFFF;
+				mask <<= 16;
+				mem_out = mem_out | mask;					
+			}
+		} else if(funct3 == 0b010) {	//LW
+			mem_out = data_mem[address + 3];
+			mem_out <<= 8;
+			mem_out = mem_out | data_mem[address + 2];
+			mem_out <<= 8;
+			mem_out = mem_out | data_mem[address + 1];
+			mem_out <<= 8;
+			mem_out = mem_out | data_mem[address];
+		} else if(funct3 == 0b100) {	//LBU
+			mem_out = data_mem[address + 3];
+		} else if(funct3 == 0b101) {	//LHU
+			mem_out = data_mem[address + 3];
+			mem_out <<= 8;
+			mem_out = mem_out | data_mem[address + 2];
+		} else {
+			cout << "Invalid funct3 field in LOAD instruction." << endl;
+			mem_out = 0x0;
+		}
+		
+	} else if(opcode == 0b0100011) {
+	
+		if(funct3 == 0b000) {	//SB
+			data_mem[address + 3] = (rs2 & 0xFF);
+		} else if(funct3 == 0b001) {	//SH
+			data_mem[address + 3] = (rs2 & 0xFF);
+			data_mem[address + 2] = (rs2 >> 8) & 0xFF;
+		} else if(funct3 == 0b010) {	//SW
+			data_mem[address + 3] = (rs2 & 0xFF);
+			data_mem[address + 2] = (rs2 >> 8) & 0xFF;
+			data_mem[address + 1] = (rs2 >> 16) & 0xFF;
+			data_mem[address] = (rs2 >> 24) & 0xFF;
+		} else {
+			cout << "Invalid funct3 field in STORE instruction." << endl;
+			mem_out = 0x0;
+		}
+		
+	} else {
+		mem_out = 0x0;
+	}
+	
+	sc_dt::sc_lv<76> mem_wb_tmp;
+	
+	mem_wb_tmp = alu_result;
+	mem_wb_tmp <<= 32;
+	
+	mem_wb_tmp = mem_wb_tmp | mem_out;
+	mem_wb_tmp <<= 5;
+	
+	mem_wb_tmp = mem_wb_tmp | rd_address;
+	mem_wb_tmp <<= 7;
+	
+	mem_wb_tmp = mem_wb_tmp | opcode;
+	
+	mem_wb = mem_wb_tmp;
 	
 	MEM_r.notify();
 }
 	
 void CPU::writeBack() {
 	next_trigger(WB_s);
-		
+	
+	
+	
 	WB_r.notify();
 }
 

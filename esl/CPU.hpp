@@ -26,7 +26,7 @@ protected:
 	sc_signal<sc_dt::sc_lv<64>> if_id;
 	sc_signal<sc_dt::sc_lv<150>> id_ex;
 	sc_signal<sc_dt::sc_lv<79>> ex_mem;
-	sc_signal<sc_dt::sc_lv<32>> mem_wb;
+	sc_signal<sc_dt::sc_lv<76>> mem_wb;
 	
 public:
 	//Dynamically allocated arrays for instruction and data memory
