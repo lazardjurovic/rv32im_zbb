@@ -492,6 +492,8 @@ void CPU::executeInstruction() {
 	imm_tmp = imm;
 	pc_tmp = pc_local;
 	
+	//cout << id_ex_tmp << "  [time: " << sc_time_stamp() << "]" << endl;
+	
 	//ALU unit implementation
 	switch(opcode) {
 		case 0b0110111:	//LUI
@@ -514,7 +516,8 @@ void CPU::executeInstruction() {
 			alu_result = alu_tmp;
 			break;
 		case 0b0100011:	//STORE
-			alu_result = rs2;
+			alu_tmp = imm_tmp + rs1_data;
+			alu_result = alu_tmp;
 			break;
 		case 0b0010011:	//IMM
 			switch(funct3) {
@@ -566,10 +569,12 @@ void CPU::executeInstruction() {
 						}
 					} else {
 						cout << "Invalid funct7 field." << endl;
+						alu_result = 0x0;
 					}
 					break;
 				default:
 					cout << "Invalid funct3 field." << endl;
+					alu_result = 0x0;
 			}
 			break;
 		case 0b0110011:	//REG
@@ -625,28 +630,80 @@ void CPU::executeInstruction() {
 					break;
 				default:
 					cout << "Invalid funct3 field." << endl;
+					alu_result = 0x0;
 			}
 			break;
 		case 0b0001111:	//FENCE
+			alu_result = 0x0;	///TODO DOPUNI POSLE
 			break;
 		case 0b1110011:	
 			if(imm == 0) { //ECALL
-
+				alu_result = 0x0;
 			} else if(imm == 1){ //EBREAK
-			
+				alu_result = 0x0;
 			} else {
 				cout << "Invalid ECALL/EBREAK instruction." << endl;
+				alu_result = 0x0;
 			}
 			break;
 	}
-	//cout << id_ex_tmp << "  [time: " << sc_time_stamp() << "]" << endl;
+	
+	sc_dt::sc_lv<79> ex_mem_tmp;
+	
+	ex_mem_tmp = alu_result;
+	ex_mem_tmp <<= 32;
+	
+	ex_mem_tmp = ex_mem_tmp | rs2;
+	ex_mem_tmp <<= 5;
+	
+	ex_mem_tmp = ex_mem_tmp | rd;
+	ex_mem_tmp <<= 3;
+	
+	ex_mem_tmp = ex_mem_tmp | funct3_lv;
+	ex_mem_tmp <<= 7;
+	
+	ex_mem_tmp = ex_mem_tmp | opcode_lv;
+	
+	ex_mem = ex_mem_tmp;
+	
+	//cout << "Execute phase register: " << ex_mem  << "[time: " << sc_time_stamp() << "]" << endl;
 	
 	EX_r.notify();
 }
 	
 void CPU::memoryAccess() {
 	next_trigger(MEM_s);
-		
+	
+	//Logic vector values
+	sc_dt::sc_lv<79> ex_mem_tmp;
+	sc_dt::sc_lv<32> mem_address;
+	sc_dt::sc_lv<32> rs2;
+	sc_dt::sc_lv<5> rd_address;
+	sc_dt::sc_lv<3> funct3;
+	sc_dt::sc_lv<7> opcode;
+	
+	//Unsigned int values
+	sc_dt::sc_int<32> address;
+	sc_dt::sc_uint<32> rs2_data;
+	sc_dt::sc_uint<5> rd;
+	
+	ex_mem_tmp = ex_mem;
+	
+	opcode = ex_mem_tmp & 0x7F;
+	funct3 = (ex_mem_tmp >> 7) & 0x7;
+	rd_address = (ex_mem_tmp >> 10) & 0x1F;
+	rs2 = (ex_mem_tmp >> 15) & 0xFFFFFFFF;
+	mem_address = (ex_mem_tmp >> 47) & 0xFFFFFFFF;
+	
+	rs2_data = rs2;
+	address = mem_address;
+	rd = rd_address;
+	
+	cout << "opcode: " << opcode << endl;
+	cout << "rs2_data: " << rs2_data << endl;
+	cout << "mem_address: " << address << endl;
+	cout << "rd_address: " << rd << "\t[time: " << sc_time_stamp() << "]" << endl;
+	
 	MEM_r.notify();
 }
 	
