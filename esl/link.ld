@@ -1,14 +1,20 @@
+MEMORY
+{
+    program_memory (rwx) : ORIGIN = 0x00000000, LENGTH = 8192
+    data_memory (rwx) : ORIGIN = 0x10000000, LENGTH = 8192
+}
+
 SECTIONS
 {
-    .text 0 : ALIGN(4)
+    .text : ALIGN(4)
     {
         *(.text)
-    }
+    } > program_memory
 
-    .data 0 : ALIGN(4)
+    .data : ALIGN(4)
     {
         *(.data)
         *(.rodata)
         *(.sdata)
-    }
+    } > data_memory
 }

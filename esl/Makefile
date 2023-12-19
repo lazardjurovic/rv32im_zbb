@@ -1,7 +1,8 @@
 CC =  riscv32-unknown-elf-gcc 
 DUMP = riscv32-unknown-elf-objdump 
 
-CFLAGS = -march=rv32i -mabi=ilp32 -static -nostdlib -mcmodel=medlow -nostartfiles -Ttext=0 -T link.ld -O2
+CFLAGS = -march=rv32i -mabi=ilp32 -static -nostdlib -mcmodel=medlow  -Ttext=0  -O2
+LDFLAGS = -T link.ld -nostartfiles
 
 # -march=rv32i -> compiling for RV32I subset
 # -mabi-ilp32 -> ABI specs - integers,longs and pointers are 32 bits
@@ -17,10 +18,14 @@ all: program.elf text.dump data.dump
 	python3 parser.py
 	rm text.dump
 	rm data.dump
+	rm program.o
 	rm program.elf
 
-program.elf: program.c
-	$(CC) $(CFLAGS) -c program.c -o program.elf
+program.elf: program.o
+	$(CC) $(LDFLAGS) program.o -o program.elf
+
+program.o: program.c
+	$(CC) $(CFLAGS) -c program.c -o program.o
 
 # disassemble .text section
 text.dump: program.elf
