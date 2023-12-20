@@ -8,8 +8,8 @@
 #include <bitset>
 #include <vector>
 
-#define INSTRMEM_SIZE 4000
-#define DATAMEM_SIZE 4000
+#define INSTRMEM_SIZE 50000
+#define DATAMEM_SIZE 50000
 
 using namespace std;
 using namespace sc_core;
@@ -58,6 +58,7 @@ public:
 	sc_dt::sc_uint<32> getPC();
 	void setPC(sc_dt::sc_uint<32> val);
 	void print_data_mem();
+	void print_registers();
 };
 
 #endif //RV32_CPU_H

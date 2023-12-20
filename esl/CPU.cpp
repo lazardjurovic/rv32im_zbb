@@ -255,6 +255,9 @@ void CPU::instructionDecode() {
 			imm = imm | mask;					
 		}
 		
+		sc_dt::sc_int<32> temporary;
+		temporary = imm;
+		
 	} else if(opcode == 0b0000011) {	//LB, LH, LW, LBU, LHU -> I type
 	
 		imm = (if_id_tmp >> 52) & 0xFFF;
@@ -317,18 +320,18 @@ void CPU::instructionDecode() {
 	
 	//Generating jump address to forward to instructionFetch()
 	if(opcode == 0b1101111) {	//JAL
-		sc_dt::sc_uint<32> pc_tmp, imm_tmp, jmp_tmp;
+		sc_dt::sc_int<32> pc_tmp, imm_tmp, jmp_tmp;
 		
 		pc_tmp = pc_local;
-		imm_tmp = (imm << 1);
+		imm_tmp = imm;
 		jmp_tmp = pc_tmp + imm_tmp;
 		
 		jump_address = jmp_tmp;
-		
+
 		pc_next_sel = 1;
 		
 	} else if(opcode == 0b1100111) {	//JALR
-		sc_dt::sc_uint<32> imm_tmp, jmp_tmp, rs1_data;
+		sc_dt::sc_int<32> imm_tmp, jmp_tmp, rs1_data;
 		sc_dt::sc_uint<5> rs1_address;
 	
 		rs1_address = rs1;
@@ -351,7 +354,7 @@ void CPU::instructionDecode() {
 		sc_dt::sc_uint<32> pc_tmp, imm_tmp, jmp_tmp;
 		
 		pc_tmp = pc_local;
-		imm_tmp = (imm << 1);
+		imm_tmp = imm;					//AKO NE RADI POGLEDAJ OVO IMM << 1
 		jmp_tmp = pc_tmp + imm_tmp;
 		
 		jump_address = jmp_tmp;
@@ -388,7 +391,7 @@ void CPU::instructionDecode() {
 				rs1_data = registers[rs1_address];
 				rs2_data = registers[rs2_address];
 				
-				if(rs1_data > rs2_data) {	//Signed operands
+				if(rs1_data >= rs2_data) {	//Signed operands
 					pc_next_sel = 1;
 				} else {
 					pc_next_sel = 0;
@@ -420,14 +423,14 @@ void CPU::instructionDecode() {
 	} else {
 		pc_next_sel = 0;
 	}
-	
-	sc_dt::sc_uint<32> temp;
-	cout << "-------------------------------  " << sc_time_stamp() << endl;
+	/*
+	sc_dt::sc_int<32> temp;
+	cout << "==================================================================  " << sc_time_stamp() << endl;
 	for(int i = 0; i < 32; i++) {
 		temp = registers[i];
-		cout << "reg[" << i << "] = \t" << temp << endl;
+		cout << "reg[" << i << "] = " << temp << endl;
 	}
-	
+	*/
 	sc_dt::sc_bv<150> tmp = 0x0;
 	sc_dt::sc_uint<5> rs1_uint, rs2_uint;
 	
@@ -496,7 +499,7 @@ void CPU::executeInstruction() {
 	funct7 = funct7_lv;
 	
 	sc_dt::sc_uint<32> pc_tmp, imm_tmp, alu_tmp;
-	sc_dt::sc_uint<32> rs1_data;
+	sc_dt::sc_uint<32> rs1_data;					///TO SIGNED
 	sc_dt::sc_uint<32> rs2_data;
 	sc_dt::sc_int<32> rs1_data_signed;
 	sc_dt::sc_int<32> rs2_data_signed;
@@ -600,10 +603,10 @@ void CPU::executeInstruction() {
 			switch(funct3) {
 				case 0b000:
 					if(funct7 == 0x0) {	//ADD
-						alu_tmp = imm_tmp + rs1_data;
+						alu_tmp = rs1_data + rs2_data;
 						alu_result = alu_tmp;
 					} else if(funct7 == 0b0100000) { //SUB
-						alu_tmp = imm_tmp - rs1_data;
+						alu_tmp = rs1_data - rs2_data;
 						alu_result = alu_tmp;
 					} 
 					break;
@@ -720,13 +723,13 @@ void CPU::memoryAccess() {
 	rs2_data = rs2;
 	address = alu_result;
 	rd = rd_address;
+	address = address * 4;
 	/*
 	cout << "opcode: " << opcode << endl;
 	cout << "rs2_data: " << rs2_data << endl;
 	cout << "mem_address: " << address << endl;
 	cout << "rd_address: " << rd << "\t[time: " << sc_time_stamp() << "]" << endl;
 	*/
-	
 	if(opcode == 0b0000011) {
 	
 		if(funct3 == 0b000) {	//LB
@@ -759,6 +762,7 @@ void CPU::memoryAccess() {
 			mem_out = mem_out | data_mem[address + 2];
 			mem_out <<= 8;
 			mem_out = mem_out | data_mem[address + 3];
+			//cout << "MEM_OUT: " << mem_out << " " << sc_time_stamp() << endl;
 		} else if(funct3 == 0b100) {	//LBU
 			mem_out = data_mem[address + 3];
 		} else if(funct3 == 0b101) {	//LHU
@@ -774,22 +778,26 @@ void CPU::memoryAccess() {
 	
 		if(funct3 == 0b000) {	//SB
 			data_mem[address + 3] = (rs2 & 0xFF);
+			//cout << address << ":\t" << data_mem[address] << data_mem[address+1] << data_mem[address+2] << data_mem[address+3] << " " << sc_time_stamp() << endl;
 		} else if(funct3 == 0b001) {	//SH
 			data_mem[address + 3] = (rs2 & 0xFF);
 			data_mem[address + 2] = (rs2 >> 8) & 0xFF;
+			//cout << address << ":\t" << data_mem[address] << data_mem[address+1] << data_mem[address+2] << data_mem[address+3] << " " << sc_time_stamp() << endl;
 		} else if(funct3 == 0b010) {	//SW
 			data_mem[address + 3] = (rs2 & 0xFF);
 			data_mem[address + 2] = (rs2 >> 8) & 0xFF;
 			data_mem[address + 1] = (rs2 >> 16) & 0xFF;
 			data_mem[address] = (rs2 >> 24) & 0xFF;
+			//cout << address << ":\t" << data_mem[address] << data_mem[address+1] << data_mem[address+2] << data_mem[address+3] << " " << sc_time_stamp() << endl;
 		} else {
 			cout << "Invalid funct3 field in STORE instruction." << endl;
-			mem_out = 0x0;
 		}
 		
 	} else {
 		mem_out = 0x0;
 	}
+	
+	//cout << "mem_out: " << mem_out << " " << sc_time_stamp() << endl;
 	
 	sc_dt::sc_bv<76> mem_wb_tmp;
 	
@@ -903,8 +911,8 @@ void CPU::timeHandle() {
 }
 
 void CPU::print_data_mem() {	
-	cout << endl << "==============DATA MEMORY==============" << endl;
-	for(int i = 0; i < 2000; i++) {
+	cout << endl << "==============DATA MEMORY AFTER==============" << endl;
+	for(int i = 0; i < 8210*4; i++) {
 		if(i%4==0) {
 			cout << endl;
 			cout << i << ":\t";
@@ -913,6 +921,12 @@ void CPU::print_data_mem() {
 		cout << data_mem[i];
 	}
 	cout << endl;
+}
+
+void CPU::print_registers() {
+	for(int i = 0; i < 32; i++) {
+		cout << "reg[" << i << "] = " << registers[i] << endl;
+	}
 }
 
 sc_dt::sc_uint<32> CPU::getPC() {
