@@ -55,7 +55,7 @@ parsed_data = [reverse_endian(s) for s in parsed_data]
 with open("data_mem.txt", 'w') as file:
 
     # write zeros before start of .data specifide by linker
-    for i in range(8192):
+    for i in range(8191):
         file.write('00000000000000000000000000000000')
         file.write('\n')
 
