@@ -1,7 +1,7 @@
 MEMORY
 {
     program_memory (rwx) : ORIGIN = 0x00000000, LENGTH = 8192
-    data_memory (rwx) : ORIGIN = 0x10000000, LENGTH = 8192
+    data_memory (rwx) : ORIGIN = 0x00010000, LENGTH = 8192
 }
 
 SECTIONS
