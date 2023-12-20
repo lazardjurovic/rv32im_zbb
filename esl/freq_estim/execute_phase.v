@@ -27,6 +27,8 @@ module execute_phase(
     reg[31:0] ex_mem_s;
     reg[31:0] mem_wb_s;
     reg[31:0] res_o_s;
+    reg[31:0] ror_tmp1,ror_tmp2, rol_tmp1, rol_tmp2;
+    reg[4:0] shamt;
     
     reg[7:0] byte0,byte1,byte2,byte3;
     
@@ -322,9 +324,23 @@ module execute_phase(
     end
 end
      
+     always @ * begin // shamt process
+        shamt = operand2[4:0];
+     end
      
-     
+     always @ * begin // rotation processes
+        ror_tmp1 = operand1 >> shamt;
+        ror_tmp2 = operand1 << (32-shamt);
+        rol_tmp1 = operand1 << shamt;
+        rol_tmp2 = operand2 >> (32 - shamt);
+     end
+         
     // combinational logic of ALU
+    
+    /*
+        There is no specific inmplementation of rori since ti does the same as ror but with immeadiate 
+        given through muxes as it's operand
+    */
     
     always @(operand1 or operand2 or alu_op_s or leading_zeros or trailing_zeros or pop_cnt)
     begin
@@ -368,18 +384,20 @@ end
                 end
             5'b01010: // zext.h
                 res_o_s = { 16'b0000000000000000, operand1[15:0]};  
-            /*
             5'b01011: // rol
-                 res_tmp <= {operand1 << shamt, operand1 & (shift_left_result[63:31])};
+               res_o_s = rol_tmp1 | rol_tmp2;
             5'b01100: // ror
-                res_tmp <= { operand1 & shift_right_result , operand1 >> shamt};
-            
-            5'b01101: // rori
-            */
+               res_o_s = ror_tmp1 | ror_tmp2;
             5'b01110: //orc.b
                res_o_s = { 8'b00000000 ? byte3 == 0 : 8'b11111111,8'b00000000 ? byte2 == 0 : 8'b11111111,8'b00000000 ? byte1 == 0 : 8'b11111111,8'b00000000 ? byte0 == 0 : 8'b11111111};
             5'b01111: // rev8
                 res_o_s = {byte0,byte1,byte2,byte3};
+            5'b10000: // andn
+                res_o_s = operand1 & operand2;
+            5'b10001: //orn
+                res_o_s = operand1 | operand2;
+            5'b10010: // xnor
+                res_o_s = ~(operand1 ^ operand2);
                        
             default : res_o_s = 32'b00000000000000000000000000000000;
         endcase
