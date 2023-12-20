@@ -2,10 +2,17 @@
 
 #define STAGE_DELAY 5
 
-#define DEBUG_OUTPUT
-///TODO: FIX SEGMENTATION FAULT
+//Uncomment for printing contents for each pipeline phase 
 
-//#define MEMORY_PRINT //defined to print contents of instruction and data memory
+//#define IF_PRINT
+//#define ID_PRINT
+//#define EX_PRINT
+//#define MEM_PRINT
+//#define WB_PRINT
+
+//Uncomment for printing contents of initially loaded data and instruction memory
+
+//#define MEMORY_PRINT 
 
 CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 	cout << "Creating a CPU object named " << name() << "." << endl;
@@ -21,7 +28,7 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 		data_mem[i] = 0x0;
 	}
 	
-	cout << "Filling instruction memory..." << endl;
+	cout << "Filling instruction memory...";
 	
 	//filling instruction memory with instruction from a file
 	ifstream instrs(insMem);
@@ -49,8 +56,9 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 	} else {
 		cout << "Unable to open file" << insMem << "." << endl;
 	}
+	cout << "DONE" << endl;
 	
-	cout << "Filling data memory..." << endl;
+	cout << "Filling data memory...";
 	
 	//filling data memory with data from a file
 	ifstream data(datMem);
@@ -78,11 +86,12 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 	} else {
 		cout << "Unable to open file" << datMem << "." << endl;
 	}
+	cout << "DONE" << endl;
 	
 	#ifdef MEMORY_PRINT
-	cout << "===========INSTRUCTION MEMORY===========" << endl;
+	cout << "=========== INSTRUCTION MEMORY ===========" << endl;
 	for(int i = 0; i < instr_amt; i++) {
-		if(i%4==0) {
+		if(i % 4 == 0) {
 			cout << endl;
 			cout << i << ":\t";
 		}
@@ -91,9 +100,9 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 	}
 	cout << endl;
 	
-	cout << endl << "==============DATA MEMORY==============" << endl;
+	cout << endl << "============== DATA MEMORY ==============" << endl;
 	for(int i = 0; i < data_amt; i++) {
-		if(i%4==0) {
+		if(i % 4 == 0) {
 			cout << endl;
 			cout << i << ":\t";
 		}
@@ -132,18 +141,22 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n) {
 		
 	pc = -4;
 	pc_next_sel = 0;
+	rd_we_wb = 0;
+	rd_we_mem = 0;
 	
-	for(int i = 0; i < 31; i++) {
+	for(int i = 0; i < 32; i++) {
 		registers[i] = 0x0;
 	}
 }
+
+//==================================== INSTRUCTION FETCH PHASE ====================================
 
 //Method for fetching instuctions from instruction memory
 void CPU::instructionFetch() {
 	next_trigger(IF_s); 
 	
 	sc_dt::sc_bv<32> instr;
-	sc_dt::sc_bv<64> tmp;
+	sc_dt::sc_bv<64> if_id_tmp;
 	
 	if(pc_next_sel == 0) {
 		pc += 4;
@@ -159,15 +172,18 @@ void CPU::instructionFetch() {
 	instr <<= 8;
 	instr = instr | instr_mem[pc+3];
 	
-	tmp = instr;
-	tmp <<= 32;
-	tmp = tmp | pc;
+	if_id_tmp = instr;
+	if_id_tmp <<= 32;
+	if_id_tmp = if_id_tmp | pc;
 	
-	if_id = tmp;
+	if_id = if_id_tmp;
 	
 	IF_r.notify();
 }
-	
+
+//==================================== INSTRUCTION DECODE PHASE ====================================
+
+//Method for decodeing instuctions fetched in instrcution fetch phase
 void CPU::instructionDecode() {
 	next_trigger(ID_s);
 	
@@ -354,7 +370,7 @@ void CPU::instructionDecode() {
 		sc_dt::sc_uint<32> pc_tmp, imm_tmp, jmp_tmp;
 		
 		pc_tmp = pc_local;
-		imm_tmp = imm;					//AKO NE RADI POGLEDAJ OVO IMM << 1
+		imm_tmp = imm;							//AKO NE RADI POGLEDAJ OVO IMM << 1
 		jmp_tmp = pc_tmp + imm_tmp;
 		
 		jump_address = jmp_tmp;
@@ -431,7 +447,7 @@ void CPU::instructionDecode() {
 		cout << "reg[" << i << "] = " << temp << endl;
 	}
 	*/
-	sc_dt::sc_bv<150> tmp = 0x0;
+	sc_dt::sc_bv<160> tmp = 0x0;
 	sc_dt::sc_uint<5> rs1_uint, rs2_uint;
 	
 	rs1_uint = rs1;
@@ -460,24 +476,34 @@ void CPU::instructionDecode() {
 	tmp <<= 32;
 	
 	tmp = tmp | pc_local;
+	tmp <<= 5;
+	
+	tmp = tmp | rs2;
+	tmp <<= 5;
+	
+	tmp = tmp | rs1;
 	
 	id_ex = tmp;
 	
 	ID_r.notify();		
 }
+
+//==================================== INSTRUCTION EXECUTE PHASE ====================================
 	
 void CPU::executeInstruction() {
 	next_trigger(EX_s);
 	
-	sc_dt::sc_bv<150> id_ex_tmp;
+	sc_dt::sc_bv<160> id_ex_tmp;
 	sc_dt::sc_bv<32> pc_local;
 	sc_dt::sc_bv<7> opcode_lv;
 	sc_dt::sc_uint<7> opcode;
 	sc_dt::sc_bv<5> rd;
+	sc_dt::sc_bv<5> rs1_address;
+	sc_dt::sc_bv<5> rs2_address;
 	sc_dt::sc_bv<32> rs1;
 	sc_dt::sc_bv<32> rs2;
-	sc_dt::sc_bv<3> funct3_lv;
-	sc_dt::sc_bv<7> funct7_lv;
+	sc_dt::sc_bv<3> funct3_bv;
+	sc_dt::sc_bv<7> funct7_bv;
 	sc_dt::sc_uint<3> funct3;
 	sc_dt::sc_uint<7> funct7;
 	sc_dt::sc_bv<32> imm;
@@ -485,18 +511,24 @@ void CPU::executeInstruction() {
 	
 	id_ex_tmp = id_ex;
 	
-	pc_local = id_ex_tmp & 0xFFFFFFFF;
-	opcode_lv = (id_ex_tmp >> 32) & 0x7F;
-	funct3_lv = (id_ex_tmp >> 39) & 0x7;
-	funct7_lv = (id_ex_tmp >> 42) & 0x7F;
-	rd = (id_ex_tmp >> 49) & 0x1F;
-	imm = (id_ex_tmp >> 54) & 0xFFFFFFFF;
-	rs2 = (id_ex_tmp >> 86) & 0xFFFFFFFF;
-	rs1 = (id_ex_tmp >> 118) & 0xFFFFFFFF;
+	rs1_address = id_ex_tmp & 0x1F;
+	rs2_address = (id_ex_tmp >> 5) & 0x1F;
+	pc_local = (id_ex_tmp >> 10) & 0xFFFFFFFF;
+	opcode_lv = (id_ex_tmp >> 42) & 0x7F;
+	funct3_bv = (id_ex_tmp >> 49) & 0x7;
+	funct7_bv = (id_ex_tmp >> 52) & 0x7F;
+	rd = (id_ex_tmp >> 59) & 0x1F;
+	imm = (id_ex_tmp >> 64) & 0xFFFFFFFF;
+	rs2 = (id_ex_tmp >> 96) & 0xFFFFFFFF;
+	rs1 = (id_ex_tmp >> 128) & 0xFFFFFFFF;
 	
 	opcode = opcode_lv;
-	funct3 = funct3_lv;
-	funct7 = funct7_lv;
+	funct3 = funct3_bv;
+	funct7 = funct7_bv;
+	
+	//Setting signals for forwarding unit
+	rs1_address_ex = rs1_address;
+	rs2_address_ex = rs2_address;
 	
 	sc_dt::sc_uint<32> pc_tmp, imm_tmp, alu_tmp;
 	sc_dt::sc_uint<32> rs1_data;					///TO SIGNED
@@ -656,7 +688,7 @@ void CPU::executeInstruction() {
 			}
 			break;
 		case 0b0001111:	//FENCE
-			alu_result = 0x0;	///TODO DOPUNI POSLE
+			alu_result = 0x0;								///TODO DOPUNI POSLE
 			break;
 		case 0b1110011:	
 			if(imm == 0) { //ECALL
@@ -681,7 +713,7 @@ void CPU::executeInstruction() {
 	ex_mem_tmp = ex_mem_tmp | rd;
 	ex_mem_tmp <<= 3;
 	
-	ex_mem_tmp = ex_mem_tmp | funct3_lv;
+	ex_mem_tmp = ex_mem_tmp | funct3_bv;
 	ex_mem_tmp <<= 7;
 	
 	ex_mem_tmp = ex_mem_tmp | opcode_lv;
@@ -692,6 +724,8 @@ void CPU::executeInstruction() {
 	
 	EX_r.notify();
 }
+
+//==================================== MEMORY ACCESS PHASE ====================================
 	
 void CPU::memoryAccess() {
 	next_trigger(MEM_s);
@@ -703,6 +737,7 @@ void CPU::memoryAccess() {
 	sc_dt::sc_bv<5> rd_address;
 	sc_dt::sc_bv<3> funct3;
 	sc_dt::sc_bv<7> opcode;
+	sc_dt::sc_uint<7> opcode_uint;
 	
 	sc_dt::sc_bv<32> mem_out;
 	sc_dt::sc_bv<32> mask;
@@ -720,10 +755,47 @@ void CPU::memoryAccess() {
 	rs2 = (ex_mem_tmp >> 15) & 0xFFFFFFFF;
 	alu_result = (ex_mem_tmp >> 47) & 0xFFFFFFFF;
 	
+	//Setting signal for forwarding unit
+	rd_address_mem = rd_address;
+	
 	rs2_data = rs2;
 	address = alu_result;
 	rd = rd_address;
 	address = address * 4;
+	
+	//Forwarding unit in MEMORY ACCESS phase
+	switch(opcode_uint) {
+		case 0b0110011:		//R type
+			rd_we_mem = 1;
+			break;
+		case 0b0010011:		//I type
+			rd_we_mem = 1;
+			break;
+		case 0b0000011:		//Load
+			rd_we_mem = 1;
+			break;
+		case 0b1100011:		//Branch
+			rd_we_mem = 0;
+			break;
+		case 0b0100011:		//Store
+			rd_we_mem = 0;
+			break;
+		case 0b1100111:		//JALR
+			rd_we_mem = 1;
+			break;
+		case 0b1101111:		//JAL
+			rd_we_mem = 1;
+			break;
+		case 0b0010111:		//AUIPC
+			rd_we_mem = 1;
+			break;
+		case 0b0110111:		//LUI
+			rd_we_mem = 1;
+			break;
+		default:
+			rd_we_mem = 0;
+	}
+	
 	/*
 	cout << "opcode: " << opcode << endl;
 	cout << "rs2_data: " << rs2_data << endl;
@@ -816,7 +888,9 @@ void CPU::memoryAccess() {
 	
 	MEM_r.notify();
 }
-	
+
+//==================================== WRITE-BACK PHASE ====================================
+
 void CPU::writeBack() {
 	next_trigger(WB_s);
 	
@@ -825,6 +899,7 @@ void CPU::writeBack() {
 	sc_dt::sc_bv<32> mem_out;
 	sc_dt::sc_bv<5> rd_address;
 	sc_dt::sc_bv<7> opcode;
+	sc_dt::sc_uint<7> opcode_uint;
 	
 	mem_wb_tmp = mem_wb;
 	
@@ -832,6 +907,39 @@ void CPU::writeBack() {
 	rd_address = (mem_wb_tmp >> 7) & 0x1F;
 	mem_out = (mem_wb_tmp >> 12) & 0xFFFFFFFF;
 	alu_result = (mem_wb_tmp >> 44) & 0xFFFFFFFF;
+	
+	//Forwarding unit in WRITE BACK phase
+	switch(opcode_uint) {
+		case 0b0110011:		//R type
+			rd_we_wb = 1;
+			break;
+		case 0b0010011:		//I type
+			rd_we_wb = 1;
+			break;
+		case 0b0000011:		//Load
+			rd_we_wb = 1;
+			break;
+		case 0b1100011:		//Branch
+			rd_we_wb = 0;
+			break;
+		case 0b0100011:		//Store
+			rd_we_wb = 0;
+			break;
+		case 0b1100111:		//JALR
+			rd_we_wb = 1;
+			break;
+		case 0b1101111:		//JAL
+			rd_we_wb = 1;
+			break;
+		case 0b0010111:		//AUIPC
+			rd_we_wb = 1;
+			break;
+		case 0b0110111:		//LUI
+			rd_we_wb = 1;
+			break;
+		default:
+			rd_we_wb = 0;
+	}
 	
 	sc_dt::sc_bv<32> wb_out;
 	
@@ -911,9 +1019,9 @@ void CPU::timeHandle() {
 }
 
 void CPU::print_data_mem() {	
-	cout << endl << "==============DATA MEMORY AFTER==============" << endl;
+	cout << endl << "============== DATA MEMORY ==============" << endl;
 	for(int i = 0; i < 8210*4; i++) {
-		if(i%4==0) {
+		if(i % 4 == 0) {
 			cout << endl;
 			cout << i << ":\t";
 		}
@@ -924,8 +1032,11 @@ void CPU::print_data_mem() {
 }
 
 void CPU::print_registers() {
+	sc_dt::sc_int<32> temp;
+	
 	for(int i = 0; i < 32; i++) {
-		cout << "reg[" << i << "] = " << registers[i] << endl;
+		temp = registers[i];
+		cout << "reg[" << i << "] = " << temp << endl;
 	}
 }
 

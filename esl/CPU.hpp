@@ -22,12 +22,19 @@ protected:
 	sc_signal<bool> pc_next_sel;				//Selection signal that chooses PC
 	sc_signal<sc_dt::sc_bv<32>> jump_address;	//Address to jump to in branch and jump instructions
 	
-	sc_signal<sc_dt::sc_bv<32>> rd_data_wb;
-	sc_signal<sc_dt::sc_bv<5>> rd_address_wb;
+	sc_signal<sc_dt::sc_bv<32>> rd_data_wb;		//Data to write back in registers
+	sc_signal<sc_dt::sc_bv<5>> rd_address_wb;	//Address to write back to
+	
+	//Signals for forwarding unit implementation
+	sc_signal<sc_dt::sc_bv<5>> rs1_address_ex;
+	sc_signal<sc_dt::sc_bv<5>> rs2_address_ex;
+	sc_signal<bool> rd_we_wb;
+	sc_signal<bool> rd_we_mem;
+	sc_signal<sc_dt::sc_bv<5>> rd_address_mem;
 	
 	//Pipeline registers
 	sc_signal<sc_dt::sc_bv<64>> if_id;
-	sc_signal<sc_dt::sc_bv<150>> id_ex;
+	sc_signal<sc_dt::sc_bv<160>> id_ex;
 	sc_signal<sc_dt::sc_bv<79>> ex_mem;
 	sc_signal<sc_dt::sc_bv<76>> mem_wb;
 	
@@ -47,7 +54,6 @@ public:
 	SC_HAS_PROCESS(CPU);
 	
 	CPU(sc_module_name n, string insMem, string datMem);
-	//~CPU();
 	
 	void instructionFetch();
 	void instructionDecode();
