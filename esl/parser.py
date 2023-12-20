@@ -27,10 +27,10 @@ with open("text.dump", "r") as file:
 
 # processign .txt section
 parsed_program = [s for s in parsed_program if s != '\n']
-parsed_program = [s for s in parsed_program if "<" not in s] # remove lines containing labels
+parsed_program = [s for s in parsed_program if ">:" not in s] # remove lines containing labelss
 parsed_program = [s.replace('\n','') for s in parsed_program]
 parsed_program = [s.replace('\t','') for s in parsed_program]
-parsed_program = parsed_program[3:]
+parsed_program = parsed_program[2:]
 parsed_program = [s.split() for s in parsed_program]
 parsed_program = [s[0] for s in parsed_program]
 parsed_program = [s.split(':')[1] for s in parsed_program]
