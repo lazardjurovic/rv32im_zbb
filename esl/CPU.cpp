@@ -361,57 +361,76 @@ void CPU::instructionDecode()
 		registers[0] = 0;
 	}
 
-	// Generating jump address to forward to instructionFetch()
+	sc_dt::sc_int<32> pc_tmp, imm_tmp, jmp_tmp;
+	sc_dt::sc_uint<5> rs1_address;
+	sc_dt::sc_uint<5> rs2_address;
+
+	pc_tmp = pc_local;
+	imm_tmp = imm;
+	rs1_address = rs1;
+	rs2_address = rs2;
+
+	// Forwarding unit for data hazard in branch instructions
+	sc_dt::sc_bv<32> operand_1;
+	sc_dt::sc_bv<32> operand_2;
+	sc_dt::sc_int<32> operand_1_signed;
+	sc_dt::sc_int<32> operand_2_signed;
+	sc_dt::sc_uint<32> operand_1_unsigned;
+	sc_dt::sc_uint<32> operand_2_unsigned;
+
+	operand_1 = registers[rs1_address];
+	operand_2 = registers[rs2_address];
+	
+	sc_dt::sc_bv<5> rd_address_wb_i;
+	sc_dt::sc_bv<5> rd_address_mem_i;
+
+	rd_address_wb_i = rd_address_wb;
+	rd_address_mem_i = rd_address_mem;
+	
+	if(rd_we_mem == 1 && rd_address_mem_i != 0x0) {
+		if(rs1 == rd_address_mem_i) {
+			operand_1 = rd_data_mem;
+		}
+
+		if(rs2 == rd_address_mem_i) {
+			operand_2 = rd_data_mem;
+		}
+	}
+	
+	operand_1_signed = operand_1;
+	operand_2_signed = operand_2;
+	operand_1_unsigned = operand_1;
+	operand_2_unsigned = operand_2;
+
+	// Branching unit - generating jump address to forward to instructionFetch()
 	if (opcode == 0b1101111)
 	{ // JAL
-		sc_dt::sc_int<32> pc_tmp, imm_tmp, jmp_tmp;
-
-		pc_tmp = pc_local;
-		imm_tmp = imm;
 		jmp_tmp = pc_tmp + imm_tmp;
-
 		jump_address = jmp_tmp;
 
 		pc_next_sel = 1;
 	}
 	else if (opcode == 0b1100111)
 	{ // JALR
-		sc_dt::sc_int<32> imm_tmp, jmp_tmp, rs1_data;
-		sc_dt::sc_uint<5> rs1_address;
+		sc_dt::sc_bv<32> jmp_bv_tmp;
 
-		rs1_address = rs1;
+		jmp_tmp = imm_tmp + operand_1_signed;
+		jmp_bv_tmp = jmp_tmp;
+		jmp_bv_tmp = jmp_bv_tmp & 0xFFFFFFFE;
 
-		imm_tmp = imm;
-		rs1_data = registers[rs1_address];
-		jmp_tmp = imm_tmp + rs1_data;
-
-		jump_address = jmp_tmp;
-
+		jump_address = jmp_bv_tmp;
+		
 		pc_next_sel = 1;
 	}
 	else if (opcode == 0b1100011)
 	{ // BRANCH
-		sc_dt::sc_uint<5> rs1_address;
-		sc_dt::sc_uint<5> rs2_address;
-		sc_dt::sc_uint<32> rs1_data_u;
-		sc_dt::sc_uint<32> rs2_data_u;
-		sc_dt::sc_int<32> rs1_data;
-		sc_dt::sc_int<32> rs2_data;
-		sc_dt::sc_uint<32> pc_tmp, imm_tmp, jmp_tmp;
-
-		pc_tmp = pc_local;
-		imm_tmp = imm; // AKO NE RADI POGLEDAJ OVO IMM << 1
-		jmp_tmp = pc_tmp + imm_tmp;
-
+		jmp_tmp = pc_tmp + imm_tmp;						// AKO NE RADI POGLEDAJ OVO IMM << 1
 		jump_address = jmp_tmp;
-
-		rs1_address = rs1;
-		rs2_address = rs2;
 
 		switch (funct3_u)
 		{
 		case 0b000: // BEQ
-			if (registers[rs1_address] == registers[rs2_address])
+			if (operand_1_unsigned == operand_2_unsigned)
 			{
 				pc_next_sel = 1;
 			}
@@ -421,7 +440,7 @@ void CPU::instructionDecode()
 			}
 			break;
 		case 0b001: // BNE
-			if (registers[rs1_address] != registers[rs2_address])
+			if (operand_1_unsigned != operand_2_unsigned)
 			{
 				pc_next_sel = 1;
 			}
@@ -431,11 +450,9 @@ void CPU::instructionDecode()
 			}
 			break;
 		case 0b100: // BLT
-			rs1_data = registers[rs1_address];
-			rs2_data = registers[rs2_address];
-
-			if (rs1_data < rs2_data)
-			{ // Signed operands
+			// Signed operands
+			if (operand_1_signed < operand_2_signed)	
+			{
 				pc_next_sel = 1;
 			}
 			else
@@ -444,11 +461,9 @@ void CPU::instructionDecode()
 			}
 			break;
 		case 0b101: // BGE
-			rs1_data = registers[rs1_address];
-			rs2_data = registers[rs2_address];
-
-			if (rs1_data >= rs2_data)
-			{ // Signed operands
+			// Signed operands
+			if (operand_1_signed >= operand_2_signed)
+			{ 
 				pc_next_sel = 1;
 			}
 			else
@@ -457,11 +472,9 @@ void CPU::instructionDecode()
 			}
 			break;
 		case 0b110: // BLTU
-			rs1_data_u = registers[rs1_address];
-			rs2_data_u = registers[rs2_address];
-
-			if (rs1_data_u < rs2_data_u)
-			{ // Unsigned operands
+			// Unsigned operands
+			if (operand_1_unsigned < operand_2_unsigned)
+			{ 
 				pc_next_sel = 1;
 			}
 			else
@@ -470,11 +483,9 @@ void CPU::instructionDecode()
 			}
 			break;
 		case 0b111: // BGTU
-			rs1_data_u = registers[rs1_address];
-			rs2_data_u = registers[rs2_address];
-
-			if (rs1_data_u > rs2_data_u)
-			{ // Unsigned operands
+			// Unsigned operands
+			if (operand_1_unsigned > operand_2_unsigned)
+			{ 
 				pc_next_sel = 1;
 			}
 			else
@@ -499,16 +510,12 @@ void CPU::instructionDecode()
 	}
 	*/
 	sc_dt::sc_bv<160> tmp = 0x0;
-	sc_dt::sc_uint<5> rs1_uint, rs2_uint;
-
-	rs1_uint = rs1;
-	rs2_uint = rs2;
 
 	// Storing values in ID_EX register
-	tmp = registers[rs1_uint];
+	tmp = registers[rs1_address];
 	tmp <<= 32;
 
-	tmp = tmp | registers[rs2_uint];
+	tmp = tmp | registers[rs2_address];
 	tmp <<= 32;
 
 	tmp = tmp | imm;
