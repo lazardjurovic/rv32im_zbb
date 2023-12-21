@@ -9,10 +9,11 @@ int sc_main (int argc, char* argv[])
 {
 	CPU cpu("CPU", "instr_mem.txt", "data_mem.txt");
 	
-	sc_start(1000, SC_NS);
+	sc_start(1500, SC_NS);
 	//cout << "FINISHED" << endl;
 	//cpu.print_data_mem();
 	cpu.print_registers();
 	
 	return 0;
 }
+
