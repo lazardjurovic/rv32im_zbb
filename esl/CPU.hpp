@@ -26,11 +26,19 @@ protected:
 	sc_signal<sc_dt::sc_bv<32>> rd_data_wb;	  // Data to write back in registers
 	sc_signal<sc_dt::sc_bv<5>> rd_address_wb; // Address to write back to
 
-	// Signals for forwarding unit implementation
+	// Signals for forwarding and hazard unit implementation
 	sc_signal<bool> rd_we_wb;
 	sc_signal<bool> rd_we_mem;
+	sc_signal<bool> rd_we_ex;
+	sc_signal<bool> mem_to_reg_ex;
+	sc_signal<bool> mem_to_reg_mem;
+	sc_signal<bool> pc_en;
+	sc_signal<bool> if_id_en;
+
 	sc_signal<sc_dt::sc_bv<5>> rd_address_mem;
 	sc_signal<sc_dt::sc_bv<32>> rd_data_mem;
+	sc_signal<sc_dt::sc_bv<5>> rd_address_ex;
+
 
 	// Pipeline registers
 	sc_signal<sc_dt::sc_bv<64>> if_id;
@@ -63,7 +71,7 @@ public:
 	void timeHandle();
 	sc_dt::sc_uint<32> getPC();
 	void setPC(sc_dt::sc_uint<32> val);
-	void print_data_mem();
+	void print_data_mem(char print_type);
 	void print_registers();
 };
 
