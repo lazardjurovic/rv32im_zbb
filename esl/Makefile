@@ -4,6 +4,8 @@ DUMP = riscv32-unknown-elf-objdump
 CFLAGS = -march=rv32i -mabi=ilp32 -static -nostdlib -mcmodel=medlow  -Ttext=0  -O2
 LDFLAGS = -T link.ld -nostartfiles
 
+CPP_FILES = main.cpp CPU.cpp memory.cpp generator.cpp
+
 # -march=rv32i -> compiling for RV32I subset
 # -mabi-ilp32 -> ABI specs - integers,longs and pointers are 32 bits
 # -static -> all necessary stuff is contained in our elf, no need for exernal libraries
@@ -20,6 +22,7 @@ all: program.elf text.dump data.dump
 	rm data.dump
 	rm program.o
 	rm program.elf
+	g++ $(CPP_FILES) -lsystemc -lpthread -o main
 
 program.elf: program.o
 	$(CC) $(LDFLAGS) program.o -o program.elf
