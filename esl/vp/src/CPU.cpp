@@ -1,16 +1,17 @@
 #include "CPU.hpp"
 
-#define STAGE_DELAY 5		// Promeniti posle na 8 
+#define STAGE_DELAY 5 // Promeniti posle na 8
 
 // Uncomment for printing contents for each pipeline phase
-// #define IF_PRINT
 // #define ID_PRINT
 // #define EX_PRINT
 // #define MEM_PRINT
-// #define WB_PRINT
 
-// Uncomment for printing contents of initially loaded data and instruction memory
+// Uncomment for printing contents of INITIALLY loaded data and instruction memory
 // #define MEMORY_PRINT
+
+// Uncomment for printing contents of registers EACH pass through decode phase
+// #define REGISTER_PRINT
 
 // Uncomment for debug output
 // #define DEBUG_OUTPUT
@@ -177,7 +178,8 @@ void CPU::instructionFetch()
 	sc_dt::sc_bv<32> instr;
 	sc_dt::sc_bv<64> if_id_tmp;
 
-	if(pc_en == 1) {
+	if (pc_en == 1)
+	{
 		if (pc_next_sel == 0)
 		{
 			pc += 4;
@@ -200,14 +202,15 @@ void CPU::instructionFetch()
 	if_id_tmp <<= 32;
 	if_id_tmp = if_id_tmp | pc;
 
-	// Note: IF_ID register flush after branch instruction 
+	// Note: IF_ID register flush after branch instruction
 	// is not necessary in this emulator because pipeline
-	// phases are running only in pseudo-parallel, order in 
-	// which method timeHandle() calls each phase method 
+	// phases are running only in pseudo-parallel, order in
+	// which method timeHandle() calls each phase method
 	// resolves the need to flush, although in HDL implementation
 	// IF_ID flush after branch is a must
 
-	if(if_id_en == 1) {
+	if (if_id_en == 1)
+	{
 		if_id = if_id_tmp;
 	}
 
@@ -235,7 +238,6 @@ void CPU::instructionDecode()
 	sc_dt::sc_bv<32> mask;
 
 	if_id_tmp = if_id;
-	//cout << pc << "\tInstruction decode:\t" << if_id_tmp << "  [time: " << sc_time_stamp() << "]" << endl;
 
 	// Extracting information from IF_ID register
 	pc_local = if_id_tmp & 0xFFFFFFFF;
@@ -255,7 +257,8 @@ void CPU::instructionDecode()
 
 	wb_data = rd_data_wb;
 	wb_address = rd_address_wb;
-	if(rd_we_wb == 1) {
+	if (rd_we_wb == 1)
+	{
 		if (wb_address != 0)
 		{
 			registers[wb_address] = wb_data;
@@ -266,12 +269,16 @@ void CPU::instructionDecode()
 		}
 	}
 
+#ifdef REGISTER_PRINT
+	print_registers();
+#endif
+
 	// Hazard unit implementation
 	bool rs1_in_use_id;
 	bool rs2_in_use_id;
 	bool branch_id;
 	bool control_pass;
-	
+
 	switch (opcode_uint)
 	{
 	case 0b0110011: // R type
@@ -329,40 +336,63 @@ void CPU::instructionDecode()
 	sc_dt::sc_bv<5> rd_mem;
 	rd_ex = rd_address_ex;
 	rd_mem = rd_address_mem;
-	
+
 	pc_en = 1;
-	if_id_en = 1; 
+	if_id_en = 1;
 	control_pass = 1;
-	/*
+
+#ifdef ID_PRINT
 	cout << "=============  TIME STAMP: " << sc_time_stamp() << "  =============" << endl;
-	cout << "rs1_address_id " << rs1 << "   " << "rs2_address_id " << rs2 << endl;
-	cout << "rs1_in_use_id " << rs1_in_use_id << "   " << "rs2_in_use_id " << rs2_in_use_id << endl;
-	cout << "rd_address_ex " << rd_ex << "   " << "rd_address_mem " << rd_mem << endl;
-	cout << "mem_to_reg_ex " << mem_to_reg_ex << "   " << "mem_to_reg_mem " << mem_to_reg_mem << endl;
-	cout << "rd_we_ex " << rd_we_ex << "   " << "rd_we_mem " << rd_we_mem << endl;
+	cout << "rs1_address_id " << rs1 << "   "
+		 << "rs2_address_id " << rs2 << endl;
+	cout << "rs1_in_use_id " << rs1_in_use_id << "   "
+		 << "rs2_in_use_id " << rs2_in_use_id << endl;
+	cout << "rd_address_ex " << rd_ex << "   "
+		 << "rd_address_mem " << rd_mem << endl;
+	cout << "mem_to_reg_ex " << mem_to_reg_ex << "   "
+		 << "mem_to_reg_mem " << mem_to_reg_mem << endl;
+	cout << "rd_we_ex " << rd_we_ex << "   "
+		 << "rd_we_mem " << rd_we_mem << endl;
 	cout << "branch_id " << branch_id << endl;
-	*/
-	if(branch_id == 0) {
-		if(((rs1 == rd_ex && rs1_in_use_id == 1) || (rs2 == rd_ex && rs2_in_use_id == 1)) && mem_to_reg_ex == 1 && rd_we_ex == 1) {
-			//cout << "======== HAZARD DETECTION ========" << endl;  
+#endif
+
+	if (branch_id == 0)
+	{
+		if (((rs1 == rd_ex && rs1_in_use_id == 1) || (rs2 == rd_ex && rs2_in_use_id == 1)) && mem_to_reg_ex == 1 && rd_we_ex == 1)
+		{
+		#ifdef ID_PRINT
+			cout << "======== HAZARD DETECTION ========" << endl;
+		#endif
+
 			pc_en = 0;
-			if_id_en = 0; 
-			control_pass = 0;
-		}
-	} else if(branch_id == 1) {
-		if((rs1 == rd_ex || rs2 == rd_ex) && rd_we_ex == 1) {
-			//cout << "======== HAZARD DETECTION ========" << endl;
-			pc_en = 0;
-			if_id_en = 0; 
-			control_pass = 0;
-		} else if((rs1 == rd_mem || rs2 == rd_mem) && rd_we_mem == 1) {
-			//cout << "======== HAZARD DETECTION ========" << endl;
-			pc_en = 0;
-			if_id_en = 0; 
+			if_id_en = 0;
 			control_pass = 0;
 		}
 	}
-	
+	else if (branch_id == 1)
+	{
+		if ((rs1 == rd_ex || rs2 == rd_ex) && rd_we_ex == 1)
+		{
+		#ifdef ID_PRINT
+			cout << "======== HAZARD DETECTION ========" << endl;
+		#endif
+
+			pc_en = 0;
+			if_id_en = 0;
+			control_pass = 0;
+		}
+		else if ((rs1 == rd_mem || rs2 == rd_mem) && rd_we_mem == 1)
+		{
+		#ifdef ID_PRINT
+			cout << "======== HAZARD DETECTION ========" << endl;
+		#endif
+
+			pc_en = 0;
+			if_id_en = 0;
+			control_pass = 0;
+		}
+	}
+
 	// Extracting immediate from IF_ID register
 	if (opcode == 0b1101111)
 	{ // JAL -> J type
@@ -496,23 +526,26 @@ void CPU::instructionDecode()
 
 	operand_1 = registers[rs1_address];
 	operand_2 = registers[rs2_address];
-	
+
 	sc_dt::sc_bv<5> rd_address_wb_i;
 	sc_dt::sc_bv<5> rd_address_mem_i;
 
 	rd_address_wb_i = rd_address_wb;
 	rd_address_mem_i = rd_address_mem;
-	
-	if(rd_we_mem == 1 && rd_address_mem_i != 0x0) {
-		if(rs1 == rd_address_mem_i) {
+
+	if (rd_we_mem == 1 && rd_address_mem_i != 0x0)
+	{
+		if (rs1 == rd_address_mem_i)
+		{
 			operand_1 = rd_data_mem;
 		}
 
-		if(rs2 == rd_address_mem_i) {
+		if (rs2 == rd_address_mem_i)
+		{
 			operand_2 = rd_data_mem;
 		}
 	}
-	
+
 	operand_1_signed = operand_1;
 	operand_2_signed = operand_2;
 	operand_1_unsigned = operand_1;
@@ -535,132 +568,137 @@ void CPU::instructionDecode()
 		jmp_bv_tmp = jmp_bv_tmp & 0xFFFFFFFE;
 
 		jump_address = jmp_bv_tmp;
-		
+
 		pc_next_sel = 1;
 	}
 	else if (opcode == 0b1100011)
 	{ // BRANCH
-		jmp_tmp = pc_tmp + imm_tmp;					// AKO NE RADI POGLEDAJ OVO IMM << 1
+		jmp_tmp = pc_tmp + imm_tmp;
 		jump_address = jmp_tmp;
 
 		switch (funct3_u)
 		{
 		case 0b000: // BEQ
-			#ifdef DEBUG_OUTPUT
+		#ifdef DEBUG_OUTPUT
 			cout << "BEQ ";
-			#endif
+		#endif
 			if (operand_1_unsigned == operand_2_unsigned)
-			{	
-				#ifdef DEBUG_OUTPUT
+			{
+			#ifdef DEBUG_OUTPUT
 				cout << "successfull to address" << jmp_tmp << " " << sc_time_stamp() << endl;
-				#endif
+			#endif
 				pc_next_sel = 1;
 			}
 			else
 			{
-				#ifdef DEBUG_OUTPUT
-				cout << "unseccessfull" << " " << sc_time_stamp() << endl;
-				#endif
+			#ifdef DEBUG_OUTPUT
+				cout << "unsuccessfull"
+				<< " " << sc_time_stamp() << endl;
+			#endif
 				pc_next_sel = 0;
 			}
 			break;
 		case 0b001: // BNE
 			#ifdef DEBUG_OUTPUT
-			cout << "BNE ";
+				cout << "BNE ";
 			#endif
 			if (operand_1_unsigned != operand_2_unsigned)
 			{
-				#ifdef DEBUG_OUTPUT
+			#ifdef DEBUG_OUTPUT
 				cout << "successfull to address" << jmp_tmp << " " << sc_time_stamp() << endl;
-				#endif
+			#endif
 				pc_next_sel = 1;
 			}
 			else
 			{
-				#ifdef DEBUG_OUTPUT
-				cout << "unseccessfull" << " " << sc_time_stamp() << endl;
-				#endif
+			#ifdef DEBUG_OUTPUT
+				cout << "unsuccessfull"
+				<< " " << sc_time_stamp() << endl;
+			#endif
 				pc_next_sel = 0;
 			}
 			break;
 		case 0b100: // BLT
 			// Signed operands
 			#ifdef DEBUG_OUTPUT
-			cout << "BLT ";
+				cout << "BLT ";
 			#endif
-			if (operand_1_signed < operand_2_signed)	
+			if (operand_1_signed < operand_2_signed)
 			{
-				#ifdef DEBUG_OUTPUT
+			#ifdef DEBUG_OUTPUT
 				cout << "successfull to address" << jmp_tmp << " " << sc_time_stamp() << endl;
-				#endif
+			#endif
 				pc_next_sel = 1;
 			}
 			else
 			{
-				#ifdef DEBUG_OUTPUT
-				cout << "unseccessfull" << " " << sc_time_stamp() << endl;
-				#endif
+			#ifdef DEBUG_OUTPUT
+				cout << "unsuccessfull"
+					<< " " << sc_time_stamp() << endl;
+			#endif
 				pc_next_sel = 0;
 			}
 			break;
 		case 0b101: // BGE
 			// Signed operands
 			#ifdef DEBUG_OUTPUT
-			cout << "BGE ";
+				cout << "BGE ";
 			#endif
-			//cout << "rs1 " << operand_1_signed << " rs2 " << operand_2_signed << endl;
 			if (operand_1_signed >= operand_2_signed)
-			{ 
-				#ifdef DEBUG_OUTPUT
+			{
+			#ifdef DEBUG_OUTPUT
 				cout << "successfull to address" << jmp_tmp << " " << sc_time_stamp() << endl;
-				#endif
+			#endif
 				pc_next_sel = 1;
 			}
 			else
 			{
-				#ifdef DEBUG_OUTPUT
-				cout << "unsuccessfull" << " " << sc_time_stamp() << endl;
-				#endif
+			#ifdef DEBUG_OUTPUT
+				cout << "unsuccessfull"
+				<< " " << sc_time_stamp() << endl;
+			#endif
 				pc_next_sel = 0;
 			}
 			break;
 		case 0b110: // BLTU
 			// Unsigned operands
 			#ifdef DEBUG_OUTPUT
-			cout << "BLTU ";
+				cout << "BLTU ";
 			#endif
 			if (operand_1_unsigned < operand_2_unsigned)
-			{ 
-				#ifdef DEBUG_OUTPUT
+			{
+			#ifdef DEBUG_OUTPUT
 				cout << "successfull to address" << jmp_tmp << " " << sc_time_stamp() << endl;
-				#endif
+			#endif
 				pc_next_sel = 1;
 			}
 			else
 			{
-				#ifdef DEBUG_OUTPUT
-				cout << "unseccessfull" << " " << sc_time_stamp() << endl;
-				#endif
+			#ifdef DEBUG_OUTPUT
+				cout << "unsuccessfull"
+					<< " " << sc_time_stamp() << endl;
+			#endif
 				pc_next_sel = 0;
 			}
 			break;
 		case 0b111: // BGTU
 			// Unsigned operands
 			#ifdef DEBUG_OUTPUT
-			cout << "BGTU ";
+				cout << "BGTU ";
 			#endif
 			if (operand_1_unsigned > operand_2_unsigned)
-			{ 
-				#ifdef DEBUG_OUTPUT
+			{
+			#ifdef DEBUG_OUTPUT
 				cout << "successfull to address" << jmp_tmp << " " << sc_time_stamp() << endl;
-				#endif
+			#endif
 				pc_next_sel = 1;
 			}
 			else
 			{
-				#ifdef DEBUG_OUTPUT
-				cout << "unseccessfull" << " " << sc_time_stamp() << endl;
-				#endif
+			#ifdef DEBUG_OUTPUT
+				cout << "unsuccessfull"
+					<< " " << sc_time_stamp() << endl;
+			#endif
 				pc_next_sel = 0;
 			}
 			break;
@@ -672,14 +710,7 @@ void CPU::instructionDecode()
 	{
 		pc_next_sel = 0;
 	}
-	/*
-	sc_dt::sc_int<32> temp;
-	cout << "==================================================================  " << sc_time_stamp() << endl;
-	for(int i = 0; i < 32; i++) {
-		temp = registers[i];
-		cout << "reg[" << i << "] = " << temp << endl;
-	}
-	*/
+
 	sc_dt::sc_bv<160> tmp = 0x0;
 
 	// Storing values in ID_EX register
@@ -712,9 +743,12 @@ void CPU::instructionDecode()
 
 	tmp = tmp | rs1;
 
-	if(control_pass == 1) {
+	if (control_pass == 1)
+	{
 		id_ex = tmp;
-	} else {
+	}
+	else
+	{
 		tmp = 0x0;
 		id_ex = tmp;
 	}
@@ -771,7 +805,7 @@ void CPU::executeInstruction()
 
 	// Setting signals for hazard unit implementation
 	rd_address_ex = rd;
-	
+
 	switch (opcode)
 	{
 	case 0b0110011: // R type
@@ -815,7 +849,7 @@ void CPU::executeInstruction()
 		mem_to_reg_ex = 0;
 	}
 
-	//cout << id_ex_tmp << "  [time: " << sc_time_stamp() << "]" << endl;
+	// cout << id_ex_tmp << "  [time: " << sc_time_stamp() << "]" << endl;
 
 	// Implementing forwarding unit
 	sc_dt::sc_bv<32> operand_1;
@@ -827,44 +861,60 @@ void CPU::executeInstruction()
 
 	operand_1 = rs1;
 	operand_2 = rs2;
-	
+
 	sc_dt::sc_bv<5> rd_address_wb_i;
 	sc_dt::sc_bv<5> rd_address_mem_i;
 
 	rd_address_wb_i = rd_address_wb;
 	rd_address_mem_i = rd_address_mem;
-	/*
+
+#ifdef EX_PRINT
 	cout << "rd_we_wb = " << rd_we_wb << endl;
-	cout << "rd_we_mem = " << rd_we_mem << endl; 
+	cout << "rd_we_mem = " << rd_we_mem << endl;
 	cout << "rd_address_wb = " << rd_address_wb << endl;
-	cout << "rd_address_mem = " << rd_address_mem << endl; 
+	cout << "rd_address_mem = " << rd_address_mem << endl;
 	cout << "rs1_address_ex = " << rs1_address << endl;
 	cout << "rs2_address_ex = " << rs2_address << endl;
- 	*/
-	if(rd_we_wb == 1 && rd_address_wb_i != 0x0) {
-		if(rs1_address == rd_address_wb_i) {
+#endif
+
+	if (rd_we_wb == 1 && rd_address_wb_i != 0x0)
+	{
+		if (rs1_address == rd_address_wb_i)
+		{
 			operand_1 = rd_data_wb;
-			//cout << "========== Forwarding rs1 from WB ==========" << endl;
+		#ifdef EX_PRINT
+			cout << "========== Forwarding rs1 from WB ==========" << endl;
+		#endif
 		}
 
-		if(rs2_address == rd_address_wb_i) {
+		if (rs2_address == rd_address_wb_i)
+		{
 			operand_2 = rd_data_wb;
-			//cout << "========== Forwarding rs2 from WB ==========" << endl;
+		#ifdef EX_PRINT
+			cout << "========== Forwarding rs2 from WB ==========" << endl;
+		#endif
 		}
 	}
 
-	if(rd_we_mem == 1 && rd_address_mem_i != 0x0) {
-		if(rs1_address == rd_address_mem_i) {
+	if (rd_we_mem == 1 && rd_address_mem_i != 0x0)
+	{
+		if (rs1_address == rd_address_mem_i)
+		{
 			operand_1 = rd_data_mem;
-			//cout << "========== Forwarding rs1 from MEM ==========" << endl;
+		#ifdef EX_PRINT
+			cout << "========== Forwarding rs1 from MEM ==========" << endl;
+		#endif
 		}
 
-		if(rs2_address == rd_address_mem_i) {
+		if (rs2_address == rd_address_mem_i)
+		{
 			operand_2 = rd_data_mem;
-			//cout << "========== Forwarding rs2 from MEM ==========" << endl;
+		#ifdef EX_PRINT
+			cout << "========== Forwarding rs2 from MEM ==========" << endl;
+		#endif
 		}
 	}
-	
+
 	operand_1_signed = operand_1;
 	operand_2_signed = operand_2;
 	operand_1_unsigned = operand_1;
@@ -876,42 +926,43 @@ void CPU::executeInstruction()
 	case 0b0110111: // LUI
 		alu_result = imm;
 		#ifdef DEBUG_OUTPUT
-		cout << "Executing LUI: imm " << imm_tmp << " " << "rd " << rd << " " << sc_time_stamp() << endl;
+			cout << "Executing LUI: imm " << imm_tmp << " "
+				 << "rd " << rd << " " << sc_time_stamp() << endl;
 		#endif
 		break;
 	case 0b0010111: // AUIPC
 		alu_tmp = imm_tmp + pc_tmp;
 		alu_result = alu_tmp;
 		#ifdef DEBUG_OUTPUT
-		cout << "Executing AUIPC: imm " << imm_tmp << ", alu_res " << alu_result << " " << sc_time_stamp() << endl;
+			cout << "Executing AUIPC: imm " << imm_tmp << ", alu_res " << alu_result << " " << sc_time_stamp() << endl;
 		#endif
 		break;
 	case 0b1101111: // JAL
 		pc_tmp += 4;
 		alu_result = pc_tmp;
 		#ifdef DEBUG_OUTPUT
-		cout << "Executing JAL" << endl;
+			cout << "Executing JAL" << endl;
 		#endif
 		break;
 	case 0b1100111: // JALR
 		pc_tmp += 4;
 		alu_result = pc_tmp;
 		#ifdef DEBUG_OUTPUT
-		cout << "Executing JALR" << endl;
+			cout << "Executing JALR" << endl;
 		#endif
 		break;
 	case 0b0000011: // LOAD
-		alu_tmp = imm_tmp + operand_1_signed;		
+		alu_tmp = imm_tmp + operand_1_signed;
 		alu_result = alu_tmp;
 		#ifdef DEBUG_OUTPUT
-		cout << "Executing LOAD: address " << alu_tmp << " " << sc_time_stamp() << endl;
+			cout << "Executing LOAD: address " << alu_tmp << " " << sc_time_stamp() << endl;
 		#endif
 		break;
 	case 0b0100011: // STORE
 		alu_tmp = imm_tmp + operand_1_signed;
 		alu_result = alu_tmp;
 		#ifdef DEBUG_OUTPUT
-		cout << "Executing STORE: address " << alu_tmp << " " << sc_time_stamp() << endl;
+			cout << "Executing STORE: address " << alu_tmp << " " << sc_time_stamp() << endl;
 		#endif
 		break;
 	case 0b0010011: // IMM
@@ -919,15 +970,14 @@ void CPU::executeInstruction()
 		{
 		case 0b000: // ADDI
 			alu_tmp = imm_tmp + operand_1_signed;
-			cout << "ADDI: " << operand_1_signed << " + " << imm_tmp << " = " << alu_tmp << endl;
 			alu_result = alu_tmp;
 			#ifdef DEBUG_OUTPUT
-			cout << "Executing ADDI" << endl;
+				cout << "Executing ADDI" << endl;
 			#endif
 			break;
 		case 0b010: // SLTI
 			#ifdef DEBUG_OUTPUT
-			cout << "Executing SLTI" << endl;
+				cout << "Executing SLTI" << endl;
 			#endif
 			if (operand_1_signed < imm_tmp)
 			{
@@ -940,7 +990,7 @@ void CPU::executeInstruction()
 			break;
 		case 0b011: // SLTIU
 			#ifdef DEBUG_OUTPUT
-			cout << "Executing SLTIU" << endl;
+				cout << "Executing SLTIU" << endl;
 			#endif
 			if (operand_1_unsigned < imm_tmp_unsigned)
 			{
@@ -953,25 +1003,25 @@ void CPU::executeInstruction()
 			break;
 		case 0b100: // XORI
 			#ifdef DEBUG_OUTPUT
-			cout << "Executing XORI" << endl;
+				cout << "Executing XORI" << endl;
 			#endif
 			alu_result = operand_1 ^ imm;
 			break;
 		case 0b110: // ORI
 			#ifdef DEBUG_OUTPUT
-			cout << "Executing ORI" << endl;
+				cout << "Executing ORI" << endl;
 			#endif
 			alu_result = operand_1 | imm;
 			break;
 		case 0b111: // ANDI
 			#ifdef DEBUG_OUTPUT
-			cout << "Executing ANDI" << endl;
+				cout << "Executing ANDI" << endl;
 			#endif
 			alu_result = operand_1 & imm;
 			break;
 		case 0b001: // SLLI
 			#ifdef DEBUG_OUTPUT
-			cout << "Executing SLLI" << endl;
+				cout << "Executing SLLI" << endl;
 			#endif
 			shamt = imm & 0x1F;
 			alu_result = operand_1 << shamt;
@@ -980,7 +1030,7 @@ void CPU::executeInstruction()
 			if (funct7 == 0)
 			{ // SRLI
 				#ifdef DEBUG_OUTPUT
-				cout << "Executing SRLI" << endl;
+					cout << "Executing SRLI" << endl;
 				#endif
 				shamt = imm & 0x1F;
 				alu_result = operand_1 >> shamt;
@@ -988,7 +1038,7 @@ void CPU::executeInstruction()
 			else if (funct7 == 0b0100000)
 			{ // SRAI
 				#ifdef DEBUG_OUTPUT
-				cout << "Executing SRAI" << endl;
+					cout << "Executing SRAI" << endl;
 				#endif
 				sc_dt::sc_uint<1> carry;
 				sc_dt::sc_bv<32> tmp;
@@ -1020,7 +1070,7 @@ void CPU::executeInstruction()
 			if (funct7 == 0x0)
 			{ // ADD
 				#ifdef DEBUG_OUTPUT
-				cout << "Executing ADD" << endl;
+					cout << "Executing ADD" << endl;
 				#endif
 				alu_tmp = operand_1_signed + operand_2_signed;
 				alu_result = alu_tmp;
@@ -1028,7 +1078,7 @@ void CPU::executeInstruction()
 			else if (funct7 == 0b0100000)
 			{ // SUB
 				#ifdef DEBUG_OUTPUT
-				cout << "Executing SUB" << endl;
+					cout << "Executing SUB" << endl;
 				#endif
 				alu_tmp = operand_1_signed - operand_2_signed;
 				alu_result = alu_tmp;
@@ -1036,13 +1086,13 @@ void CPU::executeInstruction()
 			break;
 		case 0b001: // SLL
 			#ifdef DEBUG_OUTPUT
-			cout << "Executing SLL" << endl;
+				cout << "Executing SLL" << endl;
 			#endif
 			alu_result = operand_1 << operand_2_unsigned;
 			break;
 		case 0b010: // SLT
 			#ifdef DEBUG_OUTPUT
-			cout << "Executing SLT" << endl;
+				cout << "Executing SLT" << endl;
 			#endif
 			if (operand_1_signed < operand_2_signed)
 			{
@@ -1055,7 +1105,7 @@ void CPU::executeInstruction()
 			break;
 		case 0b011: // SLTU
 			#ifdef DEBUG_OUTPUT
-			cout << "Executing SLTU" << endl;
+				cout << "Executing SLTU" << endl;
 			#endif
 			if (operand_1_unsigned < operand_2_unsigned)
 			{
@@ -1068,7 +1118,7 @@ void CPU::executeInstruction()
 			break;
 		case 0b100: // XOR
 			#ifdef DEBUG_OUTPUT
-			cout << "Executing XOR" << endl;
+				cout << "Executing XOR" << endl;
 			#endif
 			alu_result = operand_1 ^ operand_2;
 			break;
@@ -1076,14 +1126,14 @@ void CPU::executeInstruction()
 			if (funct7 == 0x0)
 			{ // SRL
 				#ifdef DEBUG_OUTPUT
-				cout << "Executing SRL" << endl;
+					cout << "Executing SRL" << endl;
 				#endif
 				alu_result = operand_1 >> operand_2_unsigned;
 			}
 			else if (funct7 == 0b0100000)
 			{ // SRA
 				#ifdef DEBUG_OUTPUT
-				cout << "Executing SRA" << endl;
+					cout << "Executing SRA" << endl;
 				#endif
 				sc_dt::sc_uint<1> carry;
 				sc_dt::sc_bv<32> tmp;
@@ -1098,13 +1148,13 @@ void CPU::executeInstruction()
 			break;
 		case 0b110: // OR
 			#ifdef DEBUG_OUTPUT
-			cout << "Executing OR" << endl;
+				cout << "Executing OR" << endl;
 			#endif
 			alu_result = operand_1 | operand_2;
 			break;
 		case 0b111: // AND
 			#ifdef DEBUG_OUTPUT
-			cout << "Executing AND" << endl;
+				cout << "Executing AND" << endl;
 			#endif
 			alu_result = operand_1 & operand_2;
 			break;
@@ -1151,8 +1201,6 @@ void CPU::executeInstruction()
 
 	ex_mem = ex_mem_tmp;
 
-	// cout << "Execute phase register: " << ex_mem  << "[time: " << sc_time_stamp() << "]" << endl;
-
 	EX_r.notify();
 }
 
@@ -1193,12 +1241,11 @@ void CPU::memoryAccess()
 	rs2_data = rs2;
 	address = alu_result;
 	rd = rd_address;
-	//address = address * 4;
 	opcode_uint = opcode;
 
 	// Forwarding unit in MEMORY ACCESS phase
 	rd_data_mem = alu_result;
-	
+
 	switch (opcode_uint)
 	{
 	case 0b0110011: // R type
@@ -1241,12 +1288,14 @@ void CPU::memoryAccess()
 		rd_we_mem = 0;
 		mem_to_reg_mem = 0;
 	}
-	/*
+
+#ifdef MEM_PRINT
 	cout << "opcode: " << opcode << endl;
 	cout << "rs2_data: " << rs2_data << endl;
 	cout << "mem_address: " << address << endl;
 	cout << "rd_address: " << rd << "\t[time: " << sc_time_stamp() << "]" << endl;
-	*/
+#endif
+
 	if (opcode == 0b0000011)
 	{
 		if (funct3 == 0b000)
@@ -1288,7 +1337,10 @@ void CPU::memoryAccess()
 			mem_out <<= 8;
 			mem_out = mem_out | data_mem[address + 3];
 			mem_out_tmp = mem_out;
-			cout << "MEM_OUT: " << mem_out_tmp << " " << sc_time_stamp() << endl;
+
+			#ifdef MEM_PRINT
+				cout << "Memory_output: " << mem_out_tmp << " " << sc_time_stamp() << endl;
+			#endif
 		}
 		else if (funct3 == 0b100)
 		{ // LBU
@@ -1326,14 +1378,7 @@ void CPU::memoryAccess()
 			data_mem[address + 2] = (rs2 >> 8) & 0xFF;
 			data_mem[address + 1] = (rs2 >> 16) & 0xFF;
 			data_mem[address] = (rs2 >> 24) & 0xFF;
-			tmp_data = data_mem[address];
-			cout << "Storing to " << address << ":\t" << tmp_data;
-			tmp_data = data_mem[address+1];
-			cout << tmp_data;
-			tmp_data = data_mem[address+2];
-			cout << tmp_data;
-			tmp_data = data_mem[address+3];
-			cout << tmp_data  << " " << sc_time_stamp() << endl;
+			// cout << address << ":\t" << data_mem[address] << data_mem[address+1] << data_mem[address+2] << data_mem[address+3] << " " << sc_time_stamp() << endl;
 		}
 		else
 		{
@@ -1344,8 +1389,6 @@ void CPU::memoryAccess()
 	{
 		mem_out = 0x0;
 	}
-
-	// cout << "mem_out: " << mem_out << " " << sc_time_stamp() << endl;
 
 	sc_dt::sc_bv<76> mem_wb_tmp;
 
@@ -1506,9 +1549,10 @@ void CPU::timeHandle()
 
 void CPU::print_data_mem(char print_type)
 {
-	cout << endl << "============== DATA MEMORY ==============" << endl;
+	cout << endl
+		 << "============== DATA MEMORY ==============" << endl;
 
-	for (int i = 0; i < 8211 * 4; i++)
+	for (int i = 0; i < data_amt; i++)
 	{
 		if (i % 4 == 0)
 		{
@@ -1518,15 +1562,19 @@ void CPU::print_data_mem(char print_type)
 
 		sc_dt::sc_uint<32> data_uint;
 
-		if(print_type == 'd') {
+		if (print_type == 'd')
+		{
 			data_uint = data_mem[i];
 			cout << std::dec << data_uint;
-		} else if(print_type == 'h') {
+		}
+		else if (print_type == 'h')
+		{
 			cout << std::hex << data_mem[i];
-		} else {
+		}
+		else
+		{
 			cout << data_mem[i];
 		}
-		
 	}
 	cout << endl;
 }
@@ -1534,12 +1582,26 @@ void CPU::print_data_mem(char print_type)
 void CPU::print_registers()
 {
 	sc_dt::sc_int<32> temp;
-
+	
+	cout << endl << "----------------------------------------------------------------";
+	cout         << "----------------------------------------------------------------|" << endl;
+	cout 		 << "\t\t\t\t\t\t\t   REGISTER BANK   \t\t\t\t\t\t\t|" << endl;
+	cout         << "----------------------------------------------------------------";
+	cout         << "----------------------------------------------------------------|" << endl;
 	for (int i = 0; i < 32; i++)
 	{
+		if(i % 4 == 0) {
+			if(i != 0) {
+				cout << endl;
+			}
+		}
 		temp = registers[i];
-		cout << "reg[" << i << "] = " << temp << endl;
+		cout << "\treg[" << i << "] = " << temp << "\t\t";
+		cout << "|  ";
 	}
+	cout << endl;
+	cout         << "----------------------------------------------------------------";
+	cout         << "----------------------------------------------------------------|" << endl;
 }
 
 sc_dt::sc_uint<32> CPU::getPC()
@@ -1551,4 +1613,3 @@ void CPU::setPC(sc_dt::sc_uint<32> val)
 {
 	pc = val;
 }
-
