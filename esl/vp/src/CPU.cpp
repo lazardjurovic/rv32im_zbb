@@ -1,4 +1,4 @@
-#include "CPU.hpp"
+#include "../header/CPU.hpp"
 
 #define STAGE_DELAY 5 // Promeniti posle na 8
 

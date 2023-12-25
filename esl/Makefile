@@ -4,7 +4,7 @@ DUMP = riscv32-unknown-elf-objdump
 CFLAGS = -march=rv32i -mabi=ilp32 -static -nostdlib -mcmodel=medlow  -Ttext=0  -O2
 LDFLAGS = -T link.ld -nostartfiles
 
-CPP_FILES = main.cpp CPU.cpp memory.cpp generator.cpp
+CPP_FILES = vp/src/main.cpp vp/src/CPU.cpp vp/src/memory.cpp vp/src/generator.cpp
 
 # -march=rv32i -> compiling for RV32I subset
 # -mabi-ilp32 -> ABI specs - integers,longs and pointers are 32 bits

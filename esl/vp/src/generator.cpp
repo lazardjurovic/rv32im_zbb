@@ -1,4 +1,4 @@
-#include "generator.hpp"
+#include "../header/generator.hpp"
 #include <tlm_utils/tlm_quantumkeeper.h>
 #include <fstream>
 #include <string>

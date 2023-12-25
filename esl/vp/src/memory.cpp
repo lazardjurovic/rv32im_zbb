@@ -1,4 +1,4 @@
-#include "memory.hpp"
+#include "../header/memory.hpp"
 
 using namespace sc_core;
 using namespace tlm;

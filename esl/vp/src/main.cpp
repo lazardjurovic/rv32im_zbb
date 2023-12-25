@@ -1,8 +1,8 @@
 #include <iostream>
 #include <systemc>
-#include "CPU.hpp"
-#include "generator.hpp"
-#include "memory.hpp"
+#include "../header/CPU.hpp"
+#include "../header/generator.hpp"
+#include "../header/memory.hpp"
 
 using namespace std;
 using namespace sc_core;
@@ -24,7 +24,7 @@ int sc_main (int argc, char* argv[])
     mem.dump_memory();
 
 	sc_start(1500, SC_NS);
-	cpu.print_data_mem();
+	//cpu.print_data_mem();
 	cpu.print_registers();
 
 	return 0;
