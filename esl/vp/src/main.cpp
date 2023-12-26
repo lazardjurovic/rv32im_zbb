@@ -29,15 +29,6 @@ int sc_main (int argc, char* argv[])
 	CPU cpu("CPU", "instr_mem.txt", "data_mem.txt");
 
 	memory mem ("memory_u");
-	mem.instr_mem_en(instr_mem_en);
-	mem.data_mem_en(data_mem_en);
-	mem.instr_mem_addr_i(instr_mem_addr_i);
-	mem.instr_mem_data_o(instr_mem_data_o);
-	mem.data_mem_addr_i(data_mem_addr_i);
-	mem.data_mem_data_i(data_mem_data_i);
-	mem.data_mem_data_o(data_mem_data_o);
-	mem.data_mem_we(data_mem_we);
-
 	generator gen("generator_u");
 	gen.isoc(mem.tsoc);
 

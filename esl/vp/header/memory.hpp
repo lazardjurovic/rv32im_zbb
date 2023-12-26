@@ -14,24 +14,10 @@ class memory :
 {
 public:
 
-	// interface for enable signals
-	sc_in<bool> instr_mem_en;
-	sc_in<bool> data_mem_en; 
-
-	// instruction memory should be read-only
-	// interface for instruction memory
-	sc_in<int> instr_mem_addr_i;
-	sc_out<int> instr_mem_data_o;
-
-	// interface for data memory
-	sc_in<int> data_mem_addr_i;
-	sc_in<int> data_mem_data_i;
-	sc_out<int> data_mem_data_o;
-	sc_in<int> data_mem_we; // change later
-
 	memory(sc_core::sc_module_name);
 
 	tlm::tlm_target_socket<> tsoc;
+	tlm::tlm_target_socket<> mem_interface; // DMI for memory
 
 	typedef tlm::tlm_base_protocol_types::tlm_payload_type pl_t;
 	typedef tlm::tlm_base_protocol_types::tlm_phase_type phase_t;
@@ -41,14 +27,10 @@ public:
 	bool get_direct_mem_ptr(pl_t&, tlm::tlm_dmi&);
 	unsigned int transport_dbg(pl_t&);
 	void dump_memory();
-	void instr_mem_process();
-	void data_mem_process();
-	void trigger();
 
 protected:
 	static const int RAM_SIZE = 66000;
 	unsigned char ram[RAM_SIZE];
-	sc_event trig;
 };
 
 #endif

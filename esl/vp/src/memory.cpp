@@ -7,93 +7,17 @@ using namespace std;
 
 memory::memory(sc_module_name name) :
 	sc_module(name),
-	tsoc("tsoc")
+	tsoc("tsoc"),
+	mem_interface("mem_interface")
 {	
 	SC_HAS_PROCESS(memory);
-	SC_THREAD(instr_mem_process);
-	sensitive << instr_mem_addr_i << instr_mem_en << trig;
-	dont_initialize();
-	SC_THREAD(data_mem_process);
-	sensitive << data_mem_addr_i << data_mem_data_i << data_mem_we << data_mem_en << trig;
-	dont_initialize();
-	SC_THREAD(trigger);
-
 	tsoc(*this);
+	mem_interface(*this);
+
 	for (int i = 0; i != RAM_SIZE; ++i)
 		ram[i] = 0;
 }
 
-void memory::instr_mem_process(){
-
-	unsigned char byte0,byte1,byte2,byte3;
-	int tmp_out;
-
-	while(true){
-		wait();
-		if(instr_mem_en == 1){
-			
-			byte3 = ram[instr_mem_addr_i];
-			byte2 = ram[instr_mem_addr_i+1];
-			byte1 = ram[instr_mem_addr_i+2];
-			byte0 = ram[instr_mem_addr_i+3];
-
-			tmp_out = byte3;
-			tmp_out <<=8;
-			tmp_out |= byte2;
-			tmp_out <<=8;
-			tmp_out |= byte1;
-			tmp_out <<=8;
-			tmp_out |= byte0;
-
-			instr_mem_data_o = tmp_out;
-
-			cout << " Reading instr memory from address " << instr_mem_addr_i << ". Value: " << tmp_out << endl;
-
-		}
-	}
-
-}
-
-void memory:: data_mem_process(){
-	int mem_out;
-	while(true){
-		wait();
-		if(data_mem_en == 1){
-
-			unsigned char byte0,byte1,byte2,byte3;
-
-			byte3  = (data_mem_data_i >> 24) & 0xFF;
-			byte2 = (data_mem_data_i >> 16) & 0xFF;
-			byte1 = (data_mem_data_i >> 8) & 0xFF;
-			byte0 = (data_mem_data_i) & 0xFF;
-
-			if(data_mem_we == 1){ // write byte
-				ram[data_mem_addr_i+3] = byte3;
-			}else if(data_mem_we == 3){ // write half
-				ram[data_mem_addr_i+3] = byte3;
-				ram[data_mem_addr_i+2] = byte2;
-			}else if(data_mem_we == 15){ // write word
-				ram[data_mem_addr_i+3] = byte3;
-				ram[data_mem_addr_i+2] = byte2;
-				ram[data_mem_addr_i+1] = byte1;
-				ram[data_mem_addr_i] = byte0;
-			}else{ // read
-				mem_out = ram[data_mem_addr_i];
-				mem_out <<= 8;
-				mem_out = mem_out | ram[data_mem_addr_i + 1];
-				mem_out <<= 8;
-				mem_out = mem_out | ram[data_mem_addr_i + 2];
-				mem_out <<= 8;
-				mem_out = mem_out | ram[data_mem_addr_i + 3];
-				data_mem_data_o = mem_out;
-
-				cout << " Reading data memory from address " << data_mem_addr_i << ". Value: " << mem_out << endl;
-
-			}
-
-		}
-	}
-}
 
 void memory::b_transport(pl_t& pl, sc_time& offset)
 {
@@ -133,7 +57,7 @@ bool memory::get_direct_mem_ptr(pl_t& pl, tlm_dmi& dmi)
 
 	dmi.set_dmi_ptr       ( ram );
 	dmi.set_start_address ( 0   );
-	dmi.set_end_address   ( 199 );
+	dmi.set_end_address   ( 66000 );
 
 	return true;
 }
@@ -156,12 +80,4 @@ unsigned int memory::transport_dbg(pl_t& pl)
 
 	return RAM_SIZE;
 }
-
-void memory::trigger(){
-
-	wait(1,SC_NS);
-	trig.notify();
-	wait(1,SC_NS);
-
- }
 
