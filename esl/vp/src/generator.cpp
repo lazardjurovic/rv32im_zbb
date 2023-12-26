@@ -8,6 +8,8 @@ using namespace sc_core;
 using namespace sc_dt;
 using namespace tlm;
 using namespace std;
+
+#define DATA_MEM_BASE 0x2000
 	
 SC_HAS_PROCESS(generator);
 
@@ -100,7 +102,9 @@ void generator::gen()
 							val += pow(2,j);
 						}
 					}
-					dmi_mem[address] = (unsigned char)val;
+					if(address >= DATA_MEM_BASE){ // needed for not overwriting exisitng data
+						dmi_mem[address] = (unsigned char)val;
+					}
 					//cout << "Writing byte " << val << " to address " << address << endl;
 					address++;
 				}
