@@ -26,7 +26,7 @@ int sc_main (int argc, char* argv[])
 
 	sc_start(5000, SC_NS);
 	cpu.print_data_mem('d');
-	cpu.print_registers();
+	//cpu.print_registers();
 
 	return 0;
 }

@@ -14,6 +14,7 @@
 
 using namespace std;
 using namespace sc_core;
+using namespace tlm;
 
 class CPU : public sc_module, public tlm::tlm_bw_transport_if<>
 {
