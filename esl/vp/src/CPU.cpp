@@ -1,4 +1,9 @@
 #include "../header/CPU.hpp"
+#include <tlm_utils/tlm_quantumkeeper.h>
+
+using namespace tlm;
+using namespace sc_core;
+using namespace sc_dt;
 
 #define STAGE_DELAY 5 // Promeniti posle na 8
 
@@ -16,9 +21,13 @@
 // Uncomment for debug output
 // #define DEBUG_OUTPUT
 
-CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n)
+#define VP
+
+CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n), mem_socket("cpu_mem_socket")
 {
 	cout << "Creating a CPU object named " << name() << "." << endl;
+
+	mem_socket(*this);
 
 	instr_amt = 0;
 	data_amt = 0;
@@ -190,17 +199,44 @@ void CPU::instructionFetch()
 		}
 	}
 
-	instr = instr_mem[pc];
-	instr <<= 8;
-	instr = instr | instr_mem[pc + 1];
-	instr <<= 8;
-	instr = instr | instr_mem[pc + 2];
-	instr <<= 8;
-	instr = instr | instr_mem[pc + 3];
+	#ifndef VP
+		instr = instr_mem[pc];
+		instr <<= 8;
+		instr = instr | instr_mem[pc + 1];
+		instr <<= 8;
+		instr = instr | instr_mem[pc + 2];
+		instr <<= 8;
+		instr = instr | instr_mem[pc + 3];
 
-	if_id_tmp = instr;
-	if_id_tmp <<= 32;
-	if_id_tmp = if_id_tmp | pc;
+		if_id_tmp = instr;
+		if_id_tmp <<= 32;
+		if_id_tmp = if_id_tmp | pc;
+
+		cout <<	if_id_tmp << endl;
+	#else
+
+		tlm_generic_payload pl;
+		tlm_dmi dmi;
+		dmi_valid = mem_socket->get_direct_mem_ptr(pl, dmi);
+
+		if(dmi_valid){
+			dmi_mem = dmi.get_dmi_ptr();
+			instr = dmi_mem[pc];
+			instr <<= 8;
+			instr = instr | dmi_mem[pc + 1];
+			instr <<= 8;
+			instr = instr | dmi_mem[pc + 2];
+			instr <<= 8;
+			instr = instr | dmi_mem[pc + 3];
+
+			if_id_tmp = instr;
+			if_id_tmp <<= 32;
+			if_id_tmp = if_id_tmp | pc;
+		}
+
+		cout <<	if_id_tmp << endl;
+
+	#endif
 
 	// Note: IF_ID register flush after branch instruction
 	// is not necessary in this emulator because pipeline
@@ -1612,4 +1648,14 @@ sc_dt::sc_uint<32> CPU::getPC()
 void CPU::setPC(sc_dt::sc_uint<32> val)
 {
 	pc = val;
+}
+
+tlm_sync_enum CPU::nb_transport_bw(pl_t& pl, phase_t& phase, sc_time& offset)
+{
+	return TLM_ACCEPTED;
+}
+
+void CPU::invalidate_direct_mem_ptr(uint64 start, uint64 end)
+{
+	dmi_valid = false;
 }

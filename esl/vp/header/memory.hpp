@@ -17,7 +17,10 @@ public:
 	memory(sc_core::sc_module_name);
 
 	tlm::tlm_target_socket<> tsoc;
-	tlm::tlm_target_socket<> mem_interface; // DMI for memory
+
+	// TLM interface for conecting to CPU
+
+	tlm::tlm_target_socket<> mem_socket; 
 
 	typedef tlm::tlm_base_protocol_types::tlm_payload_type pl_t;
 	typedef tlm::tlm_base_protocol_types::tlm_phase_type phase_t;

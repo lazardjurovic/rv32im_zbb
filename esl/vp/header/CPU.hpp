@@ -7,6 +7,7 @@
 #include <string>
 #include <bitset>
 #include <vector>
+#include <tlm>
 
 #define INSTRMEM_SIZE 50000
 #define DATAMEM_SIZE 50000
@@ -14,7 +15,7 @@
 using namespace std;
 using namespace sc_core;
 
-SC_MODULE(CPU)
+class CPU : public sc_module, public tlm::tlm_bw_transport_if<>
 {
 protected:
 	sc_dt::sc_bv<32> registers[32]; // Register bank
@@ -46,7 +47,21 @@ protected:
 	sc_signal<sc_dt::sc_bv<79>> ex_mem;
 	sc_signal<sc_dt::sc_bv<76>> mem_wb;
 
+	// used for DMI access through TLM
+	bool dmi_valid;
+	unsigned char* dmi_mem;
+
 public:
+
+	tlm::tlm_initiator_socket<> mem_socket;
+
+	// TLM interface
+	typedef tlm::tlm_base_protocol_types::tlm_payload_type pl_t;
+	typedef tlm::tlm_base_protocol_types::tlm_phase_type phase_t;
+
+	tlm::tlm_sync_enum nb_transport_bw(pl_t&, phase_t&, sc_core::sc_time&);
+	void invalidate_direct_mem_ptr(sc_dt::uint64, sc_dt::uint64);
+
 	// Dynamically allocated arrays for instruction and data memory
 	sc_dt::sc_bv<8> *instr_mem = new sc_dt::sc_bv<8>[INSTRMEM_SIZE];
 	sc_dt::sc_bv<8> *data_mem = new sc_dt::sc_bv<8>[DATAMEM_SIZE];

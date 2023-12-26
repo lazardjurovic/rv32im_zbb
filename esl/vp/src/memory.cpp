@@ -8,11 +8,13 @@ using namespace std;
 memory::memory(sc_module_name name) :
 	sc_module(name),
 	tsoc("tsoc"),
-	mem_interface("mem_interface")
+	mem_socket("read_soc")
+
 {	
 	SC_HAS_PROCESS(memory);
 	tsoc(*this);
-	mem_interface(*this);
+	mem_socket(*this); // Initiate socket for reading memory
+	// this socket can be used through DMI
 
 	for (int i = 0; i != RAM_SIZE; ++i)
 		ram[i] = 0;
