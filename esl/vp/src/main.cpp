@@ -38,7 +38,6 @@ int sc_main (int argc, char* argv[])
 	mem.data_mem_data_o(data_mem_data_o);
 	mem.data_mem_we(data_mem_we);
 
-
 	generator gen("generator_u");
 	gen.isoc(mem.tsoc);
 
@@ -46,8 +45,15 @@ int sc_main (int argc, char* argv[])
 	tlm_global_quantum::instance().set(sc_time(10, SC_NS));
 	#endif
 
-    sc_start(1000,SC_NS);
+    //sc_start(1000,SC_NS);
     //mem.dump_memory();
+
+	instr_mem_addr_i = 4;
+	instr_mem_en = 1;
+
+	data_mem_addr_i = 32768;
+	data_mem_en = 1;
+	data_mem_we = 0;
 
 	sc_start(1500, SC_NS);
 	//cpu.print_data_mem();

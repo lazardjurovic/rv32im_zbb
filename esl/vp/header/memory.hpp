@@ -43,10 +43,12 @@ public:
 	void dump_memory();
 	void instr_mem_process();
 	void data_mem_process();
+	void trigger();
 
 protected:
 	static const int RAM_SIZE = 66000;
 	unsigned char ram[RAM_SIZE];
+	sc_event trig;
 };
 
 #endif
