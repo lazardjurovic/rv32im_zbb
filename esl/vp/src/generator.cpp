@@ -3,13 +3,14 @@
 #include <fstream>
 #include <string>
 #include <cmath>
+#include <bitset>
 
 using namespace sc_core;
 using namespace sc_dt;
 using namespace tlm;
 using namespace std;
 
-#define DATA_MEM_BASE 0x2000
+#define DATA_MEM_BASE 0x2000*4
 	
 SC_HAS_PROCESS(generator);
 
@@ -29,6 +30,7 @@ void generator::gen()
 	sc_time offset = SC_ZERO_TIME;
 	unsigned char byte[8];
 	int address;
+	sc_dt::sc_bv<32> bit_line;
 
 	// Using DMI to transfer to memory
 	tlm_dmi dmi;
@@ -46,26 +48,15 @@ void generator::gen()
 			string line;
 
 			while(instr_mem.good()){
-				getline(instr_mem,line);
-				cout << "Reading line " << line << endl;
-				int val;
-
-				/* 
-				going through line in terms of 4 bytes
-				and converting each to unsigned char and 
-				writing it through dmi to memory
-				*/
-				for(int i=0;i<4;i++){
-					val = 0;
-					for(int j = 0;j<7;j++){
-						if(line[8*i+j]=='1'){
-							val += pow(2,j);
-						}
-					}
-					dmi_mem[address] = (unsigned char)val;
-					cout << "Writing byte " << val << " to address " << address << endl;
-					address++;
-				}
+				getline(instr_mem, line);
+				bitset<32> bits(line);
+				bit_line = bits.to_ulong();
+				dmi_mem[address + 3] = (unsigned char)(bit_line & 0xFF).to_uint();
+				dmi_mem[address + 2] = (unsigned char)((bit_line >> 8) & 0xFF).to_uint();
+				dmi_mem[address + 1] = (unsigned char)((bit_line >> 16) & 0xFF).to_uint();
+				dmi_mem[address] = (unsigned char)((bit_line >> 24) & 0xFF).to_uint();
+				cout << "Writing " << bit_line << " to address " << address << " in instruction memory"<< endl;
+				address += 4;
 
 			}
 
@@ -76,7 +67,7 @@ void generator::gen()
 		// Doing same for data memory
 
 		address = 0;
-		cout << "Transfering data to data using DMI." <<endl;
+		cout << "Transfering data to data memory using DMI." <<endl;
 		dmi_mem = dmi.get_dmi_ptr();
 		
 		ifstream data_mem("data_mem.txt");
@@ -86,28 +77,17 @@ void generator::gen()
 			string line;
 
 			while(data_mem.good()){
-				getline(data_mem,line);
-				//cout << "Reading line " << line << endl;
-				int val;
-
-				/* 
-				going through line in terms of 4 bytes
-				and converting each to unsigned char and 
-				writing it through dmi to memory
-				*/
-				for(int i=0;i<4;i++){
-					val = 0;
-					for(int j = 0;j<7;j++){
-						if(line[8*i+j]=='1'){
-							val += pow(2,j);
-						}
-					}
-					if(address >= DATA_MEM_BASE){ // needed for not overwriting exisitng data
-						dmi_mem[address] = (unsigned char)val;
-					}
-					//cout << "Writing byte " << val << " to address " << address << endl;
-					address++;
+				getline(data_mem, line);
+				bitset<32> bits(line);
+				bit_line = bits.to_ulong();
+				if(address >= DATA_MEM_BASE){
+					dmi_mem[address + 3] = (unsigned char)(bit_line & 0xFF).to_uint();
+					dmi_mem[address + 2] = (unsigned char)((bit_line >> 8) & 0xFF).to_uint();
+					dmi_mem[address + 1] = (unsigned char)((bit_line >> 16) & 0xFF).to_uint();
+					dmi_mem[address] = (unsigned char)((bit_line >> 24) & 0xFF).to_uint();
+					cout << "Writing " << bit_line << " to address " << address<< " in data memory" << endl;
 				}
+				address += 4;
 
 			}
 

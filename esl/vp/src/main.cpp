@@ -51,7 +51,7 @@ int sc_main (int argc, char* argv[])
 
 	sc_start(1500, SC_NS);
 	//cpu.print_data_mem();
-	cpu.print_registers();
+	//cpu.print_registers();
 
 	return 0;
 }
