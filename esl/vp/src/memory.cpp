@@ -82,4 +82,3 @@ unsigned int memory::transport_dbg(pl_t& pl)
 
 	return RAM_SIZE;
 }
-
