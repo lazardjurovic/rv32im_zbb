@@ -8,10 +8,49 @@ using namespace std;
 memory::memory(sc_module_name name) :
 	sc_module(name),
 	tsoc("tsoc")
-{
+{	
+	SC_HAS_PROCESS(memory);
+	SC_THREAD(instr_mem_process);
+	sensitive << instr_mem_addr_i, instr_mem_en;
+	SC_THREAD(data_mem_process);
+	sensitive << data_mem_addr_i << data_mem_data_i << data_mem_we << data_mem_en;
 	tsoc(*this);
 	for (int i = 0; i != RAM_SIZE; ++i)
 		ram[i] = 0;
+}
+
+void memory:: instr_mem_process(){
+
+	while(true){
+		wait();
+		if(instr_mem_en == 1){
+			instr_mem_data_o = ram[instr_mem_addr_i];
+		}
+	}
+
+}
+
+void memory:: data_mem_process(){
+	while(true){
+		wait();
+		if(data_mem_en == 1){
+
+			if(data_mem_we == 1){ // write byte
+				ram[data_mem_addr_i+3] = data_mem_data_i & 0x000000FF;
+			}else if(data_mem_we == 3){ // write half
+				ram[data_mem_addr_i+3] = data_mem_data_i & 0x000000FF;
+				ram[data_mem_addr_i+2] = data_mem_addr_i & 0x0000FF00;
+			}else if(data_mem_we == 15){ // write word
+				ram[data_mem_addr_i+3] = data_mem_data_i & 0x000000FF;
+				ram[data_mem_addr_i+2] = data_mem_addr_i & 0x0000FF00;
+				ram[data_mem_addr_i+1] = data_mem_data_i & 0x00FF0000;
+				ram[data_mem_addr_i] = data_mem_addr_i & 0xFF000000;
+			}else{ // read
+				data_mem_data_o = (int)(ram[data_mem_addr_i]<<24 | ram[data_mem_addr_i+1]<<16 << ram[data_mem_addr_i+2] << 8 | ram[data_mem_addr_i]);
+			}
+
+		}
+	}
 }
 
 void memory::b_transport(pl_t& pl, sc_time& offset)
@@ -59,7 +98,7 @@ bool memory::get_direct_mem_ptr(pl_t& pl, tlm_dmi& dmi)
 
 void memory::dump_memory(){
 	for(int i = 0; i<RAM_SIZE;i++){
-		cout << "@ address : " << i << " " <<(int)ram[i] << endl;
+		cout << "@ address : " << i << " " <<(int)ram[i] << "\t \t";
 	}
 }
 

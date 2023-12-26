@@ -34,9 +34,9 @@ void generator::gen()
 	if (dmi_valid)
 	{
 		address = 0;
-		cout << "Transfering data to memory using DMI." <<endl;
+		cout << "Transfering data to instruction memory using DMI." <<endl;
 		dmi_mem = dmi.get_dmi_ptr();
-		
+
 		ifstream instr_mem("instr_mem.txt");
 
 		if(instr_mem.is_open()){
@@ -68,7 +68,47 @@ void generator::gen()
 			}
 
 		}else{
-			cout << "Unable to open instr_mem.txt!"<<endl;
+			cout << "Unable to open instr_mem.txt! "<< strerror(errno) << endl;
+		}
+
+		// Doing same for data memory
+
+		address = 0;
+		cout << "Transfering data to data using DMI." <<endl;
+		dmi_mem = dmi.get_dmi_ptr();
+		
+		ifstream data_mem("data_mem.txt");
+
+		if(data_mem.is_open()){
+
+			string line;
+
+			while(data_mem.good()){
+				getline(data_mem,line);
+				//cout << "Reading line " << line << endl;
+				int val;
+
+				/* 
+				going through line in terms of 4 bytes
+				and converting each to unsigned char and 
+				writing it through dmi to memory
+				*/
+				for(int i=0;i<4;i++){
+					val = 0;
+					for(int j = 0;j<7;j++){
+						if(line[8*i+j]=='1'){
+							val += pow(2,j);
+						}
+					}
+					dmi_mem[address] = (unsigned char)val;
+					//cout << "Writing byte " << val << " to address " << address << endl;
+					address++;
+				}
+
+			}
+
+		}else{
+			cout << "Unable to open data_mem.txt! "<< strerror(errno) <<endl;
 		}
 
 	}else{
