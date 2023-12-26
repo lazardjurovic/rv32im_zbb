@@ -1,10 +1,6 @@
 #include "../header/CPU.hpp"
 #include <tlm_utils/tlm_quantumkeeper.h>
 
-using namespace tlm;
-using namespace sc_core;
-using namespace sc_dt;
-
 #define STAGE_DELAY 5 // Promeniti posle na 8
 
 // Uncomment for printing contents for each pipeline phase
@@ -21,14 +17,15 @@ using namespace sc_dt;
 // Uncomment for debug output
 // #define DEBUG_OUTPUT
 
+// Uncomment for using virtual platform and external memory
 #define VP
 
-CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n), mem_socket("cpu_mem_socket")
+CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n)
 {
 	cout << "Creating a CPU object named " << name() << "." << endl;
 
-	mem_socket(*this);
-
+	mem_socket(*this);	
+	
 	instr_amt = 0;
 	data_amt = 0;
 
@@ -207,14 +204,7 @@ void CPU::instructionFetch()
 		instr = instr | instr_mem[pc + 2];
 		instr <<= 8;
 		instr = instr | instr_mem[pc + 3];
-
-		if_id_tmp = instr;
-		if_id_tmp <<= 32;
-		if_id_tmp = if_id_tmp | pc;
-
-		cout <<	if_id_tmp << endl;
 	#else
-
 		tlm_generic_payload pl;
 		tlm_dmi dmi;
 		dmi_valid = mem_socket->get_direct_mem_ptr(pl, dmi);
@@ -228,15 +218,13 @@ void CPU::instructionFetch()
 			instr = instr | dmi_mem[pc + 2];
 			instr <<= 8;
 			instr = instr | dmi_mem[pc + 3];
-
-			if_id_tmp = instr;
-			if_id_tmp <<= 32;
-			if_id_tmp = if_id_tmp | pc;
 		}
-
-		cout <<	if_id_tmp << endl;
-
 	#endif
+
+
+	if_id_tmp = instr;
+	if_id_tmp <<= 32;
+	if_id_tmp = if_id_tmp | pc;
 
 	// Note: IF_ID register flush after branch instruction
 	// is not necessary in this emulator because pipeline
@@ -392,10 +380,10 @@ void CPU::instructionDecode()
 	cout << "branch_id " << branch_id << endl;
 #endif
 
-	if (branch_id == 0)
+	if (branch_id == 0)		// branch is NOT in ID phase
 	{
 		if (((rs1 == rd_ex && rs1_in_use_id == 1) || (rs2 == rd_ex && rs2_in_use_id == 1)) && mem_to_reg_ex == 1 && rd_we_ex == 1)
-		{
+		{	// LOAD is in EX phase
 		#ifdef ID_PRINT
 			cout << "======== HAZARD DETECTION ========" << endl;
 		#endif
@@ -405,9 +393,9 @@ void CPU::instructionDecode()
 			control_pass = 0;
 		}
 	}
-	else if (branch_id == 1)
+	else if (branch_id == 1)	// branch IS in ID phase
 	{
-		if ((rs1 == rd_ex || rs2 == rd_ex) && rd_we_ex == 1)
+		if ((rs1 == rd_ex || rs2 == rd_ex) && rd_we_ex == 1) // LOAD or R type is in EX phase
 		{
 		#ifdef ID_PRINT
 			cout << "======== HAZARD DETECTION ========" << endl;
@@ -417,7 +405,7 @@ void CPU::instructionDecode()
 			if_id_en = 0;
 			control_pass = 0;
 		}
-		else if ((rs1 == rd_mem || rs2 == rd_mem) && rd_we_mem == 1)
+		else if ((rs1 == rd_mem || rs2 == rd_mem) && rd_we_mem == 1) // LOAD is in MEM phase
 		{
 		#ifdef ID_PRINT
 			cout << "======== HAZARD DETECTION ========" << endl;
@@ -839,7 +827,7 @@ void CPU::executeInstruction()
 	imm_tmp_unsigned = imm;
 	pc_tmp = pc_local;
 
-	// Setting signals for hazard unit implementation
+	// Control decoder signals needed for hazard detection
 	rd_address_ex = rd;
 
 	switch (opcode)
@@ -1200,7 +1188,8 @@ void CPU::executeInstruction()
 		}
 		break;
 	case 0b0001111:		  // FENCE
-		alu_result = 0x0; /// TODO DOPUNI POSLE
+		
+		alu_result = 0x0;
 		break;
 	case 0b1110011:
 		if (imm == 0)
@@ -1279,7 +1268,7 @@ void CPU::memoryAccess()
 	rd = rd_address;
 	opcode_uint = opcode;
 
-	// Forwarding unit in MEMORY ACCESS phase
+	// Control decoder signals in MEMORY ACCESS phase needed for forwarding
 	rd_data_mem = alu_result;
 
 	switch (opcode_uint)
@@ -1409,7 +1398,6 @@ void CPU::memoryAccess()
 		}
 		else if (funct3 == 0b010)
 		{ // SW
-			sc_dt::sc_uint<8> tmp_data;
 			data_mem[address + 3] = (rs2 & 0xFF);
 			data_mem[address + 2] = (rs2 >> 8) & 0xFF;
 			data_mem[address + 1] = (rs2 >> 16) & 0xFF;
@@ -1466,7 +1454,9 @@ void CPU::writeBack()
 
 	opcode_uint = opcode;
 
-	// Forwarding unit in WRITE BACK phase
+	// Control decoder signals in WRITE BACK phase needed for forwarding
+	// and write enable generating for registar bank
+
 	switch (opcode_uint)
 	{
 	case 0b0110011: // R type
@@ -1655,7 +1645,7 @@ tlm_sync_enum CPU::nb_transport_bw(pl_t& pl, phase_t& phase, sc_time& offset)
 	return TLM_ACCEPTED;
 }
 
-void CPU::invalidate_direct_mem_ptr(uint64 start, uint64 end)
+void CPU::invalidate_direct_mem_ptr(sc_dt::uint64 start, sc_dt::uint64 end)
 {
 	dmi_valid = false;
 }
