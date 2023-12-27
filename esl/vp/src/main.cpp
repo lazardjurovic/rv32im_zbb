@@ -4,12 +4,15 @@
 #include "../header/generator.hpp"
 #include "../header/memory.hpp"
 
+#include "../header/vp.hpp"
+
 using namespace std;
 using namespace sc_core;
 using namespace tlm;
 
 int sc_main (int argc, char* argv[])
 {
+	/*
 	CPU cpu("CPU", "instr_mem.txt", "data_mem.txt");
 
 	memory mem ("memory_u");
@@ -20,11 +23,17 @@ int sc_main (int argc, char* argv[])
 	#ifdef QUANTUM
 	tlm_global_quantum::instance().set(sc_time(10, SC_NS));
 	#endif
+	*/
+
+	vp virtual_platform("Virutal_Platform");
+
 
 	sc_start(5000, SC_NS);
 	
+	/*
 	mem.data_memory_dump();
 	mem.instr_memory_dump();
+	*/
 	
 	//cpu.print_data_mem('d');
 	//cpu.print_registers();
