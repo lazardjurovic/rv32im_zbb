@@ -1,12 +1,13 @@
 CC =  riscv32-unknown-elf-gcc 
 DUMP = riscv32-unknown-elf-objdump 
 
-CFLAGS = -march=rv32i -mabi=ilp32 -static -nostdlib -mcmodel=medlow  -Ttext=0  -O2
+CFLAGS = -march=rv32im_zbb -mabi=ilp32 -static -nostdlib -mcmodel=medlow -Ttext=0  -O2
+TESTFLAGS = -march=rv32im_zbb -mabi=ilp32 -O2
 LDFLAGS = -T link.ld -nostartfiles
 
 CPP_FILES = src/main.cpp src/CPU.cpp src/memory.cpp src/generator.cpp src/vp.cpp
 
-# -march=rv32i -> compiling for RV32I subset
+# -march=rv32im_zbb -> compiling for RV32 with I, M and ZBB subsets
 # -mabi-ilp32 -> ABI specs - integers,longs and pointers are 32 bits
 # -static -> all necessary stuff is contained in our elf, no need for exernal libraries
 # -nostdlib -> no standard library is linked into our executable
@@ -24,6 +25,10 @@ all: program.elf text.dump data.dump
 	rm program.elf
 	g++ $(CPP_FILES) -lsystemc -lpthread -o main
 
+test: bitmanip_test.c
+	$(CC) $(TESTFLAGS) -o bitmanip_test.elf bitmanip_test.c
+	$(DUMP) -d bitmanip_test.elf
+
 program.elf: program.o
 	$(CC) $(LDFLAGS) program.o -o program.elf
 
@@ -37,3 +42,4 @@ text.dump: program.elf
 # disassemble .data section
 data.dump: program.elf
 	$(DUMP) -j .data -s program.elf > data.dump
+
