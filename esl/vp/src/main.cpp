@@ -21,11 +21,12 @@ int sc_main (int argc, char* argv[])
 	tlm_global_quantum::instance().set(sc_time(10, SC_NS));
 	#endif
 
-    //sc_start(1000,SC_NS);
-    //mem.dump_memory();
-
 	sc_start(5000, SC_NS);
-	cpu.print_data_mem('d');
+	
+	mem.data_memory_dump();
+	mem.instr_memory_dump();
+	
+	//cpu.print_data_mem('d');
 	//cpu.print_registers();
 
 	return 0;

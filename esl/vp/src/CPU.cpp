@@ -17,7 +17,7 @@
 // Uncomment for debug output
 // #define DEBUG_OUTPUT
 
-// Uncomment for using virtual platform and external memory
+// Uncomment for using virtual platform and external memory and loader
 #define VP
 
 CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n)
@@ -1321,12 +1321,24 @@ void CPU::memoryAccess()
 	cout << "rd_address: " << rd << "\t[time: " << sc_time_stamp() << "]" << endl;
 #endif
 
+	tlm_generic_payload pl;
+	tlm_dmi dmi;
+	dmi_valid = mem_socket->get_direct_mem_ptr(pl, dmi);
+	
 	if (opcode == 0b0000011)
 	{
 		if (funct3 == 0b000)
 		{ // LB
+		#ifndef VP
 			mem_out = data_mem[address + 3];
-
+		#else
+			if(dmi_valid)
+			{
+				dmi_mem = dmi.get_dmi_ptr();
+				mem_out = dmi_mem[address + 3];
+			}
+		#endif
+		
 			// Sign extend
 			if ((mem_out >> 7) == 1)
 			{
@@ -1338,10 +1350,20 @@ void CPU::memoryAccess()
 		}
 		else if (funct3 == 0b001)
 		{ // LH
+		#ifndef VP
 			mem_out = data_mem[address + 2];
 			mem_out <<= 8;
 			mem_out = mem_out | data_mem[address + 3];
-
+		#else
+			if(dmi_valid)
+			{
+				dmi_mem = dmi.get_dmi_ptr();
+				mem_out = dmi_mem[address + 2];
+				mem_out <<= 8;
+				mem_out = dmi_mem[address + 3];
+			}
+		#endif
+		
 			// Sign extend
 			if ((mem_out >> 15) == 1)
 			{
@@ -1354,6 +1376,7 @@ void CPU::memoryAccess()
 		else if (funct3 == 0b010)
 		{ // LW
 			sc_dt::sc_uint<32> mem_out_tmp;
+		#ifndef VP
 			mem_out = data_mem[address];
 			mem_out <<= 8;
 			mem_out = mem_out | data_mem[address + 1];
@@ -1362,6 +1385,20 @@ void CPU::memoryAccess()
 			mem_out <<= 8;
 			mem_out = mem_out | data_mem[address + 3];
 			mem_out_tmp = mem_out;
+		#else
+			if(dmi_valid)
+			{
+				dmi_mem = dmi.get_dmi_ptr();
+				mem_out = dmi_mem[address];
+				mem_out <<= 8;
+				mem_out = dmi_mem[address + 1];
+				mem_out <<= 8;
+				mem_out = dmi_mem[address + 2];
+				mem_out <<= 8;
+				mem_out = dmi_mem[address + 3];
+				mem_out_tmp = mem_out;
+			}
+		#endif
 
 			#ifdef MEM_PRINT
 				cout << "Memory_output: " << mem_out_tmp << " " << sc_time_stamp() << endl;
@@ -1369,13 +1406,31 @@ void CPU::memoryAccess()
 		}
 		else if (funct3 == 0b100)
 		{ // LBU
+		#ifndef VP
 			mem_out = data_mem[address + 3];
+		#else
+			if(dmi_valid)
+			{
+				dmi_mem = dmi.get_dmi_ptr();
+				mem_out = dmi_mem[address + 3];
+			}
+		#endif
 		}
 		else if (funct3 == 0b101)
 		{ // LHU
+		#ifndef VP
 			mem_out = data_mem[address + 2];
 			mem_out <<= 8;
 			mem_out = mem_out | data_mem[address + 3];
+		#else
+			if(dmi_valid)
+			{
+				dmi_mem = dmi.get_dmi_ptr();
+				mem_out = dmi_mem[address + 2];
+				mem_out <<= 8;
+				mem_out = dmi_mem[address + 3];
+			}
+		#endif
 		}
 		else
 		{
@@ -1398,10 +1453,21 @@ void CPU::memoryAccess()
 		}
 		else if (funct3 == 0b010)
 		{ // SW
+		#ifndef VP
 			data_mem[address + 3] = (rs2 & 0xFF);
 			data_mem[address + 2] = (rs2 >> 8) & 0xFF;
 			data_mem[address + 1] = (rs2 >> 16) & 0xFF;
 			data_mem[address] = (rs2 >> 24) & 0xFF;
+		#else
+			if(dmi_valid)
+			{
+				dmi_mem = dmi.get_dmi_ptr();
+				dmi_mem[address + 3] = (rs2_data & 0xFF);
+				dmi_mem[address + 2] = (rs2_data >> 8) & 0xFF;
+				dmi_mem[address + 1] = (rs2_data >> 16) & 0xFF;
+				dmi_mem[address] = (rs2_data >> 24) & 0xFF;
+			}
+		#endif
 			// cout << address << ":\t" << data_mem[address] << data_mem[address+1] << data_mem[address+2] << data_mem[address+3] << " " << sc_time_stamp() << endl;
 		}
 		else

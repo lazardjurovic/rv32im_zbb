@@ -5,6 +5,8 @@
 #include <tlm>
 #include <iostream>
 
+#define DATA_BASE_ADDR 32768
+
 using namespace sc_core;
 using namespace sc_dt;
 
@@ -29,7 +31,8 @@ public:
 	tlm::tlm_sync_enum nb_transport_fw(pl_t&, phase_t&, sc_core::sc_time&);
 	bool get_direct_mem_ptr(pl_t&, tlm::tlm_dmi&);
 	unsigned int transport_dbg(pl_t&);
-	void dump_memory();
+	void data_memory_dump();
+	void instr_memory_dump();
 
 protected:
 	static const int RAM_SIZE = 66000;
