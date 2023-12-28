@@ -41,6 +41,12 @@ protected:
 	sc_signal<sc_dt::sc_bv<32>> rd_data_mem;
 	sc_signal<sc_dt::sc_bv<5>> rd_address_ex;
 
+	// Signals for FENCE implementation
+	sc_signal<bool> load_in_ex;
+	sc_signal<bool> load_in_mem;
+	sc_signal<bool> load_in_wb;
+	sc_signal<bool> store_in_ex;
+	sc_signal<bool> store_in_mem;
 
 	// Pipeline registers
 	sc_signal<sc_dt::sc_bv<64>> if_id;
@@ -92,3 +98,5 @@ public:
 };
 
 #endif // RV32_CPU_H
+
+

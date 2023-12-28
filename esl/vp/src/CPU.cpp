@@ -297,7 +297,7 @@ void CPU::instructionDecode()
 	print_registers();
 #endif
 
-	// Hazard unit implementation
+	// Control decoder signals in ID phase
 	bool rs1_in_use_id;
 	bool rs2_in_use_id;
 	bool branch_id;
@@ -380,6 +380,7 @@ void CPU::instructionDecode()
 	cout << "branch_id " << branch_id << endl;
 #endif
 
+	// Hazard unit implementation
 	if (branch_id == 0)		// branch is NOT in ID phase
 	{
 		if (((rs1 == rd_ex && rs1_in_use_id == 1) || (rs2 == rd_ex && rs2_in_use_id == 1)) && mem_to_reg_ex == 1 && rd_we_ex == 1)
@@ -393,7 +394,7 @@ void CPU::instructionDecode()
 			control_pass = 0;
 		}
 	}
-	else if (branch_id == 1)	// branch IS in ID phase
+	else if (branch_id == 1)	// branch is in ID phase
 	{
 		if ((rs1 == rd_ex || rs2 == rd_ex) && rd_we_ex == 1) // LOAD or R type is in EX phase
 		{
@@ -411,6 +412,29 @@ void CPU::instructionDecode()
 			cout << "======== HAZARD DETECTION ========" << endl;
 		#endif
 
+			pc_en = 0;
+			if_id_en = 0;
+			control_pass = 0;
+		}
+	}
+
+	// FENCE instruction implementation
+	if (opcode == 0b0001111)
+	{
+		if (load_in_ex == 1 || store_in_ex == 1)
+		{
+			pc_en = 0;
+			if_id_en = 0;
+			control_pass = 0;
+		}
+		else if (load_in_mem == 1 || store_in_mem == 1)
+		{
+			pc_en = 0;
+			if_id_en = 0;
+			control_pass = 0;
+		}
+		else if (load_in_wb == 1)
+		{
 			pc_en = 0;
 			if_id_en = 0;
 			control_pass = 0;
@@ -827,6 +851,21 @@ void CPU::executeInstruction()
 	imm_tmp_unsigned = imm;
 	pc_tmp = pc_local;
 
+	// Signals for FENCE implementation
+	if (opcode == 0b0000011)
+	{
+		load_in_ex = 1;
+	}
+	else if (opcode == 0b0100011)
+	{
+		store_in_ex = 1;
+	}
+	else
+	{
+		load_in_ex = 0;
+		store_in_ex = 0;
+	}
+
 	// Control decoder signals needed for hazard detection
 	rd_address_ex = rd;
 
@@ -1188,7 +1227,6 @@ void CPU::executeInstruction()
 		}
 		break;
 	case 0b0001111:		  // FENCE
-		
 		alu_result = 0x0;
 		break;
 	case 0b1110011:
@@ -1267,6 +1305,21 @@ void CPU::memoryAccess()
 	address = alu_result;
 	rd = rd_address;
 	opcode_uint = opcode;
+
+	// Signals for FENCE implementation
+	if (opcode == 0b0000011)
+	{
+		load_in_mem = 1;
+	}
+	else if (opcode == 0b0100011)
+	{
+		store_in_mem = 1;
+	}
+	else
+	{
+		load_in_mem = 0;
+		store_in_mem = 0;
+	}
 
 	// Control decoder signals in MEMORY ACCESS phase needed for forwarding
 	rd_data_mem = alu_result;
@@ -1442,13 +1495,30 @@ void CPU::memoryAccess()
 	{
 		if (funct3 == 0b000)
 		{ // SB
+		#ifndef VP
 			data_mem[address + 3] = (rs2 & 0xFF);
+		#else
+			if(dmi_valid)
+			{
+				dmi_mem = dmi.get_dmi_ptr();
+				dmi_mem[address + 3] = (rs2_data & 0xFF);
+			}
+		#endif
 			// cout << address << ":\t" << data_mem[address] << data_mem[address+1] << data_mem[address+2] << data_mem[address+3] << " " << sc_time_stamp() << endl;
 		}
 		else if (funct3 == 0b001)
 		{ // SH
+		#ifndef VP
 			data_mem[address + 3] = (rs2 & 0xFF);
 			data_mem[address + 2] = (rs2 >> 8) & 0xFF;
+		#else
+			if(dmi_valid)
+			{
+				dmi_mem = dmi.get_dmi_ptr();
+				dmi_mem[address + 3] = (rs2_data & 0xFF);
+				dmi_mem[address + 2] = (rs2_data >> 8) & 0xFF;
+			}
+		#endif
 			// cout << address << ":\t" << data_mem[address] << data_mem[address+1] << data_mem[address+2] << data_mem[address+3] << " " << sc_time_stamp() << endl;
 		}
 		else if (funct3 == 0b010)
@@ -1519,6 +1589,16 @@ void CPU::writeBack()
 	alu_result = (mem_wb_tmp >> 44) & 0xFFFFFFFF;
 
 	opcode_uint = opcode;
+
+	// Signals for FENCE implementation
+	if (opcode == 0b0000011)
+	{
+		load_in_wb = 1;
+	}
+	else
+	{
+		load_in_wb = 0;
+	}
 
 	// Control decoder signals in WRITE BACK phase needed for forwarding
 	// and write enable generating for registar bank
@@ -1715,3 +1795,4 @@ void CPU::invalidate_direct_mem_ptr(sc_dt::uint64 start, sc_dt::uint64 end)
 {
 	dmi_valid = false;
 }
+
