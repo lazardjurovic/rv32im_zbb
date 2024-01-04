@@ -29,6 +29,9 @@ test: bitmanip_test.c
 	$(CC) $(TESTFLAGS) -o bitmanip_test.elf bitmanip_test.c
 	$(DUMP) -d bitmanip_test.elf
 
+cpp: $(CPP_FILES)
+	g++ $(CPP_FILES) -lsystemc -lpthread -o main
+
 program.elf: program.o
 	$(CC) $(LDFLAGS) program.o -o program.elf
 
@@ -42,4 +45,9 @@ text.dump: program.elf
 # disassemble .data section
 data.dump: program.elf
 	$(DUMP) -j .data -s program.elf > data.dump
+
+clean:
+	rm data_mem.txt
+	rm instr_mem.txt
+	rm main
 
