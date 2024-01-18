@@ -2,7 +2,7 @@
 
 module execute_phase(
         
-        input wire clk,
+        input wire clk_25mhz,
         input wire[31:0] rs1_i,
         input wire[31:0] rs2_i,
         input wire[31:0] imm_i,
@@ -16,7 +16,7 @@ module execute_phase(
         input wire[1:0] mux2_i, // selecting operand2
         input wire mux3_i, // selecting operand2
         
-        output reg[31:0] res_o
+        output reg[7:0] res_o
         
     );
     
@@ -41,7 +41,7 @@ module execute_phase(
     
     integer i,j,k;
     
-    always @(posedge clk)
+    always @(posedge clk_25mhz)
     begin
          rs1_s = rs1_i;
          rs2_s = rs2_i;
@@ -49,10 +49,10 @@ module execute_phase(
          alu_op_s = alu_op_i;
          ex_mem_s = ex_mem_i;
          mem_wb_s = mem_wb_i;
-         res_o = res_o_s;
+         res_o = res_o_s[7:0];
     end
 
-    always @(operand1)
+    always @*
     begin
          byte0 = operand1[7:0];
          byte1 = operand1[15:8];
@@ -62,7 +62,7 @@ module execute_phase(
     
     // mux to select first operand of ALU
     
-    always @(mux1_i,rs1_s, mem_wb_s)
+    always @*
     begin
         if(mux1_i == 2'b00)
         begin
@@ -81,7 +81,7 @@ module execute_phase(
     
     // two muxes to determine second input of ALU
     
-    always @(mux2_i, rs2_s,mem_wb_s,ex_mem_s)
+    always @*
     begin
         if(mux2_i == 2'b00)
         begin
@@ -98,7 +98,8 @@ module execute_phase(
         end
     end
     
-    always @(mux3_i ) begin
+    always @* 
+    begin
         if(mux3_i == 1'b0) begin
              operand2 = operand2_tmp;
         end
@@ -107,7 +108,8 @@ module execute_phase(
         end
     end
     
-    always @ (operand1) begin
+    always @* 
+    begin
     pop_cnt = 0;
     for (i = 0; i < 32; i = i + 1) begin
           pop_cnt = pop_cnt + operand1[i];
@@ -116,7 +118,8 @@ module execute_phase(
      
      //priority coder for clz
          
-     always @ (operand1) begin
+     always @* 
+     begin
         if(operand1[31] == 1'b1) begin
             leading_zeros = 0;
         end
@@ -221,7 +224,8 @@ module execute_phase(
     
     //priority coder for ctz
      
-    always @ (operand1) begin
+    always @*
+    begin
     
     if(operand1[0] == 1'b1) begin
         trailing_zeros = 0;
@@ -342,7 +346,8 @@ end
         given through muxes as it's operand
     */
     
-    always @(operand1 or operand2 or alu_op_s or leading_zeros or trailing_zeros or pop_cnt)
+    always @*
+
     begin
         
         case(alu_op_s)
