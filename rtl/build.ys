@@ -1,0 +1,3 @@
+read_verilog control_decoder.v
+synth_ecp5 -json hardware.json 
+show
