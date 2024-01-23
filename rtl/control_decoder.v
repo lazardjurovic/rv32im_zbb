@@ -2,6 +2,7 @@ module control_decoder(
 
         input wire[6:0] opcode_i, // instruction opcode
         input wire[2:0] funct3_i, // funct3 field in instruction word
+        input wire[6:0] funct7_i, // funct7 field in instruction word
 
         output wire mem_to_reg_o, // if register bank will be written by this instruction
         output wire[1:0] data_mem_we_o, // does data_mem need to be written to (enable signal)
