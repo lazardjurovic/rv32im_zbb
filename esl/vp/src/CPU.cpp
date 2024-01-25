@@ -1126,106 +1126,203 @@ void CPU::executeInstruction()
 			alu_result = 0x0;
 		}
 		break;
-	case 0b0110011: // REG
-		switch (funct3)
+	case 0b0110011: // REG							
+		if(funct7 == 0b0000001)
 		{
-		case 0b000:
-			if (funct7 == 0x0)
-			{ // ADD
-				#ifdef DEBUG_OUTPUT
-					cout << "Executing ADD" << endl;
-				#endif
-				alu_tmp = operand_1_signed + operand_2_signed;
-				alu_result = alu_tmp;
-			}
-			else if (funct7 == 0b0100000)
-			{ // SUB
-				#ifdef DEBUG_OUTPUT
-					cout << "Executing SUB" << endl;
-				#endif
-				alu_tmp = operand_1_signed - operand_2_signed;
-				alu_result = alu_tmp;
-			}
-			break;
-		case 0b001: // SLL
-			#ifdef DEBUG_OUTPUT
-				cout << "Executing SLL" << endl;
-			#endif
-			alu_result = operand_1 << operand_2_unsigned;
-			break;
-		case 0b010: // SLT
-			#ifdef DEBUG_OUTPUT
-				cout << "Executing SLT" << endl;
-			#endif
-			if (operand_1_signed < operand_2_signed)
+			switch(funct3)
 			{
-				alu_result = 0x1;
-			}
-			else
-			{
-				alu_result = 0x0;
-			}
-			break;
-		case 0b011: // SLTU
-			#ifdef DEBUG_OUTPUT
-				cout << "Executing SLTU" << endl;
-			#endif
-			if (operand_1_unsigned < operand_2_unsigned)
-			{
-				alu_result = 0x1;
-			}
-			else
-			{
-				alu_result = 0x0;
-			}
-			break;
-		case 0b100: // XOR
-			#ifdef DEBUG_OUTPUT
-				cout << "Executing XOR" << endl;
-			#endif
-			alu_result = operand_1 ^ operand_2;
-			break;
-		case 0b101:
-			if (funct7 == 0x0)
-			{ // SRL
-				#ifdef DEBUG_OUTPUT
-					cout << "Executing SRL" << endl;
-				#endif
-				alu_result = operand_1 >> operand_2_unsigned;
-			}
-			else if (funct7 == 0b0100000)
-			{ // SRA
-				#ifdef DEBUG_OUTPUT
-					cout << "Executing SRA" << endl;
-				#endif
-				sc_dt::sc_uint<1> carry;
-				sc_dt::sc_bv<32> tmp;
-
-				for (int i = 0; i < operand_2_unsigned; i++)
+			case 0b000:	//MUL 
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing MUL" << endl;
+					#endif
+				alu_tmp = operand_1_signed * operand_2_signed;
+					alu_result = alu_tmp & 0xFFFFFFFF;
+				break;
+			case 0b001:	//MULH
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing MULH" << endl;
+					#endif
+				alu_tmp = operand_1_signed * operand_2_signed;
+					alu_result = alu_tmp >> 32;
+				break;
+			case 0b010:	//MULHSU
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing MULHSU" << endl;
+					#endif
+				alu_tmp = operand_1_signed * operand_2_unsigned;
+					alu_result = alu_tmp >> 32;
+				break;
+			case 0b011:	//MULHU
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing MULHU" << endl;
+					#endif
+				alu_tmp = operand_1_unsigned * operand_2_unsigned;
+					alu_result = alu_tmp >> 32;
+				break;
+			case 0b100:	//DIV
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing DIV" << endl;
+					#endif
+				if(operand_2_signed == 0)
 				{
-					carry = operand_1 & 0x1;
-					tmp = (carry << 31);
-					alu_result = tmp | (operand_1 >> 1);
+					//error zbog dijeljena sa nulom
+					cout << "Nije dozvoljeno dijeljenje nulom" << endl;
 				}
+				else
+				{
+					alu_tmp = operand_1_signed / operand_2_signed;
+					alu_result = alu_tmp;
+				}
+				break;
+			case 0b101:	//DIVU
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing DIVU" << endl;
+					#endif
+				if(operand_2_unsigned == 0)
+				{
+					//error zbog dijeljena sa nulom
+					cout << "Nije dozvoljeno dijeljenje nulom" << endl;
+				}
+				else
+				{
+					alu_tmp = operand_1_unsigned / operand_2_unsigned;
+					alu_result = alu_tmp;
+				}
+				break;
+			case 0b110:	//REM
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing REM" << endl;
+					#endif
+				if(operand_2_signed == 0)
+				{
+					//error zbog dijeljena sa nulom
+					cout << "Nije dozvoljeno dijeljenje nulom" << endl;
+				}
+				else
+				{
+					alu_tmp = operand_1_signed % operand_2_signed;
+					alu_result = alu_tmp;
+				}
+				break;
+			case 0b111:	//REMU
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing REMU" << endl;
+					#endif
+					if(operand_2_unsigned == 0)
+				{
+					//error zbog dijeljena sa nulom
+					cout << "Nije dozvoljeno dijeljenje nulom" << endl;
+				}
+				else
+				{
+					alu_tmp = operand_1_unsigned % operand_2_unsigned;
+					alu_result = alu_tmp;
+				}
+				break;					
+			}								
+		}			       
+		else
+		{
+			switch (funct3)
+			{
+			case 0b000:
+				if (funct7 == 0x0)
+				{ // ADD
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing ADD" << endl;
+					#endif
+					alu_tmp = operand_1_signed + operand_2_signed;
+					alu_result = alu_tmp;
+				}
+				else if (funct7 == 0b0100000)
+				{ // SUB
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing SUB" << endl;
+					#endif
+					alu_tmp = operand_1_signed - operand_2_signed;
+					alu_result = alu_tmp;
+				}
+				break;
+			case 0b001: // SLL
+				#ifdef DEBUG_OUTPUT
+					cout << "Executing SLL" << endl;
+				#endif
+				alu_result = operand_1 << operand_2_unsigned;
+				break;
+			case 0b010: // SLT
+				#ifdef DEBUG_OUTPUT
+					cout << "Executing SLT" << endl;
+				#endif
+				if (operand_1_signed < operand_2_signed)
+				{
+					alu_result = 0x1;
+				}
+				else
+				{
+					alu_result = 0x0;
+				}
+				break;
+			case 0b011: // SLTU
+				#ifdef DEBUG_OUTPUT
+					cout << "Executing SLTU" << endl;
+				#endif
+				if (operand_1_unsigned < operand_2_unsigned)
+				{
+					alu_result = 0x1;
+				}
+				else
+				{
+					alu_result = 0x0;
+				}
+				break;
+			case 0b100: // XOR
+				#ifdef DEBUG_OUTPUT
+					cout << "Executing XOR" << endl;
+				#endif
+				alu_result = operand_1 ^ operand_2;
+				break;
+			case 0b101:
+				if (funct7 == 0x0)
+				{ // SRL
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing SRL" << endl;
+					#endif
+					alu_result = operand_1 >> operand_2_unsigned;
+				}
+				else if (funct7 == 0b0100000)
+				{ // SRA
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing SRA" << endl;
+					#endif
+					sc_dt::sc_uint<1> carry;
+					sc_dt::sc_bv<32> tmp;
+
+					for (int i = 0; i < operand_2_unsigned; i++)
+					{
+						carry = operand_1 & 0x1;
+						tmp = (carry << 31);
+						alu_result = tmp | (operand_1 >> 1);
+					}
+				}
+				break;
+			case 0b110: // OR
+				#ifdef DEBUG_OUTPUT
+					cout << "Executing OR" << endl;
+				#endif
+				alu_result = operand_1 | operand_2;
+				break;
+			case 0b111: // AND
+				#ifdef DEBUG_OUTPUT
+					cout << "Executing AND" << endl;
+				#endif
+				alu_result = operand_1 & operand_2;
+				break;
+			default:
+				cout << "Invalid funct3 field." << endl;
+				alu_result = 0x0;
 			}
 			break;
-		case 0b110: // OR
-			#ifdef DEBUG_OUTPUT
-				cout << "Executing OR" << endl;
-			#endif
-			alu_result = operand_1 | operand_2;
-			break;
-		case 0b111: // AND
-			#ifdef DEBUG_OUTPUT
-				cout << "Executing AND" << endl;
-			#endif
-			alu_result = operand_1 & operand_2;
-			break;
-		default:
-			cout << "Invalid funct3 field." << endl;
-			alu_result = 0x0;
 		}
-		break;
 	case 0b0001111:		  // FENCE
 		alu_result = 0x0;
 		break;
