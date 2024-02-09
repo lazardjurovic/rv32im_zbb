@@ -846,6 +846,7 @@ void CPU::executeInstruction()
 	sc_dt::sc_int<32> pc_tmp, imm_tmp, alu_tmp;
 	sc_dt::sc_uint<32> imm_tmp_unsigned;
 	sc_dt::sc_uint<5> shamt;
+	sc_dt::sc_int<64> alu_tmp64;
 
 	imm_tmp = imm;
 	imm_tmp_unsigned = imm;
@@ -1137,29 +1138,29 @@ void CPU::executeInstruction()
 					#ifdef DEBUG_OUTPUT
 						cout << "Executing MUL" << endl;
 					#endif
-				alu_tmp = operand_1_signed * operand_2_signed;
-					alu_result = alu_tmp & 0xFFFFFFFF;
+				alu_tmp64 = operand_1_signed * operand_2_signed;
+					alu_result = alu_tmp64 & 0xFFFFFFFF;
 				break;
 			case 0b001:	//MULH
 					#ifdef DEBUG_OUTPUT
 						cout << "Executing MULH" << endl;
 					#endif
-				alu_tmp = operand_1_signed * operand_2_signed;
-					alu_result = alu_tmp >> 32;
+				alu_tmp64 = operand_1_signed * operand_2_signed;
+					alu_result = alu_tmp64 >> 32;
 				break;
 			case 0b010:	//MULHSU
 					#ifdef DEBUG_OUTPUT
 						cout << "Executing MULHSU" << endl;
 					#endif
-				alu_tmp = operand_1_signed * operand_2_unsigned;
-					alu_result = alu_tmp >> 32;
+				alu_tmp64 = operand_1_signed * operand_2_unsigned;
+					alu_result = alu_tmp64 >> 32;
 				break;
 			case 0b011:	//MULHU
 					#ifdef DEBUG_OUTPUT
 						cout << "Executing MULHU" << endl;
 					#endif
-				alu_tmp = operand_1_unsigned * operand_2_unsigned;
-					alu_result = alu_tmp >> 32;
+				alu_tmp64 = operand_1_unsigned * operand_2_unsigned;
+					alu_result = alu_tmp64 >> 32;
 				break;
 			case 0b100:	//DIV
 					#ifdef DEBUG_OUTPUT
@@ -1250,7 +1251,6 @@ void CPU::executeInstruction()
 				break;
 			}	
 		}
-										       //<====================================================================================
 		else if(funct7 == 0b0000101)
 		{
 			switch(funct3)
