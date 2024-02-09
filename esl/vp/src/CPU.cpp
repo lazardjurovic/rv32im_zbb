@@ -977,7 +977,9 @@ void CPU::executeInstruction()
 		#endif
 		}
 	}
-
+	
+	
+	// CAST TO SIGNED/UNSIGNED
 	operand_1_signed = operand_1;
 	operand_2_signed = operand_2;
 	operand_1_unsigned = operand_1;
@@ -1220,6 +1222,100 @@ void CPU::executeInstruction()
 				}
 				break;					
 			}								
+		}
+		else if(funct7 == 0b010000)
+		{
+			switch(funct3)
+			{
+			case 0b111:  //ANDN
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing ANDN" << endl;
+					#endif
+				alu_tmp = operand_1_unsigned & ~operand_2_unsigned;
+				alu_result = alu_tmp;
+				break;
+			case 0b110:  	//ORN
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing ORN" << endl;
+					#endif
+				alu_tmp = operand_1_unsigned | ~operand_2_unsigned;
+				alu_result = alu_tmp;
+				break;
+			case 0b100: 	//XNOR
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing XNOR" << endl;
+					#endif
+				alu_tmp = ~(alu_tmp = operand_1_unsigned ^ operand_2_unsigned);
+				alu_result = alu_tmp;
+				break;
+			}	
+		}
+										       //<====================================================================================
+		else if(funct7 == 0b0000101)
+		{
+			switch(funct3)
+			{
+			case 0b110:	//MAX
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing MAX" << endl;
+					#endif
+				if(operand_1_signed < operand_2_signed)
+				{
+					alu_tmp = operand_2_signed;
+				}
+				else
+				{
+					alu_tmp = operand_1_signed;
+				}
+				
+				alu_result = alu_tmp;
+				break;
+			case 0b111:	//MAXU
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing MAXU" << endl;
+					#endif
+				if(operand_1_unsigned < operand_2_unsigned)
+				{
+					alu_tmp = operand_2_unsigned;
+				}
+				else
+				{
+					alu_tmp = operand_1_unsigned;
+				}
+				
+				alu_result = alu_tmp;
+				break;
+			case 0b100:	//MIN
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing MIN" << endl;
+					#endif
+				if(operand_1_signed < operand_2_signed)
+				{
+					alu_tmp = operand_1_signed;
+				}
+				else
+				{
+					alu_tmp = operand_2_signed;
+				}
+				
+				alu_result = alu_tmp;
+				break;
+			case 0b101:	//MINU
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing MINU" << endl;
+					#endif
+				if(operand_1_unsigned < operand_2_unsigned)
+				{
+					alu_tmp = operand_2_unsigned;
+				}
+				else
+				{
+					alu_tmp = operand_1_unsigned;
+				}
+				
+				alu_result = alu_tmp;
+				break;
+			}
 		}			       
 		else
 		{
