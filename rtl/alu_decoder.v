@@ -1,12 +1,9 @@
 module alu_decoder (
-    /*
-        NEED TO EXTEND ALU_2BIT_OP TO MORE BITS SO I CAN FIT BITMANIP
-    */
     input [1:0] alu_2bit_op_i,
     input [2:0] funct3_i,
     input [6:0] funct7_i,
     input [4:0] rs_2_i,
-    output [4:0] alu_op_o // signal that tells ALU precisely which operation to do
+    output reg[4:0] alu_op_o // signal that tells ALU precisely which operation to do
 );
 
 /*
@@ -49,6 +46,9 @@ module alu_decoder (
 
     always @*
     begin
+        
+        alu_op_o = 5'b00000;
+    
         if (alu_2bit_op_i == 2'b00) begin
             alu_op_o = 5'b00000; // add
         end 

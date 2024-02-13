@@ -25,59 +25,13 @@ module forwarding_unit(
     output wire branch_forward_b_o
 );
 
-    always @*
-    begin
+  assign alu_forward_a_o = (rd_we_wb_i && (rs1_address_ex_i == rd_address_wb_i)) ? 2'b01 : 
+                             (rd_we_mem_i && (rs1_address_ex_i == rd_address_mem_i)) ? 2'b10 : 2'b00;
 
-        // default signal values
-        alu_forward_a_o = 2'b00;
-        alu_forward_b_o = 2'b00;
+    assign alu_forward_b_o = (rd_we_wb_i && (rs2_address_ex_i == rd_address_wb_i)) ? 2'b01 : 
+                             (rd_we_mem_i && (rs2_address_ex_i == rd_address_mem_i)) ? 2'b10 : 2'b00;
 
-        // forwarding from WB phase
-        if(rd_we_wb_i == 1'b1 && rd_address_wb_i != 5'b00000) 
-        begin
-            
-            if(rs1_address_ex_i == rd_address_wb_i) begin
-                alu_forward_a_o = 2'b01;
-            end
-
-            if(rs2_address_ex_i == rd_address_wb_i) begin
-                alu_forward_b_o = 2'b01;
-            end
-
-        end
-
-        // forwarding from MEM phase
-        if(rd_we_wb_i == 1'b1 && rd_address_mem_i != 5'b00000) 
-        begin
-            
-            if(rs1_address_ex_i == rd_address_mem_i) begin
-                alu_forward_a_o = 2'b10;
-            end
-
-            if(rs2_address_ex_i == rd_address_mem_i) begin
-                alu_forward_b_o = 2'b10;
-            end
-
-        end
-
-        // forwarding signals for conditional branch instructions
-        // initial signal values
-        branch_forward_a_o = 1'b0;
-        branch_forward_b_o = 1'b0;
-
-        if(rd_we_mem_i == 1'b1 && rd_address_mem_i != 5'b00000) begin
-            
-            if(rs1_address_id_i == rd_address_mem_i) begin
-                branch_forward_a_o = 1'b1;
-            end
-
-            if(rs2_address_id_i == rd_address_mem_i) begin
-                branch_forward_b_o = 1'b1;
-            end
-
-        end
-
-    end
-
+    assign branch_forward_a_o = (rd_we_mem_i && (rs1_address_id_i == rd_address_mem_i)) ? 1'b1 : 1'b0;
+    assign branch_forward_b_o = (rd_we_mem_i && (rs2_address_id_i == rd_address_mem_i)) ? 1'b1 : 1'b0;
 
 endmodule
