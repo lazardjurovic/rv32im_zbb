@@ -185,7 +185,7 @@ module alu #(
                               ((((a_i[16] + a_i[17]) + (a_i[18] + a_i[19])) + ((a_i[20] + a_i[21]) + (a_i[22] + a_i[23]))) +
                               (((a_i[24] + a_i[25]) + (a_i[26] + a_i[27])) + ((a_i[28] + a_i[29]) + (a_i[30] + a_i[31]))));
                 end
-            5'b11011:   //ctz
+            5'b11011:   //ctz   -- NIJE URADJENO
                 begin
                     
                 end
@@ -216,49 +216,32 @@ module alu #(
                             tmpXlen = tmpXlen - 1;
                         end
                     end
-                    /*
-                            module count_lead_zero #(
-                            parameter W_IN = 64, // Must be power of 2, >=2
-                            parameter W_OUT = $clog2(W_IN) // Let this default
-                        ) (
-                            input wire  [W_IN-1:0] in,
-                            output wire [W_OUT-1:0] out
-                        );
-
-                        generate
-                        if (W_IN == 2) begin: base
-                            assign out = !in[1];
-                        end else begin: recurse
-                            wire [W_OUT-2:0] half_count;
-                            wire [W_IN / 2-1:0] lhs = in[W_IN / 2 +: W_IN / 2];
-                            wire [W_IN / 2-1:0] rhs = in[0        +: W_IN / 2];
-                            wire left_empty = ~|lhs;
-
-                            count_lead_zero #(
-                                .W_IN (W_IN / 2)
-                            ) inner (
-                                .in  (left_empty ? rhs : lhs),
-                                .out (half_count)
-                            );
-
-                            assign out = {left_empty, half_count};
-                        end
-                        endgenerate
-
-                        endmodule
-                    */
                 end
             5'b11101:   //sext.b
                 begin
-                    res_o = a_signed / b_signed;        //NIJE URADJENO
+                    reg [7:0] LSB = a_i[7:0];
+
+                    if (LSB[7] == 1'b1) begin
+                        res_o = {{24{1'b1}}, LSB};
+                    end 
+                    else begin
+                        res_o = {{24{1'b0}}, LSB};
+                    end
                 end
             5'b11110:   //sext.h
                 begin
-                    res_o = a_signed / b_signed;        //NIJE URADJENO
+                    reg [15:0] LSH = a_i[15:0];
+
+                    if (LSH[15] == 1'b1) begin
+                        res_o = {{16{1'b1}}, LSH};
+                    end 
+                    else begin
+                        res_o = {{16{1'b0}}, LSH};
+                    end
                 end
             5'b11111:   //zext.h
                 begin
-                    res_o = a_signed / b_signed;        //NIJE URADJENO
+                    res_o = {{16{1'b0}}, a_i[15:0]};
                 end
             default: 
                 res_o = 32'b0;
