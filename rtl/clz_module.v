@@ -1,5 +1,5 @@
-module count_lead_zero #(
-    parameter DATA_WIDTH = 32,
+module ctz_recursive #(
+    parameter DATA_WIDTH = 32
 ) (
     input wire  [DATA_WIDTH-1:0] in,
     output wire [DATA_WIDTH-1:0] out
@@ -25,4 +25,65 @@ end else begin: recurse
 end
 endgenerate
 
+endmodule
+
+module enc
+(
+   input [1:0] d,
+   output reg [1:0] q
+);
+
+   always_comb begin
+      case (d[1:0])
+         2'b00    :  q = 2'b10;
+         2'b01    :  q = 2'b01;
+         default  :  q = 2'b00;
+      endcase
+   end
+
+endmodule // enc
+
+module clzi #
+(
+   // external parameter
+   parameter   N = 2,
+   // internal parameters
+   parameter   WI = 2 * N,
+   parameter   WO = N + 1
+)
+(
+   input [WI-1:0] d,
+   output reg [WO-1:0] q
+);
+
+   always_comb begin
+      if (d[N - 1 + N] == 1'b0) begin
+         q[WO-1] = (d[N-1+N] & d[N-1]);
+         q[WO-2] = 1'b0;
+         q[WO-3:0] = d[(2*N)-2 : N];
+      end else begin
+         q[WO-1] = d[N-1+N] & d[N-1];
+         q[WO-2] = ~d[N-1];
+         q[WO-3:0] = d[N-2 : 0];
+      end
+   end
+
+endmodule // clzi
+
+module clz_encoder #(
+    DATA_WIDTH = 32
+) (
+    input [DATA_WIDTH-1:0] in,
+    output [DATA_WIDTH-1:0] out
+);
+    integer i;
+
+    reg [DATA_WIDTH-1:0] encoder_o;
+
+    always @* begin
+        for (i = 0; i < 16; i++) begin
+            /* TO IMPLEMENT */
+        end
+    end
+    
 endmodule
