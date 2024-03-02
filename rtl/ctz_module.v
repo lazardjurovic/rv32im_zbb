@@ -1,4 +1,4 @@
-module enc
+module enc_ctz
 (
    input [1:0] d,
    output reg [1:0] q
@@ -12,9 +12,9 @@ module enc
       endcase
    end
 
-endmodule // enc
+endmodule // enc_ctz
 
-module clzi #
+module ctzi #
 (
    // external parameter
    parameter   N = 2,
@@ -39,9 +39,9 @@ module clzi #
       end
    end
 
-endmodule // clzi
+endmodule // ctzi
 
-module clz_encoder #(
+module ctz_encoder #(
     parameter DATA_WIDTH = 32
 ) (
     input [DATA_WIDTH-1:0] in,
@@ -56,34 +56,34 @@ module clz_encoder #(
 
     generate
         for (i = 0; i < 16; i++) begin
-            enc e1(
+            enc_ctz e1(
                 .d(in[i*2:i*2+1]),
                 .q(encoder_o[i*2:i*2+1])
             );
         end
 
         for (i = 0; i < 8; i++) begin
-            clzi #(.N(2)) m1 (
+            ctzi #(.N(2)) m1 (
                 .d(encoder_o[i*4:i*4+3]),
                 .q(a[i*3:i*3+2])
             );
         end
 
         for (i = 0; i < 4; i++) begin
-            clzi #(.N(3)) m2 (
+            ctzi #(.N(3)) m2 (
                 .d(a[i*6:i*6+5]),
                 .q(b[i*4:i*4+3])
             );
         end
 
         for (i = 0; i < 2; i++) begin
-            clzi #(.N(4)) m3 (
+            ctzi #(.N(4)) m3 (
                 .d(b[i*8:i*8+7]),
                 .q(c[i*5:i*5+4])
             );
         end
 
-        clzi #(.N(5)) m4 (
+        ctzi #(.N(5)) m4 (
                 .d(c[0:9]),
                 .q(out)
             );
