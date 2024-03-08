@@ -3,6 +3,15 @@ module alu_decoder (
     input [2:0] funct3_i,
     input [6:0] funct7_i,
     input [4:0] rs_2_i,
+    output reg[1:0] alu_inverters, // used to tell alu if it should invert any of it's inputs
+    
+    /*
+    00 - invert none
+    01 - invert 1st
+    10 - invert 2nd
+    11 - invert output
+    */
+
     output reg[4:0] alu_op_o // signal that tells ALU precisely which operation to do
 );
 
@@ -48,6 +57,7 @@ module alu_decoder (
     begin
         
         alu_op_o = 5'b00000;
+        alu_inverters = 2'b00; 
     
         if (alu_2bit_op_i == 2'b00) begin
             alu_op_o = 5'b00000; // add
@@ -57,7 +67,7 @@ module alu_decoder (
         end 
         else if (alu_2bit_op_i == 2'b10) begin // R type
             case(funct7_i)
-            
+
             7'b0000000:
                 case(funct3_i)
                     3'b000: alu_op_o = 5'b00000; // add
@@ -72,6 +82,9 @@ module alu_decoder (
                 endcase
             7'b0100000:
                 case(funct3_i) 
+                    3'b111: begin alu_op_o = 5'b01000; alu_inverters = 2'b10; end// andn
+                    3'b110: begin alu_op_o = 5'b00111; alu_inverters = 2'b10; end // orn
+                    3'b100: begin alu_op_o = 5'b00101; alu_inverters = 2'b11; end// xnor
                     3'b000: alu_op_o = 5'b00001; // sub
                     3'b101: alu_op_o = 5'b01001;// sra
                 default: alu_op_o = 5'b00000; 
@@ -101,6 +114,12 @@ module alu_decoder (
                     3'b111: alu_op_o = 5'b10111; // maxu
                     default:  alu_op_o = 5'b00000;
                 endcase    
+            7'b0000100:
+                    if(rs_2_i == 5'b00000 && funct3_i == 3'b100) begin
+                        alu_op_o = 5'b11111; // zext.h
+                    end else begin
+                        alu_op_o = 5'b00000;
+                    end
             default:  alu_op_o = 5'b00000;
 
             endcase
@@ -108,50 +127,48 @@ module alu_decoder (
         else if (alu_2bit_op_i == 2'b11) begin // I type instructions
             // all I type instructions have opcode 0010011
             case(funct7_i)
-                7'b0000000:
-                    case (funct3_i)
-                        3'b000: alu_op_o = 5'b00000; // addi
-                        3'b001: alu_op_o = 5'b00010; // slli
-                        3'b010: alu_op_o = 5'b00011; // stli
-                        3'b011: alu_op_o = 5'b00100; // sltiu
-                        3'b100: alu_op_o = 5'b00101; // xori
-                        3'b101: alu_op_o = 5'b00110; // srli
-                        3'b110: alu_op_o = 5'b00111; // ori
-                        3'b111: alu_op_o = 5'b01000; // andi
-                        default: alu_op_o = 5'b00000;
-                    endcase
-                7'b0110000: // funct3 will be set to 001
-                    case(rs_2_i)
-                        5'b00000: alu_op_o = 5'b11100; // clz
-                        5'b00001: alu_op_o = 5'b11011; // ctz
-                        5'b00010: alu_op_o = 5'b11010; // cpop
-                        5'b00100: alu_op_o = 5'b11101; // sext.b
-                        5'b00101: alu_op_o = 5'b11110; // sext.h
-                        default:  alu_op_o = 5'b00000;
-                    endcase
-                7'b0000100:
-                    if(rs_2_i == 5'b00000 && funct3_i == 3'b100) begin
-                        alu_op_o = 5'b11111; // zext.h
-                    end
-                    else begin
+                7'b0110000:
+                    if(funct3_i == 3'b001) begin
+                        case(rs_2_i)
+                            5'b00000: alu_op_o = 5'b11100; // clz
+                            5'b00001: alu_op_o = 5'b11011; // ctz
+                            5'b00010: alu_op_o = 5'b11010; // cpop
+                            5'b00100: alu_op_o = 5'b11101; // sext.b
+                            5'b00101: alu_op_o = 5'b11110; // sext.h
+                            default: alu_op_o = 5'b00000;
+                        endcase
+                    end else begin
                         alu_op_o = 5'b00000;
                     end
                 7'b0110100:
                     if(rs_2_i == 5'b11000 && funct3_i == 3'b101) begin
                         alu_op_o = 5'b11000; // rev8
-                    end
-                    else begin
-                        alu_op_o = 5'b00000;
+                    end else begin
+                         alu_op_o = 5'b00000;
                     end
                 7'b0010100:
                     if(rs_2_i == 5'b00111 && funct3_i == 3'b101) begin
                         alu_op_o = 5'b11001; // orc.b
-                    end
-                    else begin
+                    end else begin
                         alu_op_o = 5'b00000;
                     end
-                default: alu_op_o = 5'b00000;
+
+                default:
+
+                        case(funct3_i) 
+                            3'b000: alu_op_o = 5'b00000; // addi
+                            3'b001: alu_op_o = 5'b00010; // slli
+                            3'b010: alu_op_o = 5'b00011; // stli
+                            3'b011: alu_op_o = 5'b00100; // sltiu
+                            3'b100: alu_op_o = 5'b00101; // xori
+                            3'b101: alu_op_o = 5'b00110; // srli
+                            3'b110: alu_op_o = 5'b00111; // ori
+                            3'b111: alu_op_o = 5'b01000; // andi
+                            default: alu_op_o = 5'b00000;
+                        endcase
+
             endcase
+
         end 
         else 
             begin
