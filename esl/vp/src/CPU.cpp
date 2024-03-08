@@ -1085,7 +1085,8 @@ void CPU::executeInstruction()
 			#endif
 			alu_result = operand_1 & imm;
 			break;
-		case 0b001: // SLLI
+		case 0b001:
+			 // SLLI
 			#ifdef DEBUG_OUTPUT
 				cout << "Executing SLLI" << endl;
 			#endif
@@ -1117,6 +1118,13 @@ void CPU::executeInstruction()
 					tmp = (carry << 31);
 					alu_result = tmp | (operand_1 >> 1);
 				}
+			}
+			else if(funct7 = 0b0110000) //RORI
+			{
+				shamt = imm & 0x1F;
+				alu_tmp = (operand_1_unsigned >> shamt) | (operand_1_unsigned << (32 - shamt));
+				
+				alu_result = alu_tmp;
 			}
 			else
 			{
@@ -1316,7 +1324,30 @@ void CPU::executeInstruction()
 				alu_result = alu_tmp;
 				break;
 			}
-		}			       
+		}	
+		else if(funct7 == 0b0110000)
+		{
+			switch(funct3)
+			{
+			case 0b001:	//ROL
+				//sc_dt::sc_uint<32> shamt;
+				
+				shamt = operand_2_unsigned & 0x001F;
+				alu_tmp = (operand_1_unsigned << shamt) | (operand_1_unsigned >> (32 - shamt));
+				
+				alu_result = alu_tmp;
+				break;
+			case 0b101:	//ROR	
+				//sc_dt::sc_uint<32> shamt;
+				
+				shamt = operand_2_unsigned & 0x001F;
+				alu_tmp = (operand_1_unsigned >> shamt) | (operand_1_unsigned << (32 - shamt));
+				
+				alu_result = alu_tmp;
+				
+				break;
+			}
+		}		       
 		else
 		{
 			switch (funct3)
