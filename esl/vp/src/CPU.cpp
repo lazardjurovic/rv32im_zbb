@@ -1086,12 +1086,84 @@ void CPU::executeInstruction()
 			alu_result = operand_1 & imm;
 			break;
 		case 0b001:
+			if(funct7 == 0b01100000 )  
+			{
+				if(rs2 == 0b00000)	//CLZ
+				{
+				#ifdef DEBUG_OUTPUT
+					cout << "Executing CLZ" << endl;
+				#endif	
+					alu_tmp = 0;
+					
+					if(operand_1 == 0)
+					{
+						alu_tmp = 0;
+					}
+					else 
+					{
+						for(int i = 1; i < 33; i++)
+						{
+							if((operand_1 >> 1) == 0)
+							{
+								alu_tmp = 32 - i;
+								break;
+							}
+							operand_1 >>= 1;
+						}
+					}
+					alu_result = alu_tmp;	
+				}
+				else if(rs2 ==  0b00001)	//CTZ
+				{
+				#ifdef DEBUG_OUTPUT
+					cout << "Executing CTZ" << endl;
+				#endif	
+					alu_tmp = 0;
+					
+					if(operand_1_unsigned == 0)
+					{
+						alu_tmp = 32;
+					}
+					else
+					{
+						while(operand_1_unsigned % 2 == 0){
+							operand_1_unsigned >> 1;
+							alu_tmp++;
+						}
+					} 
+					alu_result = alu_tmp;
+				}
+				else if(rs2 == 0b00010)   //CPOP
+				{
+				#ifdef DEBUG_OUTPUT
+					cout << "Executing CPOP" << endl;
+				#endif	
+					alu_tmp = 0;
+					
+					if(operand_1_unsigned == 0){
+						alu_tmp = 0;
+					}
+					else
+					{
+						for(int i = 0; i < 32; i++){
+							if(operand_1_unsigned & 0x1){ 
+							 alu_tmp++;
+							}
+							operand_1_unsigned >>= 1; 
+						}
+					}
+					alu_result = alu_tmp;
+				}
+			}	
+			else
+			{
 			 // SLLI
 			#ifdef DEBUG_OUTPUT
 				cout << "Executing SLLI" << endl;
 			#endif
 			shamt = imm & 0x1F;
 			alu_result = operand_1 << shamt;
+			}
 			break;
 		case 0b101:
 			if (funct7 == 0)
