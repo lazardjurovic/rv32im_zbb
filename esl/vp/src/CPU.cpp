@@ -1191,6 +1191,68 @@ void CPU::executeInstruction()
 					alu_result = tmp | (operand_1 >> 1);
 				}
 			}
+			else if(funct7 = 0b0110100 && rs2 == 0b11000)  //REV8
+			{
+				sc_dt::sc_uint<8> byte_1, byte_2, byte_3, byte_4;
+				
+				byte_1 = (operand_1_unsigned >> 24) & 0xFF; 
+				byte_2 = (operand_1_unsigned >> 16) & 0xFF;
+				byte_3 = (operand_1_unsigned >> 8) & 0xFF;
+				byte_4 = operand_1_unsigned & 0xFF;
+				
+				alu_tmp = (byte_1 << 24) | (byte_2 << 16) | (byte_3 << 8) | byte_4;
+				
+				alu_result = alu_tmp;				
+				
+			}
+			else if(funct7 = 0b0010100 && rs2 == 0b00111)
+			{
+				sc_dt::sc_uint<8> byte_1, byte_2, byte_3, byte_4;
+				
+				byte_1 = (operand_1_unsigned >> 24) & 0xFF; 
+				byte_2 = (operand_1_unsigned >> 16) & 0xFF;
+				byte_3 = (operand_1_unsigned >> 8) & 0xFF;
+				byte_4 = operand_1_unsigned & 0xFF;
+				
+				if(byte_1 > 0x00)
+				{
+				byte_1 = 0xFF;
+				}
+				else
+				{
+				byte_1 = 0x00;
+				}
+				
+				if(byte_2 > 0x00)
+				{
+				byte_2 = 0xFF;
+				}
+				else
+				{
+				byte_2 = 0x00;
+				}
+				
+				if(byte_3 > 0x00)
+				{
+				byte_3 = 0xFF;
+				}
+				else
+				{
+				byte_3 = 0x00;
+				}
+				
+				if(byte_4 > 0x00)
+				{
+				byte_4 = 0xFF;
+				}
+				else
+				{
+				byte_4 = 0x00;
+				}
+				
+				alu_tmp = (byte_4 << 24) | (byte_3 << 16) | (byte_2 << 8) | byte_1;
+				alu_result = alu_tmp;
+			}
 			else if(funct7 = 0b0110000) //RORI
 			{
 				shamt = imm & 0x1F;
