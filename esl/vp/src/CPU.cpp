@@ -1153,18 +1153,57 @@ void CPU::executeInstruction()
 						}
 					}
 					alu_result = alu_tmp;
+				}				
+				else if(rs2 == 0b0100)	//SEXT.B
+					{
+						#ifdef DEBUG_OUTPUT
+							cout << "Executing SEXT.B" << endl;
+						#endif
+						if(operand_1_signed & 0x0080)
+						{
+							alu_tmp = operand_1_signed | 0xFFFFFF00; 
+						}
+						else
+						{
+							alu_tmp = operand_1_signed | 0x00000000; 
+						}
+						
+						alu_result = alu_tmp;
+					}
+					else if(rs2 == 0b0101)	//SEXT.H
+					{
+						#ifdef DEBUG_OUTPUT
+							cout << "Executing SEXT.H" << endl;
+						#endif
+						if(operand_1_signed & 0x8000) 
+						{
+							alu_tmp = operand_1_signed | 0xFFFF0000; 
+						}
+						else
+						{
+							alu_tmp = operand_1_signed | 0x00000000; 
+						}
+						alu_result = alu_tmp;
+					}
+					else if(rs2 == 0b0110)	//ZEXT.H
+					{
+						#ifdef DEBUG_OUTPUT
+							cout << "Executing ZEXT.H" << endl;
+						#endif
+						alu_result = operand_1_unsigned | 0x00000000; 
+					}
+				
+				}	
+				else
+				{
+				 // SLLI
+				#ifdef DEBUG_OUTPUT
+					cout << "Executing SLLI" << endl;
+				#endif
+				shamt = imm & 0x1F;
+				alu_result = operand_1 << shamt;
 				}
-			}	
-			else
-			{
-			 // SLLI
-			#ifdef DEBUG_OUTPUT
-				cout << "Executing SLLI" << endl;
-			#endif
-			shamt = imm & 0x1F;
-			alu_result = operand_1 << shamt;
-			}
-			break;
+				break;
 		case 0b101:
 			if (funct7 == 0)
 			{ // SRLI
@@ -1193,6 +1232,9 @@ void CPU::executeInstruction()
 			}
 			else if(funct7 = 0b0110100 && rs2 == 0b11000)  //REV8
 			{
+				#ifdef DEBUG_OUTPUT
+					cout << "Executing REV8" << endl;
+				#endif
 				sc_dt::sc_uint<8> byte_1, byte_2, byte_3, byte_4;
 				
 				byte_1 = (operand_1_unsigned >> 24) & 0xFF; 
@@ -1205,8 +1247,11 @@ void CPU::executeInstruction()
 				alu_result = alu_tmp;				
 				
 			}
-			else if(funct7 = 0b0010100 && rs2 == 0b00111)
+			else if(funct7 = 0b0010100 && rs2 == 0b00111) //ORC.B
 			{
+				#ifdef DEBUG_OUTPUT
+					cout << "Executing ORC.B" << endl;
+				#endif
 				sc_dt::sc_uint<8> byte_1, byte_2, byte_3, byte_4;
 				
 				byte_1 = (operand_1_unsigned >> 24) & 0xFF; 
