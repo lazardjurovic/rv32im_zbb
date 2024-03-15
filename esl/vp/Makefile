@@ -2,7 +2,7 @@ CC =  riscv32-unknown-elf-gcc
 DUMP = riscv32-unknown-elf-objdump 
 
 CFLAGS = -march=rv32im_zbb -mabi=ilp32 -static -nostdlib -mcmodel=medlow -Ttext=0  -O2
-TESTFLAGS = -march=rv32im_zbb -mabi=ilp32 -O2
+TESTFLAGS = -march=rv32im_zbb -mabi=ilp32 -static -nostdlib -Ttext=0 -O2
 LDFLAGS = -T link.ld -nostartfiles
 
 CPP_FILES = src/main.cpp src/CPU.cpp src/memory.cpp src/generator.cpp src/vp.cpp
@@ -27,6 +27,8 @@ all: program.elf text.dump data.dump
 
 test: bitmanip_test.c
 	$(CC) $(TESTFLAGS) -o bitmanip_test.elf bitmanip_test.c
+	$(DUMP) -d bitmanip_test.elf > bit_text.dump
+	$(DUMP) -j .data -s bitmanip_test.elf > bit_data.dump
 	$(DUMP) -d bitmanip_test.elf
 
 cpp: $(CPP_FILES)
@@ -47,6 +49,9 @@ data.dump: program.elf
 	$(DUMP) -j .data -s program.elf > data.dump
 
 clean:
+	rm bit_data.dump
+	rm bit_text.dump
+	rm bitmanip_test.elf
 	rm data_mem.txt
 	rm instr_mem.txt
 	rm main
