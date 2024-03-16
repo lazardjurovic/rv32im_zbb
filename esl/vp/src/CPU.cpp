@@ -11,11 +11,11 @@
 // Uncomment for printing contents of INITIALLY loaded data and instruction memory
 // #define MEMORY_PRINT
 
-// Uncomment for printing contents of registers EACH pass through decode phase
+// Uncomment for printing contents of registers when writen in register file
 // #define REGISTER_PRINT
 
 // Uncomment for debug output
-// #define DEBUG_OUTPUT
+ #define DEBUG_OUTPUT
 
 // Uncomment for using virtual platform and external memory and loader
 #define VP
@@ -285,6 +285,9 @@ void CPU::instructionDecode()
 	{
 		if (wb_address != 0)
 		{
+			#ifdef REGISTER_PRINT
+				print_registers('b');
+			#endif
 			registers[wb_address] = wb_data;
 		}
 		else
@@ -292,10 +295,6 @@ void CPU::instructionDecode()
 			registers[0] = 0;
 		}
 	}
-
-#ifdef REGISTER_PRINT
-	print_registers();
-#endif
 
 	// Control decoder signals in ID phase
 	bool rs1_in_use_id;
@@ -933,12 +932,14 @@ void CPU::executeInstruction()
 	rd_address_mem_i = rd_address_mem;
 
 #ifdef EX_PRINT
+	cout << "opcode = " << opcode_lv << endl;
 	cout << "rd_we_wb = " << rd_we_wb << endl;
 	cout << "rd_we_mem = " << rd_we_mem << endl;
 	cout << "rd_address_wb = " << rd_address_wb << endl;
 	cout << "rd_address_mem = " << rd_address_mem << endl;
 	cout << "rs1_address_ex = " << rs1_address << endl;
 	cout << "rs2_address_ex = " << rs2_address << endl;
+	cout << "funct7 = " << funct7_bv << endl;
 #endif
 
 	if (rd_we_wb == 1 && rd_address_wb_i != 0x0)
@@ -979,8 +980,6 @@ void CPU::executeInstruction()
 		}
 	}
 	
-	
-	// CAST TO SIGNED/UNSIGNED
 	operand_1_signed = operand_1;
 	operand_2_signed = operand_2;
 	operand_1_unsigned = operand_1;
@@ -1086,9 +1085,9 @@ void CPU::executeInstruction()
 			alu_result = operand_1 & imm;
 			break;
 		case 0b001:
-			if(funct7 == 0b01100000 )  
+			if(funct7 == 0b0110000)  
 			{
-				if(rs2 == 0b00000)	//CLZ
+				if(rs2_address == 0b00000)	//CLZ
 				{
 				#ifdef DEBUG_OUTPUT
 					cout << "Executing CLZ" << endl;
@@ -1113,7 +1112,7 @@ void CPU::executeInstruction()
 					}
 					alu_result = alu_tmp;	
 				}
-				else if(rs2 ==  0b00001)	//CTZ
+				else if(rs2_address ==  0b00001)	//CTZ
 				{
 				#ifdef DEBUG_OUTPUT
 					cout << "Executing CTZ" << endl;
@@ -1133,7 +1132,7 @@ void CPU::executeInstruction()
 					} 
 					alu_result = alu_tmp;
 				}
-				else if(rs2 == 0b00010)   //CPOP
+				else if(rs2_address == 0b00010)   //CPOP
 				{
 				#ifdef DEBUG_OUTPUT
 					cout << "Executing CPOP" << endl;
@@ -1154,58 +1153,50 @@ void CPU::executeInstruction()
 					}
 					alu_result = alu_tmp;
 				}				
-				else if(rs2 == 0b0100)	//SEXT.B
-					{
-						#ifdef DEBUG_OUTPUT
-							cout << "Executing SEXT.B" << endl;
-						#endif
-						if(operand_1_signed & 0x0080)
-						{
-							alu_tmp = operand_1_signed | 0xFFFFFF00; 
-						}
-						else
-						{
-							alu_tmp = operand_1_signed | 0x00000000; 
-						}
-						
-						alu_result = alu_tmp;
-					}
-					else if(rs2 == 0b0101)	//SEXT.H
-					{
-						#ifdef DEBUG_OUTPUT
-							cout << "Executing SEXT.H" << endl;
-						#endif
-						if(operand_1_signed & 0x8000) 
-						{
-							alu_tmp = operand_1_signed | 0xFFFF0000; 
-						}
-						else
-						{
-							alu_tmp = operand_1_signed | 0x00000000; 
-						}
-						alu_result = alu_tmp;
-					}
-					else if(rs2 == 0b0110)	//ZEXT.H
-					{
-						#ifdef DEBUG_OUTPUT
-							cout << "Executing ZEXT.H" << endl;
-						#endif
-						alu_result = operand_1_unsigned | 0x00000000; 
-					}
-				
-				}	
-				else
+				else if(rs2_address == 0b0100)	//SEXT.B
 				{
-				 // SLLI
-				#ifdef DEBUG_OUTPUT
-					cout << "Executing SLLI" << endl;
-				#endif
-				shamt = imm & 0x1F;
-				alu_result = operand_1 << shamt;
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing SEXT.B" << endl;
+					#endif
+					if(operand_1_signed & 0x0080)
+					{
+						alu_tmp = operand_1_signed | 0xFFFFFF00; 
+					}
+					else
+					{
+						alu_tmp = operand_1_signed | 0x00000000; 
+					}
+					
+					alu_result = alu_tmp;
 				}
-				break;
+				else if(rs2_address == 0b0101)	//SEXT.H
+				{
+					#ifdef DEBUG_OUTPUT
+						cout << "Executing SEXT.H" << endl;
+					#endif
+					if(operand_1_signed & 0x8000) 
+					{
+						alu_tmp = operand_1_signed | 0xFFFF0000; 
+					}
+					else
+					{
+						alu_tmp = operand_1_signed | 0x00000000; 
+					}
+					alu_result = alu_tmp;
+				}			
+			}
+			else
+			{
+			// SLLI
+			#ifdef DEBUG_OUTPUT
+				cout << "Executing SLLI" << endl;
+			#endif
+			shamt = imm & 0x1F;
+			alu_result = operand_1 << shamt;
+			}
+			break;
 		case 0b101:
-			if (funct7 == 0)
+			if (funct7 == 0b0)
 			{ // SRLI
 				#ifdef DEBUG_OUTPUT
 					cout << "Executing SRLI" << endl;
@@ -1230,24 +1221,24 @@ void CPU::executeInstruction()
 					alu_result = tmp | (operand_1 >> 1);
 				}
 			}
-			else if(funct7 = 0b0110100 && rs2 == 0b11000)  //REV8
+			else if(funct7 == 0b0110100)  //REV8
 			{
 				#ifdef DEBUG_OUTPUT
 					cout << "Executing REV8" << endl;
 				#endif
 				sc_dt::sc_uint<8> byte_1, byte_2, byte_3, byte_4;
 				
-				byte_1 = (operand_1_unsigned >> 24) & 0xFF; 
-				byte_2 = (operand_1_unsigned >> 16) & 0xFF;
-				byte_3 = (operand_1_unsigned >> 8) & 0xFF;
-				byte_4 = operand_1_unsigned & 0xFF;
+				byte_1 = (operand_1 >> 24) & 0xFF; 
+				byte_2 = (operand_1 >> 16) & 0xFF;
+				byte_3 = (operand_1 >> 8) & 0xFF;
+				byte_4 = operand_1 & 0xFF;
 				
-				alu_tmp = (byte_1 << 24) | (byte_2 << 16) | (byte_3 << 8) | byte_4;
+				alu_tmp = (byte_4 << 24) | (byte_3 << 16) | (byte_2 << 8) | byte_1;
 				
 				alu_result = alu_tmp;				
 				
 			}
-			else if(funct7 = 0b0010100 && rs2 == 0b00111) //ORC.B
+			else if(funct7 == 0b0010100) //ORC.B
 			{
 				#ifdef DEBUG_OUTPUT
 					cout << "Executing ORC.B" << endl;
@@ -1298,8 +1289,11 @@ void CPU::executeInstruction()
 				alu_tmp = (byte_4 << 24) | (byte_3 << 16) | (byte_2 << 8) | byte_1;
 				alu_result = alu_tmp;
 			}
-			else if(funct7 = 0b0110000) //RORI
+			else if((funct7 >> 2) == 0b01100) //RORI
 			{
+				#ifdef DEBUG_OUTPUT
+					cout << "Executing RORI" << endl;
+				#endif
 				shamt = imm & 0x1F;
 				alu_tmp = (operand_1_unsigned >> shamt) | (operand_1_unsigned << (32 - shamt));
 				
@@ -1355,8 +1349,9 @@ void CPU::executeInstruction()
 					#endif
 				if(operand_2_signed == 0)
 				{
-					//error zbog dijeljena sa nulom
-					cout << "Nije dozvoljeno dijeljenje nulom" << endl;
+					//Division by zero error
+					cout << "Division by zero!" << endl;
+					exit(1);
 				}
 				else
 				{
@@ -1370,8 +1365,9 @@ void CPU::executeInstruction()
 					#endif
 				if(operand_2_unsigned == 0)
 				{
-					//error zbog dijeljena sa nulom
-					cout << "Nije dozvoljeno dijeljenje nulom" << endl;
+					//Division by zero error
+					cout << "Division by zero!" << endl;
+					exit(1);
 				}
 				else
 				{
@@ -1385,8 +1381,9 @@ void CPU::executeInstruction()
 					#endif
 				if(operand_2_signed == 0)
 				{
-					//error zbog dijeljena sa nulom
-					cout << "Nije dozvoljeno dijeljenje nulom" << endl;
+					//Division by zero error
+					cout << "Division by zero!" << endl;
+					exit(1);
 				}
 				else
 				{
@@ -1400,8 +1397,9 @@ void CPU::executeInstruction()
 					#endif
 					if(operand_2_unsigned == 0)
 				{
-					//error zbog dijeljena sa nulom
-					cout << "Nije dozvoljeno dijeljenje nulom" << endl;
+					//Division by zero error
+					cout << "Division by zero!" << endl;
+					exit(1);
 				}
 				else
 				{
@@ -1411,7 +1409,16 @@ void CPU::executeInstruction()
 				break;					
 			}								
 		}
-		else if(funct7 == 0b010000)
+		else if(funct7 == 0b0000100) //ZEXT.H
+		{	
+			#ifdef DEBUG_OUTPUT
+				cout << "Executing ZEXT.H" << endl;
+			#endif
+			alu_tmp = 0b0;
+			alu_tmp |= (operand_1_unsigned >> 16);
+			alu_result = operand_1; 	
+		}
+		else if(funct7 == 0b0100000)
 		{
 			switch(funct3)
 			{
@@ -1419,21 +1426,21 @@ void CPU::executeInstruction()
 					#ifdef DEBUG_OUTPUT
 						cout << "Executing ANDN" << endl;
 					#endif
-				alu_tmp = operand_1_unsigned & ~operand_2_unsigned;
+				alu_tmp = operand_1 & ~operand_2;
 				alu_result = alu_tmp;
 				break;
 			case 0b110:  	//ORN
 					#ifdef DEBUG_OUTPUT
 						cout << "Executing ORN" << endl;
 					#endif
-				alu_tmp = operand_1_unsigned | ~operand_2_unsigned;
+				alu_tmp = operand_1 | ~operand_2;
 				alu_result = alu_tmp;
 				break;
 			case 0b100: 	//XNOR
 					#ifdef DEBUG_OUTPUT
 						cout << "Executing XNOR" << endl;
 					#endif
-				alu_tmp = ~(alu_tmp = operand_1_unsigned ^ operand_2_unsigned);
+				alu_tmp = ~(operand_1 ^ operand_2);
 				alu_result = alu_tmp;
 				break;
 			}	
@@ -1509,7 +1516,9 @@ void CPU::executeInstruction()
 			switch(funct3)
 			{
 			case 0b001:	//ROL
-				//sc_dt::sc_uint<32> shamt;
+				#ifdef DEBUG_OUTPUT
+					cout << "Executing ROL" << endl;
+				#endif
 				
 				shamt = operand_2_unsigned & 0x001F;
 				alu_tmp = (operand_1_unsigned << shamt) | (operand_1_unsigned >> (32 - shamt));
@@ -1517,7 +1526,9 @@ void CPU::executeInstruction()
 				alu_result = alu_tmp;
 				break;
 			case 0b101:	//ROR	
-				//sc_dt::sc_uint<32> shamt;
+				#ifdef DEBUG_OUTPUT
+					cout << "Executing ROR" << endl;
+				#endif
 				
 				shamt = operand_2_unsigned & 0x001F;
 				alu_tmp = (operand_1_unsigned >> shamt) | (operand_1_unsigned << (32 - shamt));
@@ -2154,7 +2165,7 @@ void CPU::print_data_mem(char print_type)
 	cout << endl;
 }
 
-void CPU::print_registers()
+void CPU::print_registers(char type)
 {
 	sc_dt::sc_int<32> temp;
 	
@@ -2163,16 +2174,29 @@ void CPU::print_registers()
 	cout 		 << "\t\t\t\t\t\t\t   REGISTER BANK   \t\t\t\t\t\t\t|" << endl;
 	cout         << "----------------------------------------------------------------";
 	cout         << "----------------------------------------------------------------|" << endl;
-	for (int i = 0; i < 32; i++)
-	{
-		if(i % 4 == 0) {
-			if(i != 0) {
-				cout << endl;
+
+	if (type == 'b') {
+		for (int i = 0; i <32; i++) {
+			if(i % 2 == 0) {
+				if(i != 0) {
+					cout << endl;
+				}
 			}
+			cout << "\treg[" << i << "] = " << registers[i] << "\t\t";
+			cout << "|  ";
 		}
-		temp = registers[i];
-		cout << "\treg[" << i << "] = " << temp << "\t\t";
-		cout << "|  ";
+	} else {
+		for (int i = 0; i < 32; i++)
+		{
+			if(i % 4 == 0) {
+				if(i != 0) {
+					cout << endl;
+				}
+			}
+			temp = registers[i];
+			cout << "\treg[" << i << "] = " << temp << "\t\t";
+			cout << "|  ";
+		}
 	}
 	cout << endl;
 	cout         << "----------------------------------------------------------------";

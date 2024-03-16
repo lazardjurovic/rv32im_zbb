@@ -94,7 +94,7 @@ public:
 	sc_dt::sc_uint<32> getPC();
 	void setPC(sc_dt::sc_uint<32> val);
 	void print_data_mem(char print_type);
-	void print_registers();
+	void print_registers(char type);
 };
 
 #endif // RV32_CPU_H
