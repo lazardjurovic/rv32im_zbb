@@ -1,7 +1,7 @@
 #include "../header/CPU.hpp"
 #include <tlm_utils/tlm_quantumkeeper.h>
 
-#define STAGE_DELAY 5 // Promeniti posle na 8
+#define STAGE_DELAY 8 // Promeniti posle na 8
 
 // Uncomment for printing contents for each pipeline phase
 // #define ID_PRINT
@@ -12,7 +12,7 @@
 // #define MEMORY_PRINT
 
 // Uncomment for printing contents of registers when writen in register file
-// #define REGISTER_PRINT
+ #define REGISTER_PRINT
 
 // Uncomment for debug output
  #define DEBUG_OUTPUT
@@ -1153,34 +1153,34 @@ void CPU::executeInstruction()
 					}
 					alu_result = alu_tmp;
 				}				
-				else if(rs2_address == 0b0100)	//SEXT.B
+				else if(rs2_address == 0b00100)	//SEXT.B
 				{
 					#ifdef DEBUG_OUTPUT
 						cout << "Executing SEXT.B" << endl;
 					#endif
-					if(operand_1_signed & 0x0080)
+					if(operand_1_unsigned & 0x0080)
 					{
-						alu_tmp = operand_1_signed | 0xFFFFFF00; 
+						alu_tmp = operand_1 | 0xFFFFFF00; 
 					}
 					else
 					{
-						alu_tmp = operand_1_signed | 0x00000000; 
+						alu_tmp = (operand_1 & 0xFF); 
 					}
 					
 					alu_result = alu_tmp;
 				}
-				else if(rs2_address == 0b0101)	//SEXT.H
+				else if(rs2_address == 0b00101)	//SEXT.H
 				{
 					#ifdef DEBUG_OUTPUT
 						cout << "Executing SEXT.H" << endl;
 					#endif
-					if(operand_1_signed & 0x8000) 
+					if(operand_1_unsigned & 0x8000) 
 					{
-						alu_tmp = operand_1_signed | 0xFFFF0000; 
+						alu_tmp = operand_1 | 0xFFFF0000; 
 					}
 					else
 					{
-						alu_tmp = operand_1_signed | 0x00000000; 
+						alu_tmp = (operand_1 & 0xFFFF); 
 					}
 					alu_result = alu_tmp;
 				}			
@@ -1422,11 +1422,12 @@ void CPU::executeInstruction()
 		{
 			switch(funct3)
 			{
-			case 0b111:  //ANDN
+			case 0b111:  	//ANDN
 					#ifdef DEBUG_OUTPUT
 						cout << "Executing ANDN" << endl;
 					#endif
-				alu_tmp = operand_1 & ~operand_2;
+
+				alu_tmp = operand_1_unsigned & (~operand_2_unsigned);
 				alu_result = alu_tmp;
 				break;
 			case 0b110:  	//ORN
@@ -1500,11 +1501,11 @@ void CPU::executeInstruction()
 					#endif
 				if(operand_1_unsigned < operand_2_unsigned)
 				{
-					alu_tmp = operand_2_unsigned;
+					alu_tmp = operand_1_unsigned;
 				}
 				else
 				{
-					alu_tmp = operand_1_unsigned;
+					alu_tmp = operand_2_unsigned;
 				}
 				
 				alu_result = alu_tmp;
@@ -1538,7 +1539,7 @@ void CPU::executeInstruction()
 				break;
 			}
 		}		       
-		else
+		else if(funct7 == 0b0000000) 
 		{
 			switch (funct3)
 			{
@@ -1638,8 +1639,8 @@ void CPU::executeInstruction()
 				cout << "Invalid funct3 field." << endl;
 				alu_result = 0x0;
 			}
-			break;
 		}
+		break;
 	case 0b0001111:		  // FENCE
 		alu_result = 0x0;
 		break;
@@ -1785,6 +1786,8 @@ void CPU::memoryAccess()
 	cout << "opcode: " << opcode << endl;
 	cout << "rs2_data: " << rs2_data << endl;
 	cout << "mem_address: " << address << endl;
+	cout << "rd_we_mem: " << rd_we_mem << endl;
+	cout << "rd_we_wb: " << rd_we_wb << endl;
 	cout << "rd_address: " << rd << "\t[time: " << sc_time_stamp() << "]" << endl;
 #endif
 
@@ -2015,7 +2018,7 @@ void CPU::writeBack()
 	}
 
 	// Control decoder signals in WRITE BACK phase needed for forwarding
-	// and write enable generating for registar bank
+	// and write enable generating for register file
 
 	switch (opcode_uint)
 	{
