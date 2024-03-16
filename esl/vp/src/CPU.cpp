@@ -1,5 +1,7 @@
 #include "../header/CPU.hpp"
 #include <tlm_utils/tlm_quantumkeeper.h>
+#include <string>
+#include <iomanip>
 
 #define STAGE_DELAY 8 // Promeniti posle na 8
 
@@ -12,10 +14,10 @@
 // #define MEMORY_PRINT
 
 // Uncomment for printing contents of registers when writen in register file
- #define REGISTER_PRINT
+// #define REGISTER_PRINT
 
 // Uncomment for debug output
- #define DEBUG_OUTPUT
+// #define DEBUG_OUTPUT
 
 // Uncomment for using virtual platform and external memory and loader
 #define VP
@@ -2171,7 +2173,8 @@ void CPU::print_data_mem(char print_type)
 void CPU::print_registers(char type)
 {
 	sc_dt::sc_int<32> temp;
-	
+	int max_length = 0;
+
 	cout << endl << "----------------------------------------------------------------";
 	cout         << "----------------------------------------------------------------|" << endl;
 	cout 		 << "\t\t\t\t\t\t\t   REGISTER BANK   \t\t\t\t\t\t\t|" << endl;
@@ -2188,6 +2191,18 @@ void CPU::print_registers(char type)
 			cout << "\treg[" << i << "] = " << registers[i] << "\t\t";
 			cout << "|  ";
 		}
+	} else if (type == 'h') {
+		for (int i = 0; i < 32; i++)
+		{
+			if(i % 4 == 0) {
+				if(i != 0) {
+					cout << endl;
+				}
+			}
+			temp = registers[i];
+			cout << "\treg[" << i << "] = " << hex << temp << "\t";
+			cout << "|  ";
+		}
 	} else {
 		for (int i = 0; i < 32; i++)
 		{
@@ -2197,10 +2212,17 @@ void CPU::print_registers(char type)
 				}
 			}
 			temp = registers[i];
-			cout << "\treg[" << i << "] = " << temp << "\t\t";
+			
+			cout << "\treg[" << i << "] = " << temp;
+			if (temp < 100000) {
+				cout << "\t\t";
+			} else {
+				cout << "\t";
+			}
 			cout << "|  ";
 		}
 	}
+
 	cout << endl;
 	cout         << "----------------------------------------------------------------";
 	cout         << "----------------------------------------------------------------|" << endl;
