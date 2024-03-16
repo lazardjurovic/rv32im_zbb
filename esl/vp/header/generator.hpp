@@ -3,13 +3,14 @@
 
 #include <systemc>
 #include <tlm>
+#include <string>
 
 class generator :
 	public sc_core::sc_module,
 	public tlm::tlm_bw_transport_if<>
 {
 public:
-	generator(sc_core::sc_module_name);
+	generator(sc_core::sc_module_name, std::string insMem, std::string dataMem);
 
 	tlm::tlm_initiator_socket<> isoc;
 
@@ -20,6 +21,8 @@ public:
 	void invalidate_direct_mem_ptr(sc_dt::uint64, sc_dt::uint64);
 
 protected:
+	std::string ins_mem;
+	std::string dat_mem;
 	void gen();
 	bool dmi_valid;
 	unsigned char* dmi_mem;

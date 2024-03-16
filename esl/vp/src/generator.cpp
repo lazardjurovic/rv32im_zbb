@@ -1,8 +1,8 @@
 #include "../header/generator.hpp"
 #include <tlm_utils/tlm_quantumkeeper.h>
 #include <fstream>
-#include <string>
 #include <cmath>
+#include <string>
 #include <bitset>
 
 using namespace sc_core;
@@ -14,15 +14,16 @@ using namespace std;
 	
 SC_HAS_PROCESS(generator);
 
-generator::generator(sc_module_name name) :
+generator::generator(sc_module_name name, string insMem, string dataMem) :
 	sc_module(name),
 	isoc("isoc"),
 	dmi_valid(false)
 {
 	SC_THREAD(gen);
 	isoc(*this);
+	dat_mem = dataMem;
+	ins_mem = insMem;
 }
-
 
 void generator::gen()
 {
@@ -41,7 +42,7 @@ void generator::gen()
 		cout << "Transfering data to instruction memory using DMI." <<endl;
 		dmi_mem = dmi.get_dmi_ptr();
 
-		ifstream instr_mem("instr_mem.txt");
+		ifstream instr_mem(ins_mem);
 
 		if(instr_mem.is_open()){
 
@@ -70,7 +71,7 @@ void generator::gen()
 		cout << "Transfering data to data memory using DMI." <<endl;
 		dmi_mem = dmi.get_dmi_ptr();
 		
-		ifstream data_mem("data_mem.txt");
+		ifstream data_mem(dat_mem);
 
 		if(data_mem.is_open()){
 

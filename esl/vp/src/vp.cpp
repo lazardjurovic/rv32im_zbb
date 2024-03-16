@@ -1,7 +1,7 @@
 #include "../header/vp.hpp"
 
-vp::vp(sc_module_name name) : sc_module(name), cpu("CPU", "instr_mem.txt", "data_mem.txt"), 
-gen("generator"), mem("memory")
+vp::vp(sc_module_name name, string insMem, string dataMem) : sc_module(name), cpu("CPU", insMem, dataMem), 
+gen("generator", insMem, dataMem), mem("memory")
 {
 
     gen.isoc(mem.tsoc); 
@@ -16,9 +16,6 @@ gen("generator"), mem("memory")
 }
 
 vp::~vp(){
-
-    mem.data_memory_dump();
-	mem.instr_memory_dump();
 
     SC_REPORT_INFO("Virtual Platform", "Destroyed.");
 
