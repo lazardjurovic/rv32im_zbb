@@ -3,7 +3,7 @@
 #include <string>
 #include <iomanip>
 
-#define STAGE_DELAY 8 // Promeniti posle na 8
+#define STAGE_DELAY 8
 
 // Uncomment for printing contents for each pipeline phase
 // #define ID_PRINT
@@ -17,12 +17,12 @@
 // #define REGISTER_PRINT
 
 // Uncomment for debug output
-// #define DEBUG_OUTPUT
+#define DEBUG_OUTPUT
 
 // Uncomment for using virtual platform and external memory and loader
 #define VP
 
-CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n)
+CPU::CPU(sc_module_name n, string insMem, string datMem, int debug_option) : sc_module(n)
 {
 	cout << "Creating a CPU object named " << name() << "." << endl;
 
@@ -31,6 +31,24 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n)
 	instr_amt = 0;
 	data_amt = 0;
 
+	if (debug_option == 1)
+	{
+		reg_print = 1;
+	}
+	else if (debug_option == 2)
+	{
+		reg_print = 2;
+	}
+	else if (debug_option == 3)
+	{
+		reg_print = 3;
+	}
+	else
+	{
+		reg_print = 0;
+	}
+
+	#ifndef VP
 	for (int i = 0; i < INSTRMEM_SIZE; i++)
 	{
 		instr_mem[i] = 0x0;
@@ -69,7 +87,7 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n)
 	}
 	else
 	{
-		cout << "Unable to open file" << insMem << "." << endl;
+		cout << "Unable to open file " << insMem << "." << endl;
 	}
 	cout << "DONE" << endl;
 
@@ -101,9 +119,10 @@ CPU::CPU(sc_module_name n, string insMem, string datMem) : sc_module(n)
 	}
 	else
 	{
-		cout << "Unable to open file" << datMem << "." << endl;
+		cout << "Unable to open file " << datMem << "." << endl;
 	}
 	cout << "DONE" << endl;
+#endif
 
 #ifdef MEMORY_PRINT
 	cout << "=========== INSTRUCTION MEMORY ===========" << endl;
@@ -290,6 +309,21 @@ void CPU::instructionDecode()
 			#ifdef REGISTER_PRINT
 				print_registers('b');
 			#endif
+
+			// For external access to debug
+			if (reg_print == 1)
+			{
+				print_registers('b');
+			}
+			else if (reg_print == 2)
+			{
+				print_registers('h');
+			}
+			else if (reg_print == 3)
+			{
+				print_registers('d');
+			}
+
 			registers[wb_address] = wb_data;
 		}
 		else
@@ -2078,6 +2112,7 @@ void CPU::timeHandle()
 	wait(SC_ZERO_TIME);
 	IF_s.notify();
 	wait(IF_r);
+	cout << endl << "========== STARTING CPU ==========" << endl << endl;
 	wait(STAGE_DELAY, SC_NS);
 
 	// Second cycle through pipeline
@@ -2177,7 +2212,7 @@ void CPU::print_registers(char type)
 
 	cout << endl << "----------------------------------------------------------------";
 	cout         << "----------------------------------------------------------------|" << endl;
-	cout 		 << "\t\t\t\t\t\t\t   REGISTER BANK   \t\t\t\t\t\t\t|" << endl;
+	cout 		 << "\t\t\t\t\t\t\t   REGISTER FILE   \t\t\t\t\t\t\t|" << endl;
 	cout         << "----------------------------------------------------------------";
 	cout         << "----------------------------------------------------------------|" << endl;
 
@@ -2200,7 +2235,8 @@ void CPU::print_registers(char type)
 				}
 			}
 			temp = registers[i];
-			cout << "\treg[" << i << "] = " << hex << temp << "\t";
+			cout << dec << "\treg[" << i << "] = ";
+			cout << hex << temp << "\t";
 			cout << "|  ";
 		}
 	} else {

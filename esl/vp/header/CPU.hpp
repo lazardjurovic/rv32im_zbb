@@ -77,13 +77,16 @@ public:
 	int instr_amt;
 	int data_amt;
 
+	// External debug
+	int reg_print;
+
 	// Events for method timeHandle() to simulate time in a pipeline architecture
 	sc_event IF_s, ID_s, EX_s, MEM_s, WB_s;
 	sc_event IF_r, ID_r, EX_r, MEM_r, WB_r;
 
 	SC_HAS_PROCESS(CPU);
 
-	CPU(sc_module_name n, string insMem, string datMem);
+	CPU(sc_module_name n, string insMem, string datMem, int debug_option);
 
 	void instructionFetch();
 	void instructionDecode();
