@@ -23,7 +23,7 @@ all: program.elf text.dump data.dump
 	rm data.dump
 	rm program.o
 	rm program.elf
-	g++ $(CPP_FILES) -lsystemc -lpthread -o main
+	g++ $(CPP_FILES) -lsystemc -lpthread -o rv32imb
 
 test: bitmanip_test.c
 	$(CC) $(TESTFLAGS) -o bitmanip_test.elf bitmanip_test.c
@@ -32,7 +32,7 @@ test: bitmanip_test.c
 	$(DUMP) -d bitmanip_test.elf
 
 cpp: $(CPP_FILES)
-	g++ $(CPP_FILES) -lsystemc -lpthread -o main
+	g++ $(CPP_FILES) -lsystemc -lpthread -o rv32imb
 
 program.elf: program.o
 	$(CC) $(LDFLAGS) program.o -o program.elf
@@ -54,5 +54,5 @@ clean:
 	rm bitmanip_test.elf
 	rm data_mem.txt
 	rm instr_mem.txt
-	rm main
+	rm rv32imb
 
