@@ -1,6 +1,6 @@
 #include "../header/vp.hpp"
 
-vp::vp(sc_module_name name, string insMem, string dataMem) : sc_module(name), cpu("CPU", insMem, dataMem), 
+vp::vp(sc_module_name name, string insMem, string dataMem, int option) : sc_module(name), cpu("CPU", insMem, dataMem, option), 
 gen("generator", insMem, dataMem), mem("memory")
 {
 

@@ -81,7 +81,7 @@ void memory::data_memory_dump(){
 		
 		if (ram_word != 0x0)
 		{
-			cout << "@Address " << i << ":\t" << (int)ram_word << endl;
+			cout << dec << "@Address " << i << ":\t" << (int)ram_word << endl;
 		}
 	}
 	cout << endl;
@@ -104,7 +104,7 @@ void memory::instr_memory_dump(){
 		
 		if (ram_word != 0x0)
 		{
-			cout << "@Address " << i << ":\t" << ram_word << endl;
+			cout << dec << "@Address " << i << ":\t" << ram_word << endl;
 		}
 	}
 	cout << endl;

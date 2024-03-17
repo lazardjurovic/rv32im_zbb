@@ -39,7 +39,7 @@ void generator::gen()
 	if (dmi_valid)
 	{
 		address = 0;
-		cout << "Transfering data to instruction memory using DMI." <<endl;
+		cout << "TRANSFERING DATA TO INSTRUCTION MEMORY USING DMI" << endl << endl;
 		dmi_mem = dmi.get_dmi_ptr();
 
 		ifstream instr_mem(ins_mem);
@@ -68,7 +68,7 @@ void generator::gen()
 		// Doing same for data memory
 
 		address = 0;
-		cout << "Transfering data to data memory using DMI." <<endl;
+		cout << endl << "TRANSFERING DATA TO DATA MEMORY USING DMI" << endl << endl;
 		dmi_mem = dmi.get_dmi_ptr();
 		
 		ifstream data_mem(dat_mem);
