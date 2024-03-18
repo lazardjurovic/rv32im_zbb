@@ -126,7 +126,7 @@ int sc_main(int argc, char *argv[])
 	cout << endl
 		 << "====================STARTING SIMULATION====================" << endl
 		 << endl;
-	sc_start(5000, SC_NS);
+	sc_start(10000, SC_NS);
 	cout << endl
 		 << "====================FINISHED SIMULATION====================" << endl;
 

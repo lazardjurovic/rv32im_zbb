@@ -668,7 +668,7 @@ void CPU::instructionDecode()
 			if (operand_1_unsigned == operand_2_unsigned)
 			{
 			#ifdef DEBUG_OUTPUT
-				cout << "successfull to address" << jmp_tmp << " " << sc_time_stamp() << endl;
+				cout << "successfull to address " << jmp_tmp << " time: " << sc_time_stamp() << endl;
 			#endif
 				pc_next_sel = 1;
 			}
@@ -688,7 +688,7 @@ void CPU::instructionDecode()
 			if (operand_1_unsigned != operand_2_unsigned)
 			{
 			#ifdef DEBUG_OUTPUT
-				cout << "successfull to address" << jmp_tmp << " " << sc_time_stamp() << endl;
+				cout << "successfull to address " << jmp_tmp << " time: " << sc_time_stamp() << endl;
 			#endif
 				pc_next_sel = 1;
 			}
@@ -709,7 +709,7 @@ void CPU::instructionDecode()
 			if (operand_1_signed < operand_2_signed)
 			{
 			#ifdef DEBUG_OUTPUT
-				cout << "successfull to address" << jmp_tmp << " " << sc_time_stamp() << endl;
+				cout << "successfull to address " << jmp_tmp << " time: " << sc_time_stamp() << endl;
 			#endif
 				pc_next_sel = 1;
 			}
@@ -730,7 +730,7 @@ void CPU::instructionDecode()
 			if (operand_1_signed >= operand_2_signed)
 			{
 			#ifdef DEBUG_OUTPUT
-				cout << "successfull to address" << jmp_tmp << " " << sc_time_stamp() << endl;
+				cout << "successfull to address " << jmp_tmp << " time: " << sc_time_stamp() << endl;
 			#endif
 				pc_next_sel = 1;
 			}
@@ -751,7 +751,7 @@ void CPU::instructionDecode()
 			if (operand_1_unsigned < operand_2_unsigned)
 			{
 			#ifdef DEBUG_OUTPUT
-				cout << "successfull to address" << jmp_tmp << " " << sc_time_stamp() << endl;
+				cout << "successfull to address " << jmp_tmp << " time: " << sc_time_stamp() << endl;
 			#endif
 				pc_next_sel = 1;
 			}
@@ -772,7 +772,7 @@ void CPU::instructionDecode()
 			if (operand_1_unsigned > operand_2_unsigned)
 			{
 			#ifdef DEBUG_OUTPUT
-				cout << "successfull to address" << jmp_tmp << " " << sc_time_stamp() << endl;
+				cout << "successfull to address " << jmp_tmp << " " << sc_time_stamp() << endl;
 			#endif
 				pc_next_sel = 1;
 			}
@@ -1056,14 +1056,14 @@ void CPU::executeInstruction()
 		alu_tmp = imm_tmp + operand_1_signed;
 		alu_result = alu_tmp;
 		#ifdef DEBUG_OUTPUT
-			cout << "Executing LOAD: address " << alu_tmp << " " << sc_time_stamp() << endl;
+			cout << "Executing LOAD: address " << alu_tmp << " time: " << sc_time_stamp() << endl;
 		#endif
 		break;
 	case 0b0100011: // STORE
 		alu_tmp = imm_tmp + operand_1_signed;
 		alu_result = alu_tmp;
 		#ifdef DEBUG_OUTPUT
-			cout << "Executing STORE: address " << alu_tmp << " " << sc_time_stamp() << endl;
+			cout << "Executing STORE: address " << alu_tmp << " time: " << sc_time_stamp() << endl;
 		#endif
 		break;
 	case 0b0010011: // IMM
