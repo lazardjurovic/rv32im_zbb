@@ -1245,15 +1245,15 @@ void CPU::executeInstruction()
 				#ifdef DEBUG_OUTPUT
 					cout << "Executing SRAI" << endl;
 				#endif
-				sc_dt::sc_uint<1> carry;
+				sc_dt::sc_uint<1> sign_bit;
 				sc_dt::sc_bv<32> tmp;
 
 				shamt = imm & 0x1F;
 
 				for (int i = 0; i < shamt; i++)
 				{
-					carry = operand_1 & 0x1;
-					tmp = (carry << 31);
+					sign_bit = (operand_1 >> 31) & 0x1;
+					tmp = (sign_bit << 31);
 					alu_result = tmp | (operand_1 >> 1);
 				}
 			}
@@ -1648,13 +1648,13 @@ void CPU::executeInstruction()
 					#ifdef DEBUG_OUTPUT
 						cout << "Executing SRA" << endl;
 					#endif
-					sc_dt::sc_uint<1> carry;
+					sc_dt::sc_uint<1> sign_bit;
 					sc_dt::sc_bv<32> tmp;
 
 					for (int i = 0; i < operand_2_unsigned; i++)
 					{
-						carry = operand_1 & 0x1;
-						tmp = (carry << 31);
+						sign_bit = (operand_1 >> 31) & 0x1;
+						tmp = (sign_bit << 31);
 						alu_result = tmp | (operand_1 >> 1);
 					}
 				}
@@ -1677,7 +1677,7 @@ void CPU::executeInstruction()
 			}
 		}
 		break;
-	case 0b0001111:		  // FENCE
+	case 0b0001111:	// FENCE
 		alu_result = 0x0;
 		break;
 	case 0b1110011:

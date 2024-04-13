@@ -22,6 +22,14 @@ int sc_main(int argc, char *argv[])
 	int exit_error = 0;
 
 	// User interface from command line
+	if (argc == 1)
+	{
+		cout << endl;
+		cout << "\tFor help options type: " << argv[0] << " --help" << endl
+			 << endl;
+		exit(2);
+	}
+
 	for (int i = 1; i < argc; i++)
 	{
 		for (int j = 0; j < 14; j++)
