@@ -1415,6 +1415,14 @@ void CPU::executeInstruction()
 					#ifdef DEBUG_OUTPUT
 						cout << "Executing REM" << endl;
 					#endif
+
+				int op1_tmp, op2_tmp;
+				bool invert_res;
+				
+				op1_tmp = operand_1_signed;
+				op2_tmp = operand_2_signed;
+				invert_res = 0;
+
 				if(operand_2_signed == 0)
 				{
 					//Division by zero error
@@ -1423,7 +1431,22 @@ void CPU::executeInstruction()
 				}
 				else
 				{
-					alu_tmp = operand_1_signed % operand_2_signed;
+					if (op1_tmp < 0) {
+						invert_res = ~invert_res;
+						op1_tmp = op1_tmp * -1;
+					}
+
+					if (op2_tmp < 0) {
+						invert_res = ~invert_res;
+						op2_tmp = op2_tmp * -1;
+					}
+					
+					alu_tmp = op1_tmp % op2_tmp;
+
+					if (invert_res) {
+						alu_tmp = alu_tmp * -1;
+					}
+					
 					alu_result = alu_tmp;
 				}
 				break;
@@ -2250,7 +2273,7 @@ void CPU::print_registers(char type)
 			temp = registers[i];
 			
 			cout << "\treg[" << i << "] = " << temp;
-			if (temp < 100000) {
+			if (temp < 1000000) {
 				cout << "\t\t";
 			} else {
 				cout << "\t";

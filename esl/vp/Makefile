@@ -31,8 +31,15 @@ test: bitmanip_test.c
 	$(DUMP) -j .data -s bitmanip_test.elf > bit_data.dump
 	$(DUMP) -d bitmanip_test.elf
 
+test_mul: mul_test.c
+	$(CC) $(TESTFLAGS) -o mul_test.elf mul_test.c
+	$(DUMP) -d mul_test.elf > mul_text.dump
+	$(DUMP) -j .data -s mul_test.elf > mul_data.dump
+	$(DUMP) -d mul_test.elf
+
+
 cpp: $(CPP_FILES)
-	g++ $(CPP_FILES) -lsystemc -lpthread -o rv32imb
+	g++ $(CPP_FILES) -g -lsystemc -lpthread -o rv32imb
 
 program.elf: program.o
 	$(CC) $(LDFLAGS) program.o -o program.elf
@@ -49,9 +56,8 @@ data.dump: program.elf
 	$(DUMP) -j .data -s program.elf > data.dump
 
 clean:
-	rm bit_data.dump
-	rm bit_text.dump
-	rm bitmanip_test.elf
+	rm *.dump
+	rm *.elf
 	rm data_mem.txt
 	rm instr_mem.txt
 	rm rv32imb
