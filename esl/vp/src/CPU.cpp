@@ -49,12 +49,12 @@ CPU::CPU(sc_module_name n, string insMem, string datMem, int debug_option) : sc_
 	}
 
 	#ifndef VP
-	for (int i = 0; i < INSTRMEM_SIZE; i++)
+	for (int i = 0; i < MEM_SIZE; i++)
 	{
 		instr_mem[i] = 0x0;
 	}
 
-	for (int i = 0; i < DATAMEM_SIZE; i++)
+	for (int i = 0; i < MEM_SIZE; i++)
 	{
 		data_mem[i] = 0x0;
 	}
@@ -205,6 +205,7 @@ void CPU::instructionFetch()
 	sc_dt::sc_bv<32> instr;
 	sc_dt::sc_bv<64> if_id_tmp;
 
+	// Program counter
 	if (pc_en == 1)
 	{
 		if (pc_next_sel == 0)
@@ -215,6 +216,13 @@ void CPU::instructionFetch()
 		{
 			pc = jump_address;
 		}
+	}
+
+	if (pc >= MEM_SIZE) {
+		cout << "Program counter jumped out of memory space!" << endl;
+		cout << "\t-> Check JAL and JALR instructions" << endl;
+		cout << "\t-> Register X1 (ra - return address) is used by JALR" << endl;
+		exit(2);
 	}
 
 	#ifndef VP

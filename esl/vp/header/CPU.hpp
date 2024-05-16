@@ -9,8 +9,7 @@
 #include <vector>
 #include <tlm>
 
-#define INSTRMEM_SIZE 50000
-#define DATAMEM_SIZE 50000
+#define MEM_SIZE 66000
 
 using namespace std;
 using namespace sc_core;
@@ -70,8 +69,8 @@ public:
 	void invalidate_direct_mem_ptr(sc_dt::uint64, sc_dt::uint64);
 
 	// Dynamically allocated arrays for instruction and data memory
-	sc_dt::sc_bv<8> *instr_mem = new sc_dt::sc_bv<8>[INSTRMEM_SIZE];
-	sc_dt::sc_bv<8> *data_mem = new sc_dt::sc_bv<8>[DATAMEM_SIZE];
+	sc_dt::sc_bv<8> *instr_mem = new sc_dt::sc_bv<8>[MEM_SIZE];
+	sc_dt::sc_bv<8> *data_mem = new sc_dt::sc_bv<8>[MEM_SIZE];
 
 	// Number of 8 bit locations in memory taken after initial loading
 	int instr_amt;
