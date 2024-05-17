@@ -235,12 +235,12 @@ module alu #(
         endcase
     end
 
-    clz_encoder #(.DATA_WIDTH(DATA_WIDTH)) clz_0 (
+    clz_encoder #(.WIDTH_IN(DATA_WIDTH)) clz_0 (
                         .in(a_i),
                         .out(clz_o)
                     );
 
-    clz_encoder #(.DATA_WIDTH(DATA_WIDTH)) ctz_0 (
+    clz_encoder #(.WIDTH_IN(DATA_WIDTH)) ctz_0 (
                         .in(reversed_input),
                         .out(ctz_o)
                     );
