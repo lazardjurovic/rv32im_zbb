@@ -16,6 +16,7 @@ module control_path(
     output wire pc_next_sel_o,
     output reg[3:0] data_mem_we_o,
     output wire pc_operand_o,
+    output wire [1:0]alu_inverters_o,
 
     // signals utilized in forwarding
     output wire[1:0] alu_forward_a_o,
@@ -123,7 +124,8 @@ module control_path(
         .funct3_i(id_ex_reg[14:12]),
         .funct7_i(id_ex_reg[21:15]),
         .rs_2_i(id_ex_reg[36:32]),
-        .alu_op_o(alu_op_o)
+        .alu_op_o(alu_op_o),
+        .alu_inverters(alu_inverters_o)
     );
 
     always @(posedge clk) 
