@@ -64,7 +64,7 @@ module control_path(
 
     always @(posedge clk) 
     begin
-        if(rst_n == 1'b0) begin
+        if(rst_n == 1'b1) begin
             id_ex_reg = 36'b000000000000000000000000000000000000;
         end
         else begin
@@ -130,7 +130,7 @@ module control_path(
 
     always @(posedge clk) 
     begin
-        if(rst_n == 1'b0) begin
+        if(rst_n == 1'b1) begin
             ex_mem_reg = 9'b000000000;
         end
         else begin
@@ -148,7 +148,7 @@ module control_path(
 
     always @(posedge clk) 
     begin
-        if(rst_n == 1'b0) begin
+        if(rst_n == 1'b1) begin
             mem_wb_reg = 7'b0000000;
         end
         else begin
