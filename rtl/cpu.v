@@ -42,7 +42,7 @@ module cpu(
     // Inputs from top module
     
     .clk(clk),
-    .rst_n(reset),
+    .rst(reset),
     
     // Inputs from controlpath
     .mem_to_reg_i(mem_to_reg_s),
