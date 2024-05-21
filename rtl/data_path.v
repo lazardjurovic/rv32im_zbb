@@ -56,7 +56,7 @@ module data_path(
     // Combinational logic in IF phase
     always @(jump_address, pc_inc_o, pc_next_sel_i)
     begin
-        if(pc_next_sel_i == 0) begin
+        if(pc_next_sel_i == 1'b0) begin
             mux_sel_o = pc_inc_o;
         end
         else begin
@@ -72,7 +72,7 @@ module data_path(
         if (rst == 1'b1) begin
             pc_o = 32'b0;
         end
-        else if (rst == 1'b1) begin
+        else begin
             if(pc_en_i == 1'b1) begin
                 pc_o = mux_sel_o;
             end
