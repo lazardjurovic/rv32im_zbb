@@ -51,7 +51,7 @@ module data_path(
     reg [31:0] mux_sel_o;
     reg [31:0] jump_address;
     wire [31:0] pc_inc_o;
-    reg [31:0] instr_mem_o;
+    wire [31:0] instr_mem_o;
     
     // Combinational logic in IF phase
     always @(jump_address, pc_inc_o, pc_next_sel_i)
@@ -80,8 +80,10 @@ module data_path(
     end
     
     assign instr_mem_address_o = pc_o;
+    assign instr_mem_o = instr_mem_read_i;
     
-   always @(posedge clk or posedge rst) begin
+   /*
+   always @(posedge clk) begin
         if (rst) begin
             instr_mem_o <= 32'b0;
         end else if (if_id_flush_i) begin
@@ -90,6 +92,7 @@ module data_path(
             instr_mem_o <= instr_mem_read_i;
         end
     end
+    */
     
     // IF-ID Register
     always @(posedge clk) 
@@ -118,6 +121,7 @@ module data_path(
     wire [31:0] rs1_data_s;
     wire [31:0] rs2_data_s;
     wire [31:0] imm_o;
+    wire [31:0] imm_tmp;
     
     reg_file register_file (
         .clk(clk),
@@ -133,8 +137,10 @@ module data_path(
     
     immediate imm(
         .instruction_i(instr_mem_o),
-        .immediate_extended_o(imm_o)
+        .immediate_extended_o(imm_tmp)
     );
+    
+    assign imm_o = if_id_flush_i ? 32'b0 : imm_tmp;
     
     reg [31:0] mux_a_res;
     reg [31:0] mux_b_res;
