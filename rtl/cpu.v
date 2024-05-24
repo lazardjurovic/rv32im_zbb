@@ -8,10 +8,12 @@ module cpu(
         input wire reset,
         output wire overflow_o,
         output wire zero_o,
+        output wire if_id_flush_o,
         
         // CPU interface towards memories in top module
        
         output wire [31:0] instr_mem_address_o,
+        output wire if_id_en_o,
         input wire [31:0] instr_mem_read_i,
         
         output wire [3:0] data_mem_we_o,
@@ -37,6 +39,8 @@ module cpu(
     wire pc_en_s;
     wire if_id_en_s;
     
+    assign if_id_en_o = if_id_en_s;
+    assign if_id_flush_o = if_id_flush_s;
     
     data_path d_path( 
     // Inputs from top module
