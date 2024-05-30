@@ -14,8 +14,8 @@ module alu #(
     wire [DATA_WIDTH-1:0] reversed_input;
 
     wire [DATA_WIDTH-1:0] cpop_o;
-    wire [DATA_WIDTH-1:0] clz_o;
-    wire [DATA_WIDTH-1:0] ctz_o;
+    wire [5:0] clz_o;
+    wire [5:0] ctz_o;
 
     reg [7:0] byte0;
     reg [7:0] byte1;
@@ -198,11 +198,11 @@ module alu #(
                 end
             5'b11011:   //ctz
                 begin
-                    res_o = ctz_o;
+                    res_o = {26'b0,ctz_o};
                 end
             5'b11100:   //clz
                 begin
-                   res_o = clz_o;
+                   res_o = {26'b0,clz_o};
                 end
             5'b11101:   //sext.b
                 begin
