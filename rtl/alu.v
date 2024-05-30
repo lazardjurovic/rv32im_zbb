@@ -125,11 +125,11 @@ module alu #(
                 end
             5'b10010:   //rol
                 begin
-                    res_o = (a_i << b_i) | (a_i >> ((DATA_WIDTH - b_i) & (DATA_WIDTH - 1))); //PROVERI I OPTIMIZUJ
+                    res_o = (a_i << b_i[4:0]) | (a_i >> ((DATA_WIDTH - b_i[4:0]))); // & (DATA_WIDTH - 1))); //PROVERI I OPTIMIZUJ
                 end
             5'b10011:   //ror
                 begin
-                    res_o = (a_i >> b_i) | (a_i << ((DATA_WIDTH - b_i) & (DATA_WIDTH - 1))); //PROVERI I OPTIMIZUJ
+                    res_o = (a_i >> b_i[4:0]) | (a_i << ((DATA_WIDTH - b_i[4:0]))); // & (DATA_WIDTH - 1))); //PROVERI I OPTIMIZUJ
                 end
             
             /*
