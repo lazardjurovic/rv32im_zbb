@@ -4,6 +4,7 @@ module alu #(
     input [DATA_WIDTH-1:0] a_i,
     input [DATA_WIDTH-1:0] b_i,
     input [4:0] op_i,
+    input clk,
     output reg[DATA_WIDTH-1:0] res_o,
     output zero_o,
     output of_o
@@ -25,6 +26,8 @@ module alu #(
     reg [15:0] LSH;
 
     reg [2*DATA_WIDTH-1:0] tmp2Xlen;
+    
+    wire [63:0] mul_res_s;
 
     assign a_signed = a_i;
     assign b_signed = b_i;
@@ -90,22 +93,23 @@ module alu #(
                 end
             5'b01010:   //mul
                 begin
-                    res_o = a_signed * b_signed;
+                    res_o = mul_res_s[31:0];
                 end
+                
+                //In this implementation sign is taken care of so 
+                // basically all hig muls are same 
+                
             5'b01011:   //mulh
                 begin
-                    tmp2Xlen = a_signed * b_signed;
-                    res_o = tmp2Xlen[63:32];
+                    res_o = mul_res_s[63:32];
                 end
-            5'b01100:   //mulhsu
+            5'b01100:   //mulhsu I
                 begin
-                    tmp2Xlen = a_signed * b_i;
-                    res_o = tmp2Xlen[63:32];
+                    res_o = mul_res_s[63:32];
                 end
             5'b01101:   //mulhu
                 begin
-                    tmp2Xlen = a_i * b_i;
-                    res_o = tmp2Xlen[63:32];
+                    res_o = mul_res_s[63:32];
                 end
             5'b01110:   //div
                 begin
@@ -249,4 +253,12 @@ module alu #(
                         .in(a_i),
                         .out(cpop_o)
                     );
+                    
+     signed_mul smul(
+        .a_i(a_signed),
+        .b_i(b_signed),
+        .res_o(mul_res_s),
+        .clk(clk)
+     );
+     
 endmodule
