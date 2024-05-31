@@ -7,11 +7,13 @@
 
 #include "../header/vp.hpp"
 
+#define CMD_NUM 15
+
 using namespace std;
 using namespace sc_core;
 using namespace tlm;
 
-const char *command_list[14] = {"-rb", "-rd", "-rh", "-d", "-i", "-l", "-D", "-I", "--debug", "-h", "--help", "bin", "dec", "hex"};
+const char *command_list[CMD_NUM] = {"-rb", "-rd", "-rh", "-d", "-i", "-l", "-D", "-I", "--debug", "-h", "--help", "bin", "dec", "hex", "--dump"};
 
 int sc_main(int argc, char *argv[])
 {
@@ -32,7 +34,7 @@ int sc_main(int argc, char *argv[])
 
 	for (int i = 1; i < argc; i++)
 	{
-		for (int j = 0; j < 14; j++)
+		for (int j = 0; j < CMD_NUM; j++)
 		{
 			if (!strcmp(argv[i], command_list[j]))
 			{
@@ -126,6 +128,10 @@ int sc_main(int argc, char *argv[])
 			simulation_length = stoi(argv[i + 1]);
 			i++;
 		}
+		else if (!strcmp(argv[i], "--dump")) 
+		{
+			i++;
+		}
 
 		exit_error = 0;
 	}
@@ -178,6 +184,18 @@ int sc_main(int argc, char *argv[])
 		else if (!strcmp(argv[i], "-d"))
 		{
 			virtual_platform.data_mem.data_memory_dump();
+		}
+		else if (!strcmp(argv[i], "--dump"))
+		{
+			if (argv[i + 1] == NULL) {
+				cout << endl << "Error: Expected file name after --dump" << endl;
+				cout << "\tFor example: " << argv[0] << " --dump dump.txt" << endl << endl;
+				exit(3);
+			}
+
+			string fileName = argv[i + 1];
+
+			virtual_platform.print_result(fileName);
 		}
 	}
 

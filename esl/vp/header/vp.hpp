@@ -2,10 +2,12 @@
 #include "../header/generator.hpp"
 #include "../header/memory.hpp"
 #include <string>
-
+#include <iostream>
+#include <fstream>
 #include <systemc>
 
 using namespace sc_core;
+using namespace std;
 
 class vp : public sc_module{
 
@@ -17,4 +19,6 @@ class vp : public sc_module{
         memory data_mem;
         memory ins_mem;
         generator gen;
+
+        void print_result(string fileName);
 };

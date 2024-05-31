@@ -18,7 +18,6 @@ using namespace tlm;
 class CPU : public sc_module, public tlm::tlm_bw_transport_if<>
 {
 protected:
-	sc_dt::sc_bv<32> registers[32]; // Register bank
 	sc_dt::sc_uint<32> pc;			// Program counter
 
 	sc_signal<bool> pc_next_sel;			  // Selection signal that chooses PC
@@ -74,6 +73,9 @@ public:
 	// Dynamically allocated arrays for instruction and data memory
 	sc_dt::sc_bv<8> *instr_mem = new sc_dt::sc_bv<8>[MEM_SIZE];
 	sc_dt::sc_bv<8> *data_mem = new sc_dt::sc_bv<8>[MEM_SIZE];
+	
+	// Register file
+	sc_dt::sc_bv<32> registers[32];
 
 	// Number of 8 bit locations in memory taken after initial loading
 	int instr_amt;

@@ -32,7 +32,7 @@ public:
 	void data_memory_dump();
 	void instr_memory_dump();
 
-protected:
+	// BRAM memory
 	static const int RAM_SIZE = 33000;
 	unsigned char ram[RAM_SIZE];
 };
