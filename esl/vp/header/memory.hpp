@@ -5,8 +5,6 @@
 #include <tlm>
 #include <iostream>
 
-#define DATA_BASE_ADDR 32768
-
 using namespace sc_core;
 using namespace sc_dt;
 
@@ -35,7 +33,7 @@ public:
 	void instr_memory_dump();
 
 protected:
-	static const int RAM_SIZE = 66000;
+	static const int RAM_SIZE = 33000;
 	unsigned char ram[RAM_SIZE];
 };
 

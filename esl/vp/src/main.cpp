@@ -173,11 +173,11 @@ int sc_main(int argc, char *argv[])
 		}
 		else if (!strcmp(argv[i], "-i"))
 		{
-			virtual_platform.mem.instr_memory_dump();
+			virtual_platform.ins_mem.instr_memory_dump();
 		}
 		else if (!strcmp(argv[i], "-d"))
 		{
-			virtual_platform.mem.data_memory_dump();
+			virtual_platform.data_mem.data_memory_dump();
 		}
 	}
 

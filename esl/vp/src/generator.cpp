@@ -34,8 +34,8 @@ void generator::gen()
 	int address;
 	sc_dt::sc_bv<32> bit_line;
 
-	// Using DMI to transfer to memory
-	tlm_dmi ins_dmi, data_dmi;
+	// Using DMI to transfer to instruction memory
+	tlm_dmi ins_dmi;
 	ins_dmi_valid = ins_socket->get_direct_mem_ptr(pl, ins_dmi);
 	if (ins_dmi_valid)
 	{
@@ -65,9 +65,13 @@ void generator::gen()
 		}else{
 			cout << "Unable to open instr_mem.txt! "<< strerror(errno) << endl;
 		}
-
-		// Doing same for data memory
-
+	}
+	
+	// Using DMI to transfer to data memory
+	tlm_dmi data_dmi;
+	data_dmi_valid = data_socket->get_direct_mem_ptr(pl, data_dmi);
+	if (data_dmi_valid)
+	{
 		address = 0;
 		cout << endl << "TRANSFERING DATA TO DATA MEMORY USING DMI" << endl << endl;
 		data_dmi_mem = data_dmi.get_dmi_ptr();

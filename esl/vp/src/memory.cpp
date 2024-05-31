@@ -69,7 +69,7 @@ void memory::data_memory_dump(){
 		 << "============== DATA MEMORY DUMP ==============" << endl;
 	
 	sc_dt::sc_int<32> ram_word;
-	for (int i = DATA_BASE_ADDR; i < RAM_SIZE; i += 4)
+	for (int i = 0; i < RAM_SIZE; i += 4)
 	{
 		ram_word = ram[i];
 		ram_word <<= 8;
@@ -92,7 +92,7 @@ void memory::instr_memory_dump(){
 		 << "============== INSTRUCTION MEMORY DUMP ==============" << endl;
 	
 	sc_dt::sc_bv<32> ram_word;
-	for (int i = 0; i < DATA_BASE_ADDR; i += 4)
+	for (int i = 0; i < RAM_SIZE; i += 4)
 	{
 		ram_word = ram[i];
 		ram_word <<= 8;
