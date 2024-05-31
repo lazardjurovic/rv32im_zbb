@@ -14,6 +14,7 @@ class vp : public sc_module{
         ~vp();
 
         CPU cpu;
-        memory mem;
+        memory data_mem;
+        memory ins_mem;
         generator gen;
 };
