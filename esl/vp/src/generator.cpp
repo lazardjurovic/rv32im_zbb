@@ -9,18 +9,19 @@ using namespace sc_core;
 using namespace sc_dt;
 using namespace tlm;
 using namespace std;
-
-#define DATA_MEM_BASE 0x2000*4
 	
 SC_HAS_PROCESS(generator);
 
 generator::generator(sc_module_name name, string insMem, string dataMem) :
 	sc_module(name),
-	isoc("isoc"),
-	dmi_valid(false)
+	ins_socket("ins_socket"),
+	data_socket("data_socket"),
+	ins_dmi_valid(false),
+	data_dmi_valid(false)
 {
 	SC_THREAD(gen);
-	isoc(*this);
+	ins_socket(*this);
+    data_socket(*this);
 	dat_mem = dataMem;
 	ins_mem = insMem;
 }
@@ -33,14 +34,14 @@ void generator::gen()
 	int address;
 	sc_dt::sc_bv<32> bit_line;
 
-	// Using DMI to transfer to memory
-	tlm_dmi dmi;
-	dmi_valid = isoc->get_direct_mem_ptr(pl, dmi);
-	if (dmi_valid)
+	// Using DMI to transfer to instruction memory
+	tlm_dmi ins_dmi;
+	ins_dmi_valid = ins_socket->get_direct_mem_ptr(pl, ins_dmi);
+	if (ins_dmi_valid)
 	{
 		address = 0;
 		cout << "TRANSFERING DATA TO INSTRUCTION MEMORY USING DMI" << endl << endl;
-		dmi_mem = dmi.get_dmi_ptr();
+		ins_dmi_mem = ins_dmi.get_dmi_ptr();
 
 		ifstream instr_mem(ins_mem);
 
@@ -52,10 +53,10 @@ void generator::gen()
 				getline(instr_mem, line);
 				bitset<32> bits(line);
 				bit_line = bits.to_ulong();
-				dmi_mem[address + 3] = (unsigned char)(bit_line & 0xFF).to_uint();
-				dmi_mem[address + 2] = (unsigned char)((bit_line >> 8) & 0xFF).to_uint();
-				dmi_mem[address + 1] = (unsigned char)((bit_line >> 16) & 0xFF).to_uint();
-				dmi_mem[address] = (unsigned char)((bit_line >> 24) & 0xFF).to_uint();
+				ins_dmi_mem[address + 3] = (unsigned char)(bit_line & 0xFF).to_uint();
+				ins_dmi_mem[address + 2] = (unsigned char)((bit_line >> 8) & 0xFF).to_uint();
+				ins_dmi_mem[address + 1] = (unsigned char)((bit_line >> 16) & 0xFF).to_uint();
+				ins_dmi_mem[address] = (unsigned char)((bit_line >> 24) & 0xFF).to_uint();
 				cout << "Writing " << bit_line << " to address " << address << " in instruction memory"<< endl;
 				address += 4;
 
@@ -64,12 +65,16 @@ void generator::gen()
 		}else{
 			cout << "Unable to open instr_mem.txt! "<< strerror(errno) << endl;
 		}
-
-		// Doing same for data memory
-
+	}
+	
+	// Using DMI to transfer to data memory
+	tlm_dmi data_dmi;
+	data_dmi_valid = data_socket->get_direct_mem_ptr(pl, data_dmi);
+	if (data_dmi_valid)
+	{
 		address = 0;
 		cout << endl << "TRANSFERING DATA TO DATA MEMORY USING DMI" << endl << endl;
-		dmi_mem = dmi.get_dmi_ptr();
+		data_dmi_mem = data_dmi.get_dmi_ptr();
 		
 		ifstream data_mem(dat_mem);
 
@@ -81,13 +86,11 @@ void generator::gen()
 				getline(data_mem, line);
 				bitset<32> bits(line);
 				bit_line = bits.to_ulong();
-				if(address >= DATA_MEM_BASE){
-					dmi_mem[address + 3] = (unsigned char)(bit_line & 0xFF).to_uint();
-					dmi_mem[address + 2] = (unsigned char)((bit_line >> 8) & 0xFF).to_uint();
-					dmi_mem[address + 1] = (unsigned char)((bit_line >> 16) & 0xFF).to_uint();
-					dmi_mem[address] = (unsigned char)((bit_line >> 24) & 0xFF).to_uint();
-					cout << "Writing " << bit_line << " to address " << address<< " in data memory" << endl;
-				}
+				data_dmi_mem[address + 3] = (unsigned char)(bit_line & 0xFF).to_uint();
+				data_dmi_mem[address + 2] = (unsigned char)((bit_line >> 8) & 0xFF).to_uint();
+				data_dmi_mem[address + 1] = (unsigned char)((bit_line >> 16) & 0xFF).to_uint();
+				data_dmi_mem[address] = (unsigned char)((bit_line >> 24) & 0xFF).to_uint();
+				cout << "Writing " << bit_line << " to address " << address<< " in data memory" << endl;
 				address += 4;
 
 			}
@@ -113,5 +116,6 @@ tlm_sync_enum generator::nb_transport_bw(pl_t& pl, phase_t& phase, sc_time& offs
 
 void generator::invalidate_direct_mem_ptr(uint64 start, uint64 end)
 {
-	dmi_valid = false;
+	ins_dmi_valid = false;
+	data_dmi_valid = false;
 }

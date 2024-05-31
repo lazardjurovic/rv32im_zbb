@@ -26,7 +26,8 @@ CPU::CPU(sc_module_name n, string insMem, string datMem, int debug_option) : sc_
 {
 	cout << "Creating a CPU object named " << name() << "." << endl;
 
-	mem_socket(*this);	
+	ins_socket(*this);
+	data_socket(*this);	
 	
 	instr_amt = 0;
 	data_amt = 0;
@@ -235,18 +236,18 @@ void CPU::instructionFetch()
 		instr = instr | instr_mem[pc + 3];
 	#else
 		tlm_generic_payload pl;
-		tlm_dmi dmi;
-		dmi_valid = mem_socket->get_direct_mem_ptr(pl, dmi);
+		tlm_dmi ins_dmi;
+		ins_dmi_valid = ins_socket->get_direct_mem_ptr(pl, ins_dmi);
 
-		if(dmi_valid){
-			dmi_mem = dmi.get_dmi_ptr();
-			instr = dmi_mem[pc];
+		if(ins_dmi_valid){
+			ins_dmi_mem = ins_dmi.get_dmi_ptr();
+			instr = ins_dmi_mem[pc];
 			instr <<= 8;
-			instr = instr | dmi_mem[pc + 1];
+			instr = instr | ins_dmi_mem[pc + 1];
 			instr <<= 8;
-			instr = instr | dmi_mem[pc + 2];
+			instr = instr | ins_dmi_mem[pc + 2];
 			instr <<= 8;
-			instr = instr | dmi_mem[pc + 3];
+			instr = instr | ins_dmi_mem[pc + 3];
 		}
 	#endif
 
@@ -1859,8 +1860,8 @@ void CPU::memoryAccess()
 #endif
 
 	tlm_generic_payload pl;
-	tlm_dmi dmi;
-	dmi_valid = mem_socket->get_direct_mem_ptr(pl, dmi);
+	tlm_dmi data_dmi;
+	data_dmi_valid = data_socket->get_direct_mem_ptr(pl, data_dmi);
 	
 	if (opcode == 0b0000011)
 	{
@@ -1869,10 +1870,10 @@ void CPU::memoryAccess()
 		#ifndef VP
 			mem_out = data_mem[address + 3];
 		#else
-			if(dmi_valid)
+			if(data_dmi_valid)
 			{
-				dmi_mem = dmi.get_dmi_ptr();
-				mem_out = dmi_mem[address + 3];
+				data_dmi_mem = data_dmi.get_dmi_ptr();
+				mem_out = data_dmi_mem[address + 3];
 			}
 		#endif
 		
@@ -1892,12 +1893,12 @@ void CPU::memoryAccess()
 			mem_out <<= 8;
 			mem_out = mem_out | data_mem[address + 3];
 		#else
-			if(dmi_valid)
+			if(data_dmi_valid)
 			{
-				dmi_mem = dmi.get_dmi_ptr();
-				mem_out = dmi_mem[address + 2];
+				data_dmi_mem = data_dmi.get_dmi_ptr();
+				mem_out = data_dmi_mem[address + 2];
 				mem_out <<= 8;
-				mem_out = dmi_mem[address + 3];
+				mem_out = data_dmi_mem[address + 3];
 			}
 		#endif
 		
@@ -1923,16 +1924,16 @@ void CPU::memoryAccess()
 			mem_out = mem_out | data_mem[address + 3];
 			mem_out_tmp = mem_out;
 		#else
-			if(dmi_valid)
+			if(data_dmi_valid)
 			{
-				dmi_mem = dmi.get_dmi_ptr();
-				mem_out = dmi_mem[address];
+				data_dmi_mem = data_dmi.get_dmi_ptr();
+				mem_out = data_dmi_mem[address];
 				mem_out <<= 8;
-				mem_out = dmi_mem[address + 1];
+				mem_out = data_dmi_mem[address + 1];
 				mem_out <<= 8;
-				mem_out = dmi_mem[address + 2];
+				mem_out = data_dmi_mem[address + 2];
 				mem_out <<= 8;
-				mem_out = dmi_mem[address + 3];
+				mem_out = data_dmi_mem[address + 3];
 				mem_out_tmp = mem_out;
 			}
 		#endif
@@ -1946,10 +1947,10 @@ void CPU::memoryAccess()
 		#ifndef VP
 			mem_out = data_mem[address + 3];
 		#else
-			if(dmi_valid)
+			if(data_dmi_valid)
 			{
-				dmi_mem = dmi.get_dmi_ptr();
-				mem_out = dmi_mem[address + 3];
+				data_dmi_mem = data_dmi.get_dmi_ptr();
+				mem_out = data_dmi_mem[address + 3];
 			}
 		#endif
 		}
@@ -1960,12 +1961,12 @@ void CPU::memoryAccess()
 			mem_out <<= 8;
 			mem_out = mem_out | data_mem[address + 3];
 		#else
-			if(dmi_valid)
+			if(data_dmi_valid)
 			{
-				dmi_mem = dmi.get_dmi_ptr();
-				mem_out = dmi_mem[address + 2];
+				data_dmi_mem = data_dmi.get_dmi_ptr();
+				mem_out = data_dmi_mem[address + 2];
 				mem_out <<= 8;
-				mem_out = dmi_mem[address + 3];
+				mem_out = data_dmi_mem[address + 3];
 			}
 		#endif
 		}
@@ -1982,10 +1983,10 @@ void CPU::memoryAccess()
 		#ifndef VP
 			data_mem[address + 3] = (rs2 & 0xFF);
 		#else
-			if(dmi_valid)
+			if(data_dmi_valid)
 			{
-				dmi_mem = dmi.get_dmi_ptr();
-				dmi_mem[address + 3] = (rs2_data & 0xFF);
+				data_dmi_mem = data_dmi.get_dmi_ptr();
+				data_dmi_mem[address + 3] = (rs2_data & 0xFF);
 			}
 		#endif
 			// cout << address << ":\t" << data_mem[address] << data_mem[address+1] << data_mem[address+2] << data_mem[address+3] << " " << sc_time_stamp() << endl;
@@ -1996,11 +1997,11 @@ void CPU::memoryAccess()
 			data_mem[address + 3] = (rs2 & 0xFF);
 			data_mem[address + 2] = (rs2 >> 8) & 0xFF;
 		#else
-			if(dmi_valid)
+			if(data_dmi_valid)
 			{
-				dmi_mem = dmi.get_dmi_ptr();
-				dmi_mem[address + 3] = (rs2_data & 0xFF);
-				dmi_mem[address + 2] = (rs2_data >> 8) & 0xFF;
+				data_dmi_mem = data_dmi.get_dmi_ptr();
+				data_dmi_mem[address + 3] = (rs2_data & 0xFF);
+				data_dmi_mem[address + 2] = (rs2_data >> 8) & 0xFF;
 			}
 		#endif
 			// cout << address << ":\t" << data_mem[address] << data_mem[address+1] << data_mem[address+2] << data_mem[address+3] << " " << sc_time_stamp() << endl;
@@ -2013,13 +2014,13 @@ void CPU::memoryAccess()
 			data_mem[address + 1] = (rs2 >> 16) & 0xFF;
 			data_mem[address] = (rs2 >> 24) & 0xFF;
 		#else
-			if(dmi_valid)
+			if(data_dmi_valid)
 			{
-				dmi_mem = dmi.get_dmi_ptr();
-				dmi_mem[address + 3] = (rs2_data & 0xFF);
-				dmi_mem[address + 2] = (rs2_data >> 8) & 0xFF;
-				dmi_mem[address + 1] = (rs2_data >> 16) & 0xFF;
-				dmi_mem[address] = (rs2_data >> 24) & 0xFF;
+				data_dmi_mem = data_dmi.get_dmi_ptr();
+				data_dmi_mem[address + 3] = (rs2_data & 0xFF);
+				data_dmi_mem[address + 2] = (rs2_data >> 8) & 0xFF;
+				data_dmi_mem[address + 1] = (rs2_data >> 16) & 0xFF;
+				data_dmi_mem[address] = (rs2_data >> 24) & 0xFF;
 			}
 		#endif
 			// cout << address << ":\t" << data_mem[address] << data_mem[address+1] << data_mem[address+2] << data_mem[address+3] << " " << sc_time_stamp() << endl;
@@ -2312,6 +2313,7 @@ tlm_sync_enum CPU::nb_transport_bw(pl_t& pl, phase_t& phase, sc_time& offset)
 
 void CPU::invalidate_direct_mem_ptr(sc_dt::uint64 start, sc_dt::uint64 end)
 {
-	dmi_valid = false;
+	ins_dmi_valid = false;
+	data_dmi_valid = false;
 }
 

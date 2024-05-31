@@ -54,12 +54,15 @@ protected:
 	sc_signal<sc_dt::sc_bv<76>> mem_wb;
 
 	// used for DMI access through TLM
-	bool dmi_valid;
-	unsigned char* dmi_mem;
+	bool ins_dmi_valid;
+	bool data_dmi_valid;
+	unsigned char* ins_dmi_mem;
+	unsigned char* data_dmi_mem;
 
 public:
 
-	tlm::tlm_initiator_socket<> mem_socket;
+	tlm::tlm_initiator_socket<> data_socket;
+	tlm::tlm_initiator_socket<> ins_socket;
 
 	// TLM interface
 	typedef tlm::tlm_base_protocol_types::tlm_payload_type pl_t;
