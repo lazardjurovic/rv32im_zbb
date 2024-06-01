@@ -111,6 +111,9 @@ module alu #(
                 begin
                     res_o = mul_res_s[63:32];
                 end
+           
+           /*     Division not supported
+             
             5'b01110:   //div
                 begin
                     res_o = a_signed / b_signed;
@@ -127,6 +130,9 @@ module alu #(
                 begin
                     res_o = a_signed / b_signed;        //NIJE URADJENO
                 end
+                
+            */    
+                
             5'b10010:   //rol
                 begin
                     res_o = (a_i << b_i[4:0]) | (a_i >> ((DATA_WIDTH - b_i[4:0]))); // & (DATA_WIDTH - 1))); //PROVERI I OPTIMIZUJ
