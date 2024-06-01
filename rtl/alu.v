@@ -239,6 +239,8 @@ module alu #(
         endcase
     end
 
+    assign zero_o = res_o == 32'b0 ? 1'b1 : 1'b0;
+
     clz_encoder #(.WIDTH_IN(DATA_WIDTH)) clz_0 (
                         .in(a_i),
                         .out(clz_o)
