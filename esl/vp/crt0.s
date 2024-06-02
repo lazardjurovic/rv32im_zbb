@@ -1,18 +1,21 @@
 .section .text
 .global _start
-.global _exit
-.global main
 
+# Define memory regions
+.equ PROGRAM_START, 0x00000000
+.equ DATA_START, 0x00008000
+
+# Entry point
 _start:
-    # Set up the stack pointer
-    la sp, _stack_top
+    # Set up the stack pointer (assuming the stack grows downwards)
+    la sp, _stack_start
 
     # Copy initialized data from ROM to RAM
     la t0, _etext
     la t1, _data
     la t2, _edata
 copy_data:
-    beq t1, t2, copy_bss
+    beq t1, t2, clear_bss
     lw t3, 0(t0)
     sw t3, 0(t1)
     addi t0, t0, 4
@@ -20,7 +23,7 @@ copy_data:
     j copy_data
 
 # Zero initialize the .bss section
-copy_bss:
+clear_bss:
     la t1, _bss
     la t2, _ebss
 zero_bss:
@@ -29,25 +32,16 @@ zero_bss:
     addi t1, t1, 4
     j zero_bss
 
+# Call main function
 call_main:
-    # Call the main function
-    call main
+    jal ra, main
 
-    # Move the return value of main into a0 (the argument register for _exit)
-    mv a0, a0  # RISC-V ABI convention: a0 holds the return value
-
-    # Jump to the _exit function
-    j _exit
-
-_exit:
-    # ECALL to signal program completion
+    # Set exit code (0) and invoke ecall to signal program completion
+    li a0, 0
     ecall
 
-    # Infinite loop to prevent returning
-1:  j 1b
-
-# Define the stack top symbol (set appropriately for your memory layout)
+# Define the stack start (assuming the stack grows downwards)
 .section .bss
 .align 4
-_stack_top:
+_stack_start:
     .space 4096  # Adjust stack size as needed
