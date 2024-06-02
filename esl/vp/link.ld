@@ -8,12 +8,13 @@ MEMORY
 
 SECTIONS
 {
+    . = ORIGIN(IMEM);
+
     .text : {
+        _start = .;
         *(.text)
         *(.text*)
-        KEEP(*(.init))
-        KEEP(*(.fini))
-        KEEP(*(.rodata*))
+        _etext = .;  /* End of code section */
     } > IMEM
 
     .rodata : {
@@ -21,16 +22,20 @@ SECTIONS
         *(.rodata*)
     } > IMEM
 
+    . = ORIGIN(DMEM);
+
     .data : {
+        _data = .;
         *(.data)
         *(.data*)
-        KEEP(*(.sdata))
+        _edata = .;  /* End of initialized data */
     } > DMEM
 
     .bss : {
+        _bss = .;
         *(.bss)
         *(.bss*)
-        KEEP(*(.sbss))
+        _ebss = .;  /* End of uninitialized data */
     } > DMEM
 
     /DISCARD/ : {
