@@ -18,7 +18,7 @@ C_SRC = program.c crt0.s
 # -O2 -> this option increases both compilation time and the performance of the generated code
 
 #extract all binary codes
-all: program.elf text.dump data.dump
+all: text.dump data.dump program.elf 
 	python3 parser.py
 	rm text.dump
 	rm data.dump
@@ -27,14 +27,14 @@ all: program.elf text.dump data.dump
 	rm program.elf
 	g++ $(CPP_FILES) -lsystemc -lpthread -o rv32imb
 
-test: bitmanip_test.c
-	$(CC) $(TESTFLAGS) -o bitmanip_test.elf bitmanip_test.c
+test: tests/bitmanip_test.c crt0.o
+	$(CC) $(TESTFLAGS) $(LDFLAGS) -o bitmanip_test.elf tests/mul_test.c crt0.s
 	$(DUMP) -d bitmanip_test.elf > bit_text.dump
 	$(DUMP) -j .data -s bitmanip_test.elf > bit_data.dump
 	$(DUMP) -d bitmanip_test.elf
 
-test_mul: mul_test.c
-	$(CC) $(TESTFLAGS) -o mul_test.elf mul_test.c
+test_mul: tests/mul_test.c
+	$(CC) $(TESTFLAGS) $(LDFLAGS) -o mul_test.elf tests/mul_test.c crt0.s
 	$(DUMP) -d mul_test.elf > mul_text.dump
 	$(DUMP) -j .data -s mul_test.elf > mul_data.dump
 	$(DUMP) -d mul_test.elf
@@ -46,8 +46,8 @@ cpp: $(CPP_FILES)
 program.elf: program.o crt0.o
 	$(CC) $(LDFLAGS) program.o crt0.o -o program.elf
 
-program.o: program.c
-	$(CC) $(CFLAGS) -c program.c -o program.o
+program.o: tests/selection_sort.c
+	$(CC) $(CFLAGS) -c tests/selection_sort.c -o program.o
 
 crt0.o: crt0.s
 	$(CC) $(CFLAGS) -c crt0.s -o crt0.o
