@@ -130,6 +130,12 @@ int sc_main(int argc, char *argv[])
 		}
 		else if (!strcmp(argv[i], "--dump")) 
 		{
+			if (argv[i + 1] == NULL) {
+				cout << endl << "Error: Expected file name after --dump" << endl;
+				cout << "\tFor example: " << argv[0] << " --dump dump.txt" << endl << endl;
+				exit(3);
+			}
+			
 			i++;
 		}
 
@@ -201,12 +207,6 @@ int sc_main(int argc, char *argv[])
 		}
 		else if (!strcmp(argv[i], "--dump"))
 		{
-			if (argv[i + 1] == NULL) {
-				cout << endl << "Error: Expected file name after --dump" << endl;
-				cout << "\tFor example: " << argv[0] << " --dump dump.txt" << endl << endl;
-				exit(3);
-			}
-
 			string fileName = argv[i + 1];
 
 			virtual_platform.print_result(fileName);
