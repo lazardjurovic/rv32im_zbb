@@ -46,6 +46,9 @@ protected:
 	sc_signal<bool> store_in_ex;
 	sc_signal<bool> store_in_mem;
 
+	// Signal for simulation stop
+	bool ecall_fetched;
+
 	// Pipeline registers
 	sc_signal<sc_dt::sc_bv<64>> if_id;
 	sc_signal<sc_dt::sc_bv<160>> id_ex;
@@ -102,6 +105,7 @@ public:
 	void setPC(sc_dt::sc_uint<32> val);
 	void print_data_mem(char print_type);
 	void print_registers(char type);
+	bool ecall_flag();
 };
 
 #endif // RV32_CPU_H

@@ -161,6 +161,20 @@ int sc_main(int argc, char *argv[])
 	sc_start(simulation_length, SC_NS);
 	cout << endl
 		 << "====================FINISHED SIMULATION====================" << endl;
+	
+	if (virtual_platform.cpu.ecall_flag() == 0) 
+	{
+		cout << R"(
+*********************************************
+*                  WARNING                  *
+*                                           *
+* The ECALL on the end of program was never *
+* reached, try to specify longer simulation *
+* length [-l option], ignore if you don't   *
+* have ECALL as the last instruction.       *
+*********************************************
+			)" << endl;
+	}	
 
 	// Prints and debug from command line
 	for (int i = 1; i < argc; i++)

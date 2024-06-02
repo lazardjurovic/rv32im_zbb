@@ -189,6 +189,7 @@ CPU::CPU(sc_module_name n, string insMem, string datMem, int debug_option) : sc_
 	rd_we_ex = 0;
 	pc_en = 1;
 	if_id_en = 1;
+	ecall_fetched = 0;
 
 	for (int i = 0; i < 32; i++)
 	{
@@ -593,6 +594,8 @@ void CPU::instructionDecode()
 	else if (opcode == 0b1110011)
 	{ // ECALL, EBREAK -> I type
 		imm = (if_id_tmp >> 52) & 0xFFF;
+		ecall_fetched = 1;
+		pc_en = 0;
 	}
 	else
 	{
@@ -2075,6 +2078,13 @@ void CPU::writeBack()
 
 	opcode_uint = opcode;
 
+	// Check if ECALL is in WB to stop the simulation
+	if (opcode == 0b1110011)
+	{ // ECALL, EBREAK
+		if (ecall_fetched)
+			sc_stop();
+	}
+
 	// Signals for FENCE implementation
 	if (opcode == 0b0000011)
 	{
@@ -2296,14 +2306,12 @@ void CPU::print_registers(char type)
 	cout         << "----------------------------------------------------------------|" << endl;
 }
 
-sc_dt::sc_uint<32> CPU::getPC()
+bool CPU::ecall_flag()
 {
-	return pc;
-}
-
-void CPU::setPC(sc_dt::sc_uint<32> val)
-{
-	pc = val;
+	if (ecall_fetched)
+		return 1;
+	else
+		return 0;
 }
 
 tlm_sync_enum CPU::nb_transport_bw(pl_t& pl, phase_t& phase, sc_time& offset)
