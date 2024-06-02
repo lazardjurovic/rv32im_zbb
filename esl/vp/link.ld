@@ -1,20 +1,39 @@
+ENTRY(_start)
+
 MEMORY
 {
-    program_memory (rwx) : ORIGIN = 0x00000000, LENGTH = 8192
-    data_memory (rwx) : ORIGIN = 0x00000000, LENGTH = 8192
+    IMEM (rx) : ORIGIN = 0x80000000, LENGTH = 64K
+    DMEM (rw) : ORIGIN = 0x90000000, LENGTH = 64K
 }
 
 SECTIONS
 {
-    .text : ALIGN(4)
-    {
+    .text : {
         *(.text)
-    } > program_memory
+        *(.text*)
+        KEEP(*(.init))
+        KEEP(*(.fini))
+        KEEP(*(.rodata*))
+    } > IMEM
 
-    .data : ALIGN(4)
-    {
-        *(.data)
+    .rodata : {
         *(.rodata)
-        *(.sdata)
-    } > data_memory
+        *(.rodata*)
+    } > IMEM
+
+    .data : {
+        *(.data)
+        *(.data*)
+        KEEP(*(.sdata))
+    } > DMEM
+
+    .bss : {
+        *(.bss)
+        *(.bss*)
+        KEEP(*(.sbss))
+    } > DMEM
+
+    /DISCARD/ : {
+        *(.note.GNU-stack)
+    }
 }

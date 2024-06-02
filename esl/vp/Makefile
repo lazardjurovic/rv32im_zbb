@@ -28,7 +28,7 @@ all: text.dump data.dump program.elf
 	g++ $(CPP_FILES) -lsystemc -lpthread -o rv32imb
 
 test: tests/bitmanip_test.c crt0.o
-	$(CC) $(TESTFLAGS) $(LDFLAGS) -o bitmanip_test.elf tests/mul_test.c crt0.s
+	$(CC) $(TESTFLAGS) $(LDFLAGS) -o bitmanip_test.elf tests/bitmanip_test.c crt0.s
 	$(DUMP) -d bitmanip_test.elf > bit_text.dump
 	$(DUMP) -j .data -s bitmanip_test.elf > bit_data.dump
 	$(DUMP) -d bitmanip_test.elf
