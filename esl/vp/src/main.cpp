@@ -79,9 +79,10 @@ int sc_main(int argc, char *argv[])
 			cout << "\tFor example: " << argv[0] << " -l 10000 -rb -d -i" << endl;
 			cout << "Options:" << endl;
 			cout << "\t-h, --help\t\t\tShow help options" << endl;
-			cout << "\t-D [FILE]\t\t\tSpecify textual file to read data memory from [DEFAULT: -D data_mem.txt]" << endl;
-			cout << "\t-I [FILE]\t\t\tSpecify textual file to read instruction memory from [DEFAULT: -I instr_mem.txt]" << endl;
+			cout << "\t-D [file_name]\t\t\tSpecify textual file to read data memory from [DEFAULT: -D data_mem.txt]" << endl;
+			cout << "\t-I [file_name]\t\t\tSpecify textual file to read instruction memory from [DEFAULT: -I instr_mem.txt]" << endl;
 			cout << "\t--debug <bin/hex/dec>\t\tPrint register file each write in run-time along with instructions" << endl;
+			cout << "\t--dump [file_name]\t\tDump registers and data memory to a file after simulation" << endl;
 			cout << "\t-l <int>\t\t\tSpecify simulation legth in ns (default is 10000 ns) [OPTIONAL]" << endl;
 			cout << "\t-rb\t\t\t\tPrint register file in binary format after simulation" << endl;
 			cout << "\t-rd\t\t\t\tPrint register file in decimal format after simulation" << endl;
