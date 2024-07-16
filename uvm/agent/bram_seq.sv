@@ -22,11 +22,11 @@ class bram_seq extends uvm_sequence#(bram_seq_item);
         // treci korak priprema
         // po potrebi moguce prosiriti sa npr. inline ogranicenjima
         //assert (bram_it.randomize());
-        // cetvrti korak − nish
+        // cetvrti korak − finish
         finish_item(bram_it);
 
     // calls to uvm_do or uvm_do with macro
-    // or start / nish item
+    // or start / finish item
     // ...
     endtask : body
 
