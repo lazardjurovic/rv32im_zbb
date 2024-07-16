@@ -15,6 +15,27 @@ launch_runs impl_1 -jobs 6
 
 report_timing_summary -delay_type min_max -report_unconstrained -check_timing_verbose -max_paths 10 -input_pins -routable_nets -name timing_1 -file timing_report.txt
 
+
+create_project pakovanje ./projects/packing -part xc7z010clg400-1
+set_property board_part digilentinc.com:zybo-z7-10:part0:1.2 [current_project]
+set_property simulator_language Verilog [current_project]
+add_files -norecurse src/alu_decoder.v src/alu.v src/bram.v src/branch_module.v src/clz_module.v src/control_decoder.v src/control_path.v src/cpop_module.v src/cpu.v src/data_path.v src/forwarding_unit.v src/hazard_unit.v src/immediate.v src/register_file.v src/signed_mul.v src/top.v src/unsigned_mul.v
+update_compile_order -fileset sources_1
+update_compile_order -fileset sources_1
+add_files -norecurse constraints.xdc
+open_project ./projects/packing/packing.xpr
+update_compile_order -fileset sources_1
+current_project pakovanje
+update_compile_order -fileset sources_1
+update_compile_order -fileset sources_1
+update_compile_order -fileset sources_1
+create_peripheral user.org user risc_v_cpu 1.0 -dir /home/lazar/Desktop/projekat_pakovanje/ip_repo
+add_peripheral_interface S00_AXI -interface_mode slave -axi_type lite [ipx::find_open_core user.org:user:risc_v_cpu:1.0]
+generate_peripheral -driver -bfm_example_design -debug_hw_example_design -force [ipx::find_open_core user.org:user:risc_v_cpu:1.0]
+write_peripheral [ipx::find_open_core user.org:user:risc_v_cpu:1.0]
+set_property  ip_repo_paths  /home/lazar/Desktop/projekat_pakovanje/ip_repo/risc_v_cpu_1_0 [current_project]
+update_ip_catalog -rebuild
+
 ipx::merge_project_changes files [ipx::current_core]
 ipx::merge_project_changes hdl_parameters [ipx::current_core]
 ipx::add_bus_interface instr_mem_init_bram [ipx::current_core]
