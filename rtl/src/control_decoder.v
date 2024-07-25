@@ -166,7 +166,7 @@ module control_decoder(
                 rs1_in_use_o = 1'b0;
                 rs2_in_use_o = 1'b0;
                 pc_operand_o  = 1'b0;
-                stop_flag_o = 1'b0;
+                stop_flag_o = 1'b1;     // If the instruction is not known the stop flag is raised
             end
         endcase
     end
