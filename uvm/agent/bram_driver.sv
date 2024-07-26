@@ -21,16 +21,13 @@ class bram_driver extends uvm_driver#(bram_seq_item);
         end
     endtask : main_phase
 
-        task drive_tr();
-        // do actual driving here
+    task drive_tr();
+    
         vif.bram_din = req.din;
-        vif.bram_dout = req.dout;
         vif.bram_addr = req.addr;
         vif.bram_en = 1'b1;
-        vif.bram_reset = 1'b0;
         vif.bram_we = req.we;
-
-
+        req.dout = vif.bram_dout;
 
     endtask : drive_tr
 

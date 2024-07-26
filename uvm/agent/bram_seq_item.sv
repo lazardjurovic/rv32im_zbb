@@ -6,10 +6,10 @@ class bram_seq_item extends uvm_sequence_item;
     parameter ADDR_WIDTH = 15;
     parameter DATA_WIDTH = 32;
 
-   rand logic [ADDR_WIDTH - 1 : 0] addr;
-   rand logic [DATA_WIDTH - 1 : 0] din;
-   rand logic [DATA_WIDTH - 1 : 0] dout;
-   rand logic [3:0]  we;
+   logic [ADDR_WIDTH - 1 : 0] addr;
+   logic [DATA_WIDTH - 1 : 0] din;
+   logic [DATA_WIDTH - 1 : 0] dout;
+   logic [3:0]  we;
 
    
    `uvm_object_utils_begin(bram_seq_item)
