@@ -69,7 +69,7 @@ module top(
     
  bram_module #(
     .RAM_PERFORMANCE("LOW_LATENCY"), // Select "HIGH_PERFORMANCE" or "LOW_LATENCY" 
-    .INIT_FILE("/home/lazar/risc_test/instr.txt")    // Specify name/location of RAM initialization file if using one (leave blank if not)
+    .INIT_FILE("")    // Specify name/location of RAM initialization file if using one (leave blank if not)
   ) instruction_memory (
     .addra(instr_mem_address_s),   // Port A address bus, width determined from RAM_DEPTH
     .addrb(instr_mem_init_addr),   // Port B address bus, width determined from RAM_DEPTH
