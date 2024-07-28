@@ -1,15 +1,10 @@
-class bram_seq extends uvm_sequence#(bram_seq_item);
+class bram_transaction extends bram_base_seq;
 
-    `uvm_object_utils(bram_seq)
-    `uvm_declare_p_sequencer(bram_sequencer)
+    `uvm_object_utils(bram_transaction)
 
-    function new(string name = "bram_seq");
+    function new(string name = "bram_transaction");
         super.new(name);
     endfunction
-
-    virtual task pre_body();
-    // ...
-    endtask : pre_body
 
     // transaction generating logic in body
     virtual task body();
@@ -49,10 +44,7 @@ class bram_seq extends uvm_sequence#(bram_seq_item);
 
         // Close the file
         $fclose(file);
+
     endtask : body
 
-    virtual task post_body();
-    // ...
-    endtask : post_body
-
-endclass : bram_seq
+endclass : bram_transaction
