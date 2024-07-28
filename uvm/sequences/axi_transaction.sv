@@ -1,10 +1,10 @@
-class axi_seq extends uvm_sequence #(axi_seq_item);
+class axi_transaction extends uvm_sequence #(axi_seq_item);
 
-    `uvm_object_utils(axi_seq)
+    `uvm_object_utils(axi_transaction)
     `uvm_declare_p_sequencer(axi_sequencer)
 
     // Constructor
-    function new(string name = "axi_seq");
+    function new(string name = "axi_transaction");
         super.new(name);
     endfunction
 
