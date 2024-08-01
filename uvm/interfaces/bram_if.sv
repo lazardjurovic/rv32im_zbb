@@ -11,7 +11,7 @@ interface bram_if (input clk, input logic rst);
    logic [ADDR_WIDTH - 1 : 0]  bram_addr;
    logic                       bram_en;
    logic                       bram_reset;
-   loigc [3 : 0]               bram_we;
+   logic [3 : 0]               bram_we;
   
 endinterface : bram_if
 

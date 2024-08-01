@@ -12,6 +12,7 @@ interface axi_lite_if (
     logic [AXI_ADDR_WIDTH-1:0] AWADDR;
     logic        AWVALID;
     logic        AWREADY;
+    logic [2 : 0] AWPROT;
 
     // Write Data Channel
     logic [AXI_DATA_WIDTH-1:0] WDATA;
@@ -28,6 +29,7 @@ interface axi_lite_if (
     logic [AXI_ADDR_WIDTH-1:0] ARADDR;
     logic        ARVALID;
     logic        ARREADY;
+    logic [2 : 0] ARPROT;
 
     // Read Data Channel
     logic [AXI_DATA_WIDTH-1:0] RDATA;
