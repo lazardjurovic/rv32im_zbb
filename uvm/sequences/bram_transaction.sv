@@ -6,13 +6,14 @@ class bram_transaction extends bram_base_seq;
         super.new(name);
     endfunction
 
-    // transaction generating logic in body
+    // Transaction generating logic in body
     virtual task body();
 
         bram_seq_item bram_it;
         int file;
         string line;
-        int addr, din, we;
+        int din;
+        int addr = 0;
 
         // Open the file for reading
         file = $fopen("../../esl/vp/instr_mem.txt", "r");
@@ -25,13 +26,13 @@ class bram_transaction extends bram_base_seq;
             // Read a line from the file
             line = $fgets(file);
             
-            // Parse the line (assuming a specific format, e.g., "addr din we")
-            if ($sscanf(line, "%x %x %x", addr, din, we) == 3) begin
+            // Parse the line
+            if ($sscanf(line, "%x", din) == 1) begin
                 // Create and configure the sequence item
                 bram_it = bram_seq_item::type_id::create("bram_it");
                 bram_it.addr = addr;
                 bram_it.din = din;
-                bram_it.we = we;
+                bram_it.we = 4'b1111;
 
                 // Start and finish the transaction
                 start_item(bram_it);
@@ -40,6 +41,8 @@ class bram_transaction extends bram_base_seq;
             else begin
                 `uvm_warning("PARSE_ERROR", {"Unable to parse line: ", line})
             end
+
+            addr++;
         end
 
         // Close the file
