@@ -1,6 +1,7 @@
 import uvm_pkg::*;
 `include "uvm_macros.svh"
-`include "axi_agent_pkg.sv"
+
+import cpu_verif_pkg::*;
 
 class cpu_scoreboard extends uvm_scoreboard;
 

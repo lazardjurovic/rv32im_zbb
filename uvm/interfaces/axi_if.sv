@@ -5,8 +5,8 @@ interface axi_lite_if (
     input  logic clk,
     input  logic reset_n
 );
-    parameter integer AXI_DATA_WIDTH = 32,
-    parameter integer AXI_ADDR_WIDTH = 4
+    parameter integer AXI_DATA_WIDTH = 32;
+    parameter integer AXI_ADDR_WIDTH = 4;
 
     // Write Address Channel
     logic [AXI_ADDR_WIDTH-1:0] AWADDR;

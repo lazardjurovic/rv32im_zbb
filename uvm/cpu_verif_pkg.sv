@@ -8,6 +8,9 @@
 
         import axi_agent_pkg::*;
         import bram_agent_pkg::*;
+        
+        `include "axi_if.sv"
+        `include "bram_if.sv"
 
     endpackage : cpu_verif_pkg
 

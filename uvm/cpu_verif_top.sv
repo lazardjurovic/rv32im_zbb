@@ -1,7 +1,8 @@
 import uvm_pkg::*;     // import the UVM library
 `include "uvm_macros.svh" // Include the UVM macros
-`include "bram_agent_pkg.sv"
-`include "axi_agent_pkg.sv"
+
+//import cpu_verif_pkg::*;
+`include "cpu_verif_pkg.sv"
 
 module cpu_verif_top;
 
@@ -9,19 +10,19 @@ module cpu_verif_top;
 
         bram_if instr_bram_vif(clk,reset);
         bram_if data_bram_vif(clk,reset);
-        axi_if axi_lite_vif(clk,reset);
+        axi_lite_if axi_lite_vif(clk,reset);
 
         risc_v_cpu_v1_0 DUT(
                 .instr_mem_init_addr(instr_bram_vif.bram_addr),
                 .instr_mem_init_data_in(instr_bram_vif.bram_din),
                 .instr_mem_init_data_out(instr_bram_vif.bram_dout),
-                .instr_mem_init_enable(instr_bram_vif.bram_ena),
+                .instr_mem_init_enable(instr_bram_vif.bram_en),
                 .instr_mem_init_we(instr_bram_vif.bram_we),
 
                 .data_mem_init_addr(data_bram_vif.bram_addr),
                 .data_mem_init_data_in(data_bram_vif.bram_din),
                 .data_mem_init_data_out(data_bram_vif.bram_dout),
-                .data_mem_init_enable(data_bram_vif.bram_ena),
+                .data_mem_init_enable(data_bram_vif.bram_en),
                 .data_mem_init_we(data_bram_vif.bram_we),
 
                 .s00_axi_aclk(clk),

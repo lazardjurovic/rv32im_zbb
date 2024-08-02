@@ -3,8 +3,8 @@
 
 class axi_seq_item extends uvm_sequence_item;
 
-   parameter integer AXI_DATA_WIDTH = 32,
-   parameter integer AXI_ADDR_WIDTH = 4
+   parameter integer AXI_DATA_WIDTH = 32;
+   parameter integer AXI_ADDR_WIDTH = 4;
 
    logic [AXI_ADDR_WIDTH:0] addr; // Address
    logic [AXI_DATA_WIDTH:0] data; // Data to write or read
@@ -19,7 +19,7 @@ class axi_seq_item extends uvm_sequence_item;
    `uvm_object_utils_begin(axi_seq_item)
       `uvm_field_int(addr, UVM_ALL_ON)
       `uvm_field_int(data, UVM_ALL_ON)
-      `uvm_field_bit(write, UVM_ALL_ON)
+      `uvm_field_int(write, UVM_ALL_ON)
       `uvm_field_int(resp, UVM_ALL_ON)
    `uvm_object_utils_end
 
