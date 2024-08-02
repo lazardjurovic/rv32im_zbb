@@ -1,10 +1,9 @@
-module cpu_verif_top 
+import uvm_pkg::*;     // import the UVM library
+`include "uvm_macros.svh" // Include the UVM macros
+`include "bram_agent_pkg.sv"
+`include "axi_agent_pkg.sv"
 
-        import uvm_pkg::*;     // import the UVM library
-        `include "uvm_macros.svh" // Include the UVM macros
-
-        `include "agent/bram_agent_pkg.sv";
-        `include "agent/axi_agent_pkg.sv";
+module cpu_verif_top;
 
         logic clk,reset,overflow,zero,stop;
 
@@ -35,7 +34,7 @@ module cpu_verif_top
                 .s00_axi_wstrb(axi_lite_vif.WSTRB),
                 .s00_axi_wvalid(axi_lite_vif.WVALID),
                 .s00_axi_wready(axi_lite_vif.WREADY),
-                .s00_axi_bresp(axi_lite_vif).BRESP,
+                .s00_axi_bresp(axi_lite_vif.BRESP),
                 .s00_axi_bvalid(axi_lite_vif.BVALID),
                 .s00_axi_bready(axi_lite_vif.BREADY),
                 .s00_axi_araddr(axi_lite_vif.ARADDR),
@@ -60,8 +59,8 @@ module cpu_verif_top
         // clock and reset init.
         initial begin
             clk <= 0;
-            rst <= 1;
-            #50 rst <= 0;
+            reset <= 1;
+            #50 reset <= 0;
         end
 
         // clock generation

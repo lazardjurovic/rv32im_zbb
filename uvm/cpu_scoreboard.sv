@@ -1,6 +1,10 @@
-class cpu_scoreboard extends uvm_scoreboard     
+import uvm_pkg::*;
+`include "uvm_macros.svh"
+`include "axi_agent_pkg.sv"
 
-    bit start_check = 0;
+class cpu_scoreboard extends uvm_scoreboard;
+
+    logic start_check = 1'b0;
 
     uvm_analysis_imp#(axi_seq_item, cpu_scoreboard) item_collected_imp;
 
@@ -16,7 +20,7 @@ class cpu_scoreboard extends uvm_scoreboard
     function write (axi_seq_item tr);
         axi_seq_item tr_clone;
         $cast(tr_clone, tr.clone());
-        if(tr_clone.RDATA == 0xFFFFFF) begin
+        if(tr_clone.RDATA == 32'hFFFFFFFF) begin
          // actually compare files
         end
     endfunction : write
