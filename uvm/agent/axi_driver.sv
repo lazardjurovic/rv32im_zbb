@@ -14,39 +14,59 @@ class axi_lite_driver extends uvm_driver#(axi_seq_item);
     endfunction // connect_phase
 
     task main_phase(uvm_phase phase);
+        axi_seq_item req;
         forever begin
-        seq_item_port.get_next_item(req);
-        drive_tr();
-        seq_item_port.item_done();
+            seq_item_port.get_next_item(req);
+
+            if (req.write) begin
+                drive_write(req.addr, req.data);
+            end else begin
+                drive_read(req.addr, req.data);
+            end
+
+            seq_item_port.item_done();
         end
-    endtask // main_phase
+    endtask
 
-    task drive_tr();
+    task drive_write(logic [AXI_ADDR_WIDTH-1:0] addr, logic [AXI_DATA_WIDTH-1:0] data);
+        // Write Address Channel
+        vif.AWADDR <= addr;
+        vif.AWVALID <= 1;
+        @(posedge vif.clk);
+        while (!vif.AWREADY) @(posedge vif.clk);
+        vif.AWVALID <= 0;
 
-        // Drive the AXI signals based on the transaction
-        if (req.write) begin
-            vif.awaddr <= req.addr;
-            vif.wdata <= req.data;
-            vif.wstrb <= 4'b1111; // Assuming all bytes are valid
-            vif.awvalid <= 1;
-            vif.wvalid <= 1;
-            // Wait for acknowledgment
-            wait(vif.awready && vif.wready);
-            vif.awvalid <= 0;
-            vif.wvalid <= 0;
-        end
-        else begin
-            vif.araddr <= req.addr;
-            vif.arvalid <= 1;
-            // Wait for response
-            wait(vif.arready);
-            req.data <= vif.rdata;
-            vif.arvalid <= 0;
-        end
+        // Write Data Channel
+        vif.WDATA <= data;
+        vif.WVALID <= 1;
+        vif.WSTRB <= 4'b1111; // Assuming full write strobes
+        @(posedge vif.clk);
+        while (!vif.WREADY) @(posedge vif.clk);
+        vif.WVALID <= 0;
 
-        // Handle response
-        req.resp <= vif.rresp;
+        // Write Response Channel
+        vif.BREADY <= 1;
+        @(posedge vif.clk);
+        while (!vif.BVALID) @(posedge vif.clk);
+        assert(vif.BRESP == 2'b00) else $fatal("Write response error: %0b", vif.BRESP); // Check for OKAY response
+        vif.BREADY <= 0;
+    endtask
 
-    endtask // drive_tr
+    task drive_read(logic [AXI_ADDR_WIDTH-1:0] addr, logic [AXI_DATA_WIDTH-1:0] data);
+        // Read Address Channel
+        vif.ARADDR <= addr;
+        vif.ARVALID <= 1;
+        @(posedge vif.clk);
+        while (!vif.ARREADY) @(posedge vif.clk);
+        vif.ARVALID <= 0;
+
+        // Read Data Channel
+        vif.RREADY <= 1;
+        @(posedge vif.clk);
+        while (!vif.RVALID) @(posedge vif.clk);
+        data <= vif.RDATA;
+        assert(vif.RRESP == 2'b00) else $fatal("Read response error: %0b", vif.RRESP); // Check for OKAY response
+        vif.RREADY <= 0;
+    endtask
 
 endclass // axi_lite_driver
