@@ -1,3 +1,6 @@
+`ifndef CPU_VERIF_TOP_SV
+`define CPU_VERIF_TOP_SV
+
 import uvm_pkg::*;     // import the UVM library
 `include "uvm_macros.svh" // Include the UVM macros
 
@@ -54,7 +57,7 @@ module cpu_verif_top;
             //uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.env", "calc_if", bram_vif);
             //uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.env", "calc_if", bram_vif);
             //uvm_config_db#(virtual axi_if)::set(null, "uvm_test_top.env", "calc_if", bram_vif);
-            run_test();
+            run_test("cpu_test");
         end
 
         // clock and reset init.
@@ -68,3 +71,5 @@ module cpu_verif_top;
         always #50 clk = ~clk;
 
 endmodule : cpu_verif_top
+
+`endif

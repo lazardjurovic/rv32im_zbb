@@ -1,3 +1,6 @@
+`ifndef BRAM_DRIVER_SV
+`define BRAM_DRIVER_SV
+
 class bram_driver extends uvm_driver#(bram_seq_item);
     `uvm_component_utils(bram_driver)
 
@@ -32,3 +35,5 @@ class bram_driver extends uvm_driver#(bram_seq_item);
     endtask : drive_tr
 
 endclass : bram_driver
+
+`endif

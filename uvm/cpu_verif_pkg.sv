@@ -11,6 +11,9 @@
         
         `include "axi_if.sv"
         `include "bram_if.sv"
+        
+        `include "cpu_env.sv"
+        `include "cpu_test.sv"
 
     endpackage : cpu_verif_pkg
 

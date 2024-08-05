@@ -1,3 +1,9 @@
+`ifndef AXI_DRIVER_SV
+`define AXI_DRIVER_SV
+
+import axi_agent_pkg::*;
+import bram_agent_pkg::*;
+        
 class axi_lite_driver extends uvm_driver#(axi_seq_item);
     `uvm_component_utils(axi_lite_driver)
 
@@ -28,7 +34,7 @@ class axi_lite_driver extends uvm_driver#(axi_seq_item);
         end
     endtask
 
-    task drive_write(logic [AXI_ADDR_WIDTH-1:0] addr, logic [AXI_DATA_WIDTH-1:0] data);
+    task drive_write(logic [32-1:0] addr, logic [32-1:0] data);
         // Write Address Channel
         vif.AWADDR <= addr;
         vif.AWVALID <= 1;
@@ -52,7 +58,7 @@ class axi_lite_driver extends uvm_driver#(axi_seq_item);
         vif.BREADY <= 0;
     endtask
 
-    task drive_read(logic [AXI_ADDR_WIDTH-1:0] addr, logic [AXI_DATA_WIDTH-1:0] data);
+    task drive_read(logic [32-1:0] addr, logic [32-1:0] data);
         // Read Address Channel
         vif.ARADDR <= addr;
         vif.ARVALID <= 1;
@@ -70,3 +76,5 @@ class axi_lite_driver extends uvm_driver#(axi_seq_item);
     endtask
 
 endclass // axi_lite_driver
+
+`endif
