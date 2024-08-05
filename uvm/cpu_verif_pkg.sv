@@ -1,5 +1,5 @@
-`ifdef CPU_VERIF_PKG
-`define CPU_VERIF_PKG
+`ifdef CPU_VERIF_PKG_SV
+`define CPU_VERIF_PKG_SV
 
     package cpu_verif_pkg;
 

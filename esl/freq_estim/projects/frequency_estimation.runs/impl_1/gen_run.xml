@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenRun Id="impl_1" LaunchPart="xc7z010clg400-1" LaunchTime="1718978017">
+  <File Type="POSTROUTE-PHYSOPT-RQS-RPT" Name="postroute_physopt_report_qor_suggestions_0.rpt"/>
+  <File Type="ROUTE-RQS-RPT" Name="route_report_qor_suggestions_0.rpt"/>
+  <File Type="POSTROUTE-PHYSOPT-RQS" Name="execute_phase_postroute_physopted.rqs"/>
+  <File Type="ROUTE-RQS" Name="execute_phase_routed.rqs"/>
+  <File Type="WBT-USG" Name="usage_statistics_webtalk.html"/>
+  <File Type="BG-DRC" Name="execute_phase.drc"/>
+  <File Type="BG-BGN" Name="execute_phase.bgn"/>
+  <File Type="BITSTR-SYSDEF" Name="execute_phase.sysdef"/>
+  <File Type="BITSTR-LTX" Name="debug_nets.ltx"/>
+  <File Type="BITSTR-LTX" Name="execute_phase.ltx"/>
+  <File Type="RBD_FILE" Name="execute_phase.rbd"/>
+  <File Type="NPI_FILE" Name="execute_phase.npi"/>
+  <File Type="RNPI_FILE" Name="execute_phase.rnpi"/>
+  <File Type="CFI_FILE" Name="execute_phase.cfi"/>
+  <File Type="RCFI_FILE" Name="execute_phase.rcfi"/>
+  <File Type="RDI-RDI" Name="execute_phase.vdi"/>
+  <File Type="PDI-FILE" Name="execute_phase.pdi"/>
+  <File Type="BITSTR-MMI" Name="execute_phase.mmi"/>
+  <File Type="BITSTR-BMM" Name="execute_phase_bd.bmm"/>
+  <File Type="BITSTR-NKY" Name="execute_phase.nky"/>
+  <File Type="BITSTR-RBT" Name="execute_phase.rbt"/>
+  <File Type="BITSTR-MSK" Name="execute_phase.msk"/>
+  <File Type="BG-BIN" Name="execute_phase.bin"/>
+  <File Type="BG-BIT" Name="execute_phase.bit"/>
+  <File Type="POSTROUTE-PHYSOPT-BUS-SKEW-RPX" Name="execute_phase_bus_skew_postroute_physopted.rpx"/>
+  <File Type="POSTROUTE-PHYSOPT-BUS-SKEW-PB" Name="execute_phase_bus_skew_postroute_physopted.pb"/>
+  <File Type="POSTROUTE-PHYSOPT-BUS-SKEW" Name="execute_phase_bus_skew_postroute_physopted.rpt"/>
+  <File Type="POSTROUTE-PHYSOPT-TIMING-RPX" Name="execute_phase_timing_summary_postroute_physopted.rpx"/>
+  <File Type="POSTROUTE-PHYSOPT-TIMING-PB" Name="execute_phase_timing_summary_postroute_physopted.pb"/>
+  <File Type="POSTROUTE-PHYSOPT-TIMING" Name="execute_phase_timing_summary_postroute_physopted.rpt"/>
+  <File Type="POSTROUTE-PHYSOPT-BLACKBOX-DCP" Name="execute_phase_postroute_physopt_bb.dcp"/>
+  <File Type="POSTROUTE-PHYSOPT-DCP" Name="execute_phase_postroute_physopt.dcp"/>
+  <File Type="ROUTE-BUS-SKEW-RPX" Name="execute_phase_bus_skew_routed.rpx"/>
+  <File Type="POSTPLACE-PWROPT-DCP" Name="execute_phase_postplace_pwropt.dcp"/>
+  <File Type="PLACE-UTIL-PB" Name="execute_phase_utilization_placed.pb"/>
+  <File Type="OPT-METHODOLOGY-DRC" Name="execute_phase_methodology_drc_opted.rpt"/>
+  <File Type="PLACE-UTIL" Name="execute_phase_utilization_placed.rpt"/>
+  <File Type="PLACE-CLK" Name="execute_phase_clock_utilization_placed.rpt"/>
+  <File Type="POSTPLACE-PWROPT-TIMING" Name="execute_phase_timing_summary_postplace_pwropted.rpt"/>
+  <File Type="OPT-HWDEF" Name="execute_phase.hwdef"/>
+  <File Type="PLACE-IO" Name="execute_phase_io_placed.rpt"/>
+  <File Type="PHYSOPT-TIMING" Name="execute_phase_timing_summary_physopted.rpt"/>
+  <File Type="PLACE-SIMILARITY" Name="execute_phase_incremental_reuse_placed.rpt"/>
+  <File Type="ROUTE-METHODOLOGY-DRC-PB" Name="execute_phase_methodology_drc_routed.pb"/>
+  <File Type="PLACE-DCP" Name="execute_phase_placed.dcp"/>
+  <File Type="PWROPT-TIMING" Name="execute_phase_timing_summary_pwropted.rpt"/>
+  <File Type="OPT-DRC" Name="execute_phase_drc_opted.rpt"/>
+  <File Type="PLACE-TIMING" Name="execute_phase_timing_summary_placed.rpt"/>
+  <File Type="PWROPT-DRC" Name="execute_phase_drc_pwropted.rpt"/>
+  <File Type="INIT-TIMING" Name="execute_phase_timing_summary_init.rpt"/>
+  <File Type="PA-TCL" Name="execute_phase.tcl"/>
+  <File Type="PLACE-CTRL" Name="execute_phase_control_sets_placed.rpt"/>
+  <File Type="ROUTE-METHODOLOGY-DRC" Name="execute_phase_methodology_drc_routed.rpt"/>
+  <File Type="OPT-DCP" Name="execute_phase_opt.dcp"/>
+  <File Type="REPORTS-TCL" Name="execute_phase_reports.tcl"/>
+  <File Type="OPT-TIMING" Name="execute_phase_timing_summary_opted.rpt"/>
+  <File Type="PLACE-PRE-SIMILARITY" Name="execute_phase_incremental_reuse_pre_placed.rpt"/>
+  <File Type="ROUTE-DRC-RPX" Name="execute_phase_drc_routed.rpx"/>
+  <File Type="PWROPT-DCP" Name="execute_phase_pwropt.dcp"/>
+  <File Type="PHYSOPT-DCP" Name="execute_phase_physopt.dcp"/>
+  <File Type="PHYSOPT-DRC" Name="execute_phase_drc_physopted.rpt"/>
+  <File Type="ROUTE-ERROR-DCP" Name="execute_phase_routed_error.dcp"/>
+  <File Type="ROUTE-DCP" Name="execute_phase_routed.dcp"/>
+  <File Type="ROUTE-BLACKBOX-DCP" Name="execute_phase_routed_bb.dcp"/>
+  <File Type="ROUTE-DRC" Name="execute_phase_drc_routed.rpt"/>
+  <File Type="ROUTE-METHODOLOGY-DRC-RPX" Name="execute_phase_methodology_drc_routed.rpx"/>
+  <File Type="ROUTE-DRC-PB" Name="execute_phase_drc_routed.pb"/>
+  <File Type="ROUTE-PWR" Name="execute_phase_power_routed.rpt"/>
+  <File Type="ROUTE-PWR-SUM" Name="execute_phase_power_summary_routed.pb"/>
+  <File Type="ROUTE-PWR-RPX" Name="execute_phase_power_routed.rpx"/>
+  <File Type="ROUTE-STATUS" Name="execute_phase_route_status.rpt"/>
+  <File Type="ROUTE-STATUS-PB" Name="execute_phase_route_status.pb"/>
+  <File Type="ROUTE-TIMINGSUMMARY" Name="execute_phase_timing_summary_routed.rpt"/>
+  <File Type="ROUTE-TIMING-PB" Name="execute_phase_timing_summary_routed.pb"/>
+  <File Type="ROUTE-TIMING-RPX" Name="execute_phase_timing_summary_routed.rpx"/>
+  <File Type="ROUTE-SIMILARITY" Name="execute_phase_incremental_reuse_routed.rpt"/>
+  <File Type="ROUTE-CLK" Name="execute_phase_clock_utilization_routed.rpt"/>
+  <File Type="ROUTE-BUS-SKEW" Name="execute_phase_bus_skew_routed.rpt"/>
+  <File Type="ROUTE-BUS-SKEW-PB" Name="execute_phase_bus_skew_routed.pb"/>
+  <FileSet Name="sources" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1" RelGenDir="$PGENDIR/sources_1">
+    <Filter Type="Srcs"/>
+    <File Path="$PPRDIR/../execute_phase.v">
+      <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="implementation"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PPRDIR/../constraints.xdc">
+      <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="implementation"/>
+      </FileInfo>
+    </File>
+    <Config>
+      <Option Name="DesignMode" Val="RTL"/>
+      <Option Name="TopModule" Val="execute_phase"/>
+      <Option Name="TopAutoSet" Val="TRUE"/>
+    </Config>
+  </FileSet>
+  <FileSet Name="constrs_in" Type="Constrs" RelSrcDir="$PSRCDIR/constrs_1">
+    <Filter Type="Constrs"/>
+    <Config>
+      <Option Name="ConstrsType" Val="XDC"/>
+    </Config>
+  </FileSet>
+  <FileSet Name="utils" Type="Utils" RelSrcDir="$PSRCDIR/utils_1">
+    <Filter Type="Utils"/>
+    <Config>
+      <Option Name="TopAutoSet" Val="TRUE"/>
+    </Config>
+  </FileSet>
+  <Strategy Version="1" Minor="2">
+    <StratHandle Name="Performance_NetDelay_high" Flow="Vivado Implementation 2022">
+      <Desc>To compensate for optimistic delay estimation, add extra delay cost to long distance and high fanout connections. (high setting, most pessimistic)</Desc>
+    </StratHandle>
+    <Step Id="init_design"/>
+    <Step Id="opt_design"/>
+    <Step Id="power_opt_design"/>
+    <Step Id="place_design">
+      <Option Id="Directive">2</Option>
+    </Step>
+    <Step Id="post_place_power_opt_design"/>
+    <Step Id="phys_opt_design">
+      <Option Id="Directive">2</Option>
+    </Step>
+    <Step Id="route_design">
+      <Option Id="Directive">1</Option>
+    </Step>
+    <Step Id="post_route_phys_opt_design"/>
+    <Step Id="write_bitstream"/>
+  </Strategy>
+</GenRun>
