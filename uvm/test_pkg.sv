@@ -13,7 +13,7 @@ package test_pkg;
 `include "cpu_test.sv"
 
 
-endpackage : calc_test_pkg
+endpackage :test_pkg
 
  `include "axi_if.sv"
  `include "bram_if.sv"
