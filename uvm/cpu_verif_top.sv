@@ -4,8 +4,8 @@
 import uvm_pkg::*;     // import the UVM library
 `include "uvm_macros.svh" // Include the UVM macros
 
-//import cpu_verif_pkg::*;
-`include "cpu_verif_pkg.sv"
+import test_pkg::*;
+//`include "cpu_verif_pkg.sv"
 
 module cpu_verif_top;
 
