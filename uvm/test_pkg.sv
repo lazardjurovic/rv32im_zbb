@@ -15,8 +15,8 @@ package test_pkg;
 
 endpackage :test_pkg
 
- `include "axi_if.sv"
- `include "bram_if.sv"
+ //`include "axi_if.sv"
+ //`include "bram_if.sv"
 
 `endif
 

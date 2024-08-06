@@ -6,7 +6,7 @@ package configurations_pkg;
    import uvm_pkg::*;      // import the UVM library   
  `include "uvm_macros.svh" // Include the UVM macros
 
-`include "config.sv"
+`include "cpu_config.sv"
 
 
 endpackage : configurations_pkg

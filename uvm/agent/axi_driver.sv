@@ -58,7 +58,7 @@ class axi_lite_driver extends uvm_driver#(axi_seq_item);
         vif.BREADY <= 0;
     endtask
 
-    task drive_read(logic [32-1:0] addr, logic [32-1:0] data);
+    task drive_read(logic [32-1:0] addr, output logic [32-1:0] data);
         // Read Address Channel
         vif.ARADDR <= addr;
         vif.ARVALID <= 1;
@@ -70,8 +70,8 @@ class axi_lite_driver extends uvm_driver#(axi_seq_item);
         vif.RREADY <= 1;
         @(posedge vif.clk);
         while (!vif.RVALID) @(posedge vif.clk);
-        data <= vif.RDATA;
-        assert(vif.RRESP == 2'b00) else $fatal("Read response error: %0b", vif.RRESP); // Check for OKAY response
+        data = vif.RDATA;
+        assert(vif.RRESP == 2'b00) else $fatal(1,"Read response error: %0b", vif.RRESP); // Check for OKAY response
         vif.RREADY <= 0;
     endtask
 

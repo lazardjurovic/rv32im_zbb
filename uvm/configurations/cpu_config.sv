@@ -1,3 +1,6 @@
+   import uvm_pkg::*;      // import the UVM library   
+ `include "uvm_macros.svh" // Include the UVM macros
+
 class cpu_config extends uvm_object;
 
    uvm_active_passive_enum is_active = UVM_ACTIVE;
@@ -10,4 +13,4 @@ class cpu_config extends uvm_object;
       super.new(name);
    endfunction
 
-endclass : calc_config
+endclass : cpu_config
