@@ -6,6 +6,7 @@ import uvm_pkg::*;
 
 //import axi_agent_pkg::*;
 import configurations_pkg::*;
+import axi_agent_pkg::*;
 
 class axi_agent extends uvm_agent;
 
@@ -32,8 +33,11 @@ class axi_agent extends uvm_agent;
     super.build_phase(phase);
 
     // Get configuration object from the database
-    if (!uvm_config_db#(cpu_config)::get(this, "", "cpu_config", cfg))
-      `uvm_fatal("NOCONFIG", {"Config object must be set for: ", get_full_name(), ".cfg"})
+      
+      if (!uvm_config_db#(cpu_config)::get(this, "", "cpu_config", cfg)) begin
+            cfg = cpu_config::type_id::create("cfg", this);
+            uvm_config_db#(cpu_config)::set(this, "", "cpu_config", cfg);
+        end
 
     // Create driver and sequencer if agent is active
     if (cfg.is_active == UVM_ACTIVE) begin

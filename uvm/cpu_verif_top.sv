@@ -5,7 +5,9 @@ import uvm_pkg::*;     // import the UVM library
 `include "uvm_macros.svh" // Include the UVM macros
 
 import test_pkg::*;
+import configurations_pkg::*;
 //`include "cpu_verif_pkg.sv"
+
 
 module cpu_verif_top;
 
@@ -54,6 +56,12 @@ module cpu_verif_top;
     
         // run test
         initial begin      
+        
+         cpu_config my_cfg;
+         my_cfg = cpu_config::type_id::create("my_cfg");
+         my_cfg.is_active = UVM_ACTIVE;
+         uvm_config_db#(cpu_config)::set(null, "uvm_test_top.m_env", "cpu_config", my_cfg);
+
            uvm_config_db#(virtual axi_lite_if)::set(null, "m_env", "cpu_verif_top.m_env", axi_lite_vif);
            $display("Simulation starting...");
            run_test("cpu_test");

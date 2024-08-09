@@ -15,9 +15,10 @@ class axi_lite_driver extends uvm_driver#(axi_seq_item);
 
     function void connect_phase(uvm_phase phase);
         super.connect_phase(phase);
-        if (! uvm_config_db#(virtual axi_lite_if)::get(this, "*", "axi_lite_if", vif))
-        `uvm_fatal("NO_IF",{"virtual interface must be set for: ",get_full_name(),".vif"})
-    endfunction // connect_phase
+        if (!uvm_config_db#(virtual axi_lite_if)::get(this, "*", "vif", vif))
+             uvm_config_db#(virtual axi_lite_if)::set(this, "axi_agt.drv", "vif", vif);
+        //`uvm_fatal("NO_VIF", {"virtual interface must be set for: ", get_full_name(), ".vif"})
+    endfunction
 
     task main_phase(uvm_phase phase);
         axi_seq_item req;

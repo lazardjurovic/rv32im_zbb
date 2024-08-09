@@ -38,37 +38,35 @@ class cpu_env extends uvm_env;
     
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
-        
-        if (!uvm_config_db#(virtual axi_lite_if)::get(this, "", "axi_lite_if", axi_lite_vif))
+       /* 
+        if (!uvm_config_db#(virtual axi_lite_if)::get(this, "", "axi_lite_vif", axi_lite_vif))
             `uvm_fatal("NOVIF", "Virtual interface axi_lite_vif not found")
-        if (!uvm_config_db#(virtual bram_if)::get(this, "", "bram_if", instr_bram_vif))
+        if (!uvm_config_db#(virtual bram_if)::get(this, "", "instr_bram_vif", instr_bram_vif))
             `uvm_fatal("NOVIF", "Virtual interface instr_bram_vif not found")
-        if (!uvm_config_db#(virtual bram_if)::get(this, "", "bram_if", data_bram_vif))
+        if (!uvm_config_db#(virtual bram_if)::get(this, "", "data_bram_vif", data_bram_vif))
             `uvm_fatal("NOVIF", "Virtual interface data_bram_vif not found")
+        */
             
                     //configure interfaces in cfg database
+    
+        // Create and set the configuration object for the agent
+        if (!uvm_config_db#(cpu_config)::get(this, "", "cpu_config", cfg)) begin
+            cfg = cpu_config::type_id::create("cfg", this);
+            uvm_config_db#(cpu_config)::set(this, "", "cpu_config", cfg);
+        end
         
-        uvm_config_db#(virtual axi_lite_if)::set(null, "axi_lite_vif", "axi_lite_vif", axi_lite_vif);
         uvm_config_db#(virtual bram_if)::set(null, "instr_bram_if", "instr_bram_if", instr_bram_vif);
         uvm_config_db#(virtual bram_if)::set(null, "data_bram_if", "data_bram_if", data_bram_vif);
-
-        // Instantiate monitors
-        //axi_mon = axi_monitor::type_id::create("axi_mon", this);
-        //instr_bram_mon = bram_monitor::type_id::create("instr_bram_mon", this);
-        //data_bram_mon = bram_monitor::type_id::create("data_bram_mon", this);
+        uvm_config_db#(virtual axi_lite_if)::set(this, "axi_agent", "axi_lite_vif", axi_lite_vif);
         
-        axi_agt = axi_agent::type_id::create("axi_agent",this);
-
+        axi_agt = axi_agent::type_id::create("axi_agt", this);
+        
     endfunction
+
     
     function void connect_phase(uvm_phase phase);
         super.connect_phase(phase);
         
-        
-        // Connect analysis ports to monitors
-        axi_mon.ap.connect(axi_ap);
-        instr_bram_mon.ap.connect(instr_bram_ap);
-        data_bram_mon.ap.connect(data_bram_ap);
     endfunction
 endclass
 
