@@ -13,6 +13,7 @@ package axi_agent_pkg;
    `include "axi_sequencer.sv"
    `include "axi_driver.sv"
    `include "axi_monitor.sv"
+   `include "axi_agent.sv"
 
 endpackage
 

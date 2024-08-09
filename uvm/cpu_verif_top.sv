@@ -54,10 +54,10 @@ module cpu_verif_top;
     
         // run test
         initial begin      
-            //uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.env", "calc_if", bram_vif);
-            //uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.env", "calc_if", bram_vif);
-            //uvm_config_db#(virtual axi_if)::set(null, "uvm_test_top.env", "calc_if", bram_vif);
-            run_test("cpu_test");
+           uvm_config_db#(virtual axi_lite_if)::set(null, "m_env", "cpu_verif_top.m_env", axi_lite_vif);
+           $display("Simulation starting...");
+           run_test("cpu_test");
+           $display("Simulation finished.");
         end
 
         // clock and reset init.
@@ -65,6 +65,7 @@ module cpu_verif_top;
             clk <= 0;
             reset <= 1;
             #50 reset <= 0;
+            #200 $finish;
         end
 
         // clock generation
