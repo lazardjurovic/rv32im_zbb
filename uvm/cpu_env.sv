@@ -38,14 +38,14 @@ class cpu_env extends uvm_env;
     
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
-       /* 
+       
         if (!uvm_config_db#(virtual axi_lite_if)::get(this, "", "axi_lite_vif", axi_lite_vif))
             `uvm_fatal("NOVIF", "Virtual interface axi_lite_vif not found")
         if (!uvm_config_db#(virtual bram_if)::get(this, "", "instr_bram_vif", instr_bram_vif))
             `uvm_fatal("NOVIF", "Virtual interface instr_bram_vif not found")
         if (!uvm_config_db#(virtual bram_if)::get(this, "", "data_bram_vif", data_bram_vif))
             `uvm_fatal("NOVIF", "Virtual interface data_bram_vif not found")
-        */
+        
             
                     //configure interfaces in cfg database
     
@@ -60,6 +60,8 @@ class cpu_env extends uvm_env;
         uvm_config_db#(virtual axi_lite_if)::set(this, "axi_agent", "axi_lite_vif", axi_lite_vif);
         
         axi_agt = axi_agent::type_id::create("axi_agt", this);
+        
+        uvm_config_db#(virtual axi_lite_if)::set(this, "axi_agt.mon", "vif", axi_lite_vif);
         
     endfunction
 

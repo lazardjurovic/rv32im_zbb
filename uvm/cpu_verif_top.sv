@@ -61,8 +61,15 @@ module cpu_verif_top;
          my_cfg = cpu_config::type_id::create("my_cfg");
          my_cfg.is_active = UVM_ACTIVE;
          uvm_config_db#(cpu_config)::set(null, "uvm_test_top.m_env", "cpu_config", my_cfg);
+          uvm_config_db#(virtual axi_lite_if)::set(null, "uvm_test_top.m_env.axi_agt.mon", "vif", axi_lite_vif);
+         //uvm_config_db#(virtual axi_lite_if)::set(null, "m_env", "axi_lite_vif", axi_lite_vif);
+         
+          uvm_config_db#(virtual axi_lite_if)::set(uvm_root::get(), "uvm_test_top.m_env", "axi_lite_vif", axi_lite_vif);
+          uvm_config_db#(virtual bram_if)::set(uvm_root::get(), "uvm_test_top.m_env", "data_bram_vif", data_bram_vif);
+          uvm_config_db#(virtual bram_if)::set(uvm_root::get(), "uvm_test_top.m_env", "instr_bram_vif", instr_bram_vif);
 
-           uvm_config_db#(virtual axi_lite_if)::set(null, "m_env", "cpu_verif_top.m_env", axi_lite_vif);
+
+           //uvm_config_db#(virtual axi_lite_if)::set(null, "m_env", "cpu_verif_top.m_env", axi_lite_vif);
            $display("Simulation starting...");
            run_test("cpu_test");
            $display("Simulation finished.");
