@@ -1,3 +1,6 @@
+`ifndef CPU_TEST_SV
+`define CPU_TEST_SV
+
 class cpu_test extends uvm_test;
    
     cpu_env m_env;
@@ -21,8 +24,11 @@ class cpu_test extends uvm_test;
         phase.raise_objection(this);
        
         // Add any sequences here
+        #200ns
 
         phase.drop_objection(this);
     endtask : main_phase
     
 endclass
+
+`endif
