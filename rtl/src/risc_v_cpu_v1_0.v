@@ -21,7 +21,7 @@
         output wire [31:0] instr_mem_init_data_out,
         input wire instr_mem_init_enable,
         input wire [3:0] instr_mem_init_we,
-        input wire instr_mem_rest,
+        input wire instr_mem_reset,
         input wire instr_mem_clk,
         
         // data memory interface
@@ -31,7 +31,7 @@
         output wire [31:0] data_mem_init_data_out,
         input wire data_mem_init_enable,
         input wire [3:0] data_mem_init_we,
-        input wire data_mem_rest,
+        input wire data_mem_reset,
         input wire data_mem_clk,
 		
 		// User ports ends
