@@ -17,7 +17,7 @@ class axi_monitor extends uvm_monitor;
     
     function void connect_phase(uvm_phase phase);
         super.connect_phase(phase);
-        if (!uvm_config_db#(virtual axi_lite_if)::get(this, "*", "vif", vif))
+        if (!uvm_config_db#(virtual axi_lite_if)::get(this, "*", "axi_lite_if", vif))
             `uvm_fatal("NO_VIF", {"virtual interface must be set for: ", get_full_name(), ".vif"})
     endfunction
     
