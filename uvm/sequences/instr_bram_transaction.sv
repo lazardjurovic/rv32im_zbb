@@ -29,7 +29,7 @@ class instr_bram_transaction extends bram_base_seq;
         // Read the file line by line
         while (!$feof(file)) begin
             // Read a line from the file
-            line = $fgets(file);
+             $fgets(line,file);
             
             // Parse the line
             if ($sscanf(line, "%x", din) == 1) begin
