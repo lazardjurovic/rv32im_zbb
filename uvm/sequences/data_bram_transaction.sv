@@ -1,3 +1,8 @@
+`ifndef DATA_BRAM_TRANSACTION_SV
+`define DATA_BRAM_TRANSACTION_SV
+
+import bram_seq_pkg::*;
+
 class data_bram_transaction extends bram_base_seq;
 
     `uvm_object_utils(data_bram_transaction)
@@ -51,3 +56,5 @@ class data_bram_transaction extends bram_base_seq;
     endtask : body
 
 endclass : data_bram_transaction
+
+`endif

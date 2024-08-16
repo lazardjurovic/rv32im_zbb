@@ -1,6 +1,9 @@
 `ifndef CPU_TEST_SV
 `define CPU_TEST_SV
 
+import bram_seq_pkg::*;
+import axi_seq_pkg::*;
+
 class cpu_test extends uvm_test;
    
     cpu_env m_env;
@@ -36,9 +39,9 @@ class cpu_test extends uvm_test;
         phase.raise_objection(this);
        
         fork
-            axi_test_seq.start(env.axi_agt.seqr);
-            data_bram_test_seq.start(env.data_bram_agt.seqr);
-            instr_bram_test_seq.start(env.instr_bram_agt.seqr);
+            axi_test_seq.start(m_env.axi_agt.seqr);
+            data_bram_test_seq.start(m_env.data_bram_agt.seqr);
+            instr_bram_test_seq.start(m_env.instr_bram_agt.seqr);
         join
 
         // Add any sequences here
