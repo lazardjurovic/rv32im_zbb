@@ -21,6 +21,8 @@ class cpu_env extends uvm_env;
     //bram_monitor data_bram_mon;
     
     axi_agent axi_agt;
+    bram_agent instr_bram_agt;
+    bram_agent data_bram_agt;
 
     // Analysis ports (you can define scoreboards later to connect to these ports)
     uvm_analysis_port #(axi_seq_item) axi_ap;
@@ -55,12 +57,16 @@ class cpu_env extends uvm_env;
             uvm_config_db#(cpu_config)::set(this, "", "cpu_config", cfg);
         end
         
-        uvm_config_db#(virtual bram_if)::set(null, "instr_bram_if", "instr_bram_if", instr_bram_vif);
-        uvm_config_db#(virtual bram_if)::set(null, "data_bram_if", "data_bram_if", data_bram_vif);
+        uvm_config_db#(virtual bram_if)::set(null, "instr_bram_agt", "instr_bram_if", instr_bram_vif);
+        uvm_config_db#(virtual bram_if)::set(null, "data_bram_agt", "data_bram_if", data_bram_vif);
         uvm_config_db#(virtual axi_lite_if)::set(this, "axi_agent", "axi_lite_vif", axi_lite_vif);
         
         axi_agt = axi_agent::type_id::create("axi_agt", this);
+        instr_bram_agt = bram_agent::type_id::create("instr_bram_agt", this);
+        data_bram_agt = bram_agent::type_id::create("data_bram_agt", this);
         
+        uvm_config_db#(virtual bram_if)::set(this, "instr_bram_agt.mon", "vif", instr_bram_vif);
+        uvm_config_db#(virtual bram_if)::set(this, "data_bram_agt.mon", "vif", data_bram_vif);
         uvm_config_db#(virtual axi_lite_if)::set(this, "axi_agt.mon", "vif", axi_lite_vif);
         
     endfunction

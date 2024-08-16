@@ -16,6 +16,8 @@ class cpu_test extends uvm_test;
         super.build_phase(phase);
         cfg = cpu_config::type_id::create("cfg");     
         uvm_config_db#(cpu_config)::set(this, "m_env.axi_agt", "cpu_config", cfg);
+        uvm_config_db#(cpu_config)::set(this, "m_env.instr_bram_agt", "cpu_config", cfg);
+        uvm_config_db#(cpu_config)::set(this, "m_env.data_bram_agt", "cpu_config", cfg);
         m_env = cpu_env::type_id::create("m_env", this);
 
     endfunction
