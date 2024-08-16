@@ -1,8 +1,8 @@
-class bram_transaction extends bram_base_seq;
+class data_bram_transaction extends bram_base_seq;
 
-    `uvm_object_utils(bram_transaction)
+    `uvm_object_utils(data_bram_transaction)
 
-    function new(string name = "bram_transaction");
+    function new(string name = "data_bram_transaction");
         super.new(name);
     endfunction
 
@@ -16,7 +16,7 @@ class bram_transaction extends bram_base_seq;
         int addr = 0;
 
         // Open the file for reading
-        file = $fopen("../../esl/vp/instr_mem.txt", "r");
+        file = $fopen("../../esl/vp/data_mem.txt", "r");
         if (file == 0) begin
             `uvm_fatal("FILE_ERROR", "Unable to open file!")
         end
@@ -50,4 +50,4 @@ class bram_transaction extends bram_base_seq;
 
     endtask : body
 
-endclass : bram_transaction
+endclass : data_bram_transaction
