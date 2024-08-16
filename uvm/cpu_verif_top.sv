@@ -13,9 +13,9 @@ module cpu_verif_top;
 
         logic clk,reset,overflow,zero,stop;
 
-        bram_if instr_bram_vif(clk,reset);
-        bram_if data_bram_vif(clk,reset);
-        axi_lite_if axi_lite_vif(clk,reset);
+         bram_if instr_bram_vif(clk,reset);
+         bram_if data_bram_vif(clk,reset);
+         axi_lite_if axi_lite_vif(clk,reset);
 
         risc_v_cpu_v1_0 DUT(
                 .instr_mem_init_addr(instr_bram_vif.bram_addr),
@@ -57,21 +57,21 @@ module cpu_verif_top;
         // run test
         initial begin      
         
+        /*
          cpu_config my_cfg;
          my_cfg = cpu_config::type_id::create("my_cfg");
          my_cfg.is_active = UVM_ACTIVE;
-         uvm_config_db#(cpu_config)::set(null, "uvm_test_top.m_env", "cpu_config", my_cfg);
-          uvm_config_db#(virtual axi_lite_if)::set(null, "uvm_test_top.m_env.axi_agt.mon", "vif", axi_lite_vif);
-          uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.m_env.instr_bram_agt.mon", "vif", instr_bram_vif);
-          uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.m_env.data_bram_agt.mon", "vif", data_bram_vif);
-         //uvm_config_db#(virtual axi_lite_if)::set(null, "m_env", "axi_lite_vif", axi_lite_vif);
-         
-          uvm_config_db#(virtual axi_lite_if)::set(uvm_root::get(), "uvm_test_top.m_env", "axi_lite_vif", axi_lite_vif);
-          uvm_config_db#(virtual bram_if)::set(uvm_root::get(), "uvm_test_top.m_env", "data_bram_vif", data_bram_vif);
-          uvm_config_db#(virtual bram_if)::set(uvm_root::get(), "uvm_test_top.m_env", "instr_bram_vif", instr_bram_vif);
-
-
-           //uvm_config_db#(virtual axi_lite_if)::set(null, "m_env", "cpu_verif_top.m_env", axi_lite_vif);
+         uvm_config_db#(cpu_config)::set(null, "uvm_test_top.m_env", "cfg", my_cfg);
+         */
+        
+         uvm_config_db#(virtual axi_lite_if)::set(null, "uvm_test_top.m_env", "axi_lite_if", axi_lite_vif);
+         uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.m_env", "bram_iif", instr_bram_vif);
+         uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.m_env", "bram_if", data_bram_vif);
+        
+         //uvm_config_db#(virtual axi_lite_if)::set(null, "uvm_test_top.m_env.axi_agt.mon", "vif", axi_lite_vif);          
+         //uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.m_env.instr_bram_agt.mon", "vif", instr_bram_vif); 
+         //uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.m_env.data_bram_agt.mon", "vif", data_bram_vif);
+       
            $display("Simulation starting...");
            run_test("cpu_test");
            $display("Simulation finished.");
