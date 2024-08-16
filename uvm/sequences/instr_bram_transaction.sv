@@ -1,8 +1,8 @@
-class bram_transaction extends bram_base_seq;
+class instr_bram_transaction extends bram_base_seq;
 
-    `uvm_object_utils(bram_transaction)
+    `uvm_object_utils(instr_bram_transaction)
 
-    function new(string name = "bram_transaction");
+    function new(string name = "instr_bram_transaction");
         super.new(name);
     endfunction
 
@@ -50,4 +50,4 @@ class bram_transaction extends bram_base_seq;
 
     endtask : body
 
-endclass : bram_transaction
+endclass : instr_bram_transaction
