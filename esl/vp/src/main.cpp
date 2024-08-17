@@ -13,7 +13,7 @@ using namespace std;
 using namespace sc_core;
 using namespace tlm;
 
-const char *command_list[CMD_NUM] = {"-rb", "-rd", "-rh", "-d", "-i", "-l", "-D", "-I", "--debug", "-h", "--help", "bin", "dec", "hex", "--dump"};
+const char *command_list[CMD_NUM] = {"-rb", "-rd", "-rh", "-d", "-i", "-l", "-D", "-I", "--debug", "-h", "--help", "bin", "dec", "hex", "--dump", "--dump_for_checker"};
 
 int sc_main(int argc, char *argv[])
 {
@@ -139,6 +139,16 @@ int sc_main(int argc, char *argv[])
 			
 			i++;
 		}
+		else if (!strcmp(argv[i], "--dump_for_checker")) 
+		{
+			if (argv[i + 1] == NULL) {
+				cout << endl << "Error: Expected file name after --dump_for_checker" << endl;
+				cout << "\tFor example: " << argv[0] << " --dump_for_checker dump.txt" << endl << endl;
+				exit(3);
+			}
+			
+			i++;
+		}
 
 		exit_error = 0;
 	}
@@ -211,6 +221,12 @@ int sc_main(int argc, char *argv[])
 			string fileName = argv[i + 1];
 
 			virtual_platform.print_result(fileName);
+		}
+		else if (!strcmp(argv[i], "--dump_for_checker"))
+		{
+			string fileName = argv[i + 1];
+
+			virtual_platform.print_result_for_checker(fileName);
 		}
 	}
 
