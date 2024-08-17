@@ -124,6 +124,33 @@ void vp::print_result(string fileName) {
     dumpFile.close();
 }
 
+void vp::print_result_for_checker(string fileName) {
+
+    ofstream dumpFile(fileName);
+
+    //============== DATA MEMORY DUMP ==============
+	
+	sc_dt::sc_uint<32> ram_word;
+
+	for (int i = 0; i < data_mem.RAM_SIZE; i += 4)
+	{
+		ram_word = data_mem.ram[i];
+		ram_word <<= 8;
+		ram_word = data_mem.ram[i+1];
+		ram_word <<= 8;
+		ram_word = data_mem.ram[i+2];
+		ram_word <<= 8;
+		ram_word = data_mem.ram[i+3];		
+		
+		if (ram_word != 0x0)
+		{
+			dumpFile << ram_word << endl;
+		}
+	}
+
+    dumpFile.close();
+}
+
 vp::~vp(){
 
     SC_REPORT_INFO("Virtual Platform", "Destroyed.");
