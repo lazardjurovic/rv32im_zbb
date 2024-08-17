@@ -130,7 +130,7 @@ void vp::print_result_for_checker(string fileName) {
 
     //============== DATA MEMORY DUMP ==============
 	
-	sc_dt::sc_uint<32> ram_word;
+	sc_dt::sc_bv<32> ram_word;
 
 	for (int i = 0; i < data_mem.RAM_SIZE; i += 4)
 	{
