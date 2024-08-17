@@ -48,6 +48,7 @@ class bram_agent extends uvm_agent;
     mon = bram_monitor::type_id::create("mon", this);
     
     if (cfg.is_active == UVM_ACTIVE) begin
+        $display("Building BRAM sequancer and driver...");
         seqr = bram_sequencer::type_id::create("seqr", this);
         drv = bram_driver::type_id::create("drv", this);
     end

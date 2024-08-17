@@ -7,6 +7,7 @@ class bram_driver extends uvm_driver#(bram_seq_item);
     `uvm_component_utils(bram_driver)
 
     virtual interface bram_if vif;
+    bram_seq_item req;
 
  
    function new(string name = "bram_driver", uvm_component parent = null);
@@ -22,7 +23,6 @@ class bram_driver extends uvm_driver#(bram_seq_item);
    endfunction : connect_phase
 
     task main_phase(uvm_phase phase);
-        bram_seq_item req;
 
         forever begin
         seq_item_port.get_next_item(req);
@@ -34,6 +34,10 @@ class bram_driver extends uvm_driver#(bram_seq_item);
     endtask : main_phase
 
     task drive_tr();
+    
+     if (req == null) begin
+        `uvm_fatal("NULL_REQ", "Received a null request item in drive_tr task")
+    end
     
         @(posedge vif.clk);
         vif.bram_din = req.din;

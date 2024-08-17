@@ -8,6 +8,7 @@ class axi_lite_driver extends uvm_driver#(axi_seq_item);
     `uvm_component_utils(axi_lite_driver)
 
     virtual interface axi_lite_if vif;
+    axi_seq_item req;
 
    function new(string name = "axi_lite_driver", uvm_component parent = null);
       super.new(name,parent);
@@ -22,7 +23,7 @@ class axi_lite_driver extends uvm_driver#(axi_seq_item);
    endfunction : connect_phase
 
     task main_phase(uvm_phase phase);
-        axi_seq_item req;
+
         forever begin
             seq_item_port.get_next_item(req);
 
