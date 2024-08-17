@@ -7,7 +7,7 @@
 
 #include "../header/vp.hpp"
 
-#define CMD_NUM 15
+#define CMD_NUM 16
 
 using namespace std;
 using namespace sc_core;
