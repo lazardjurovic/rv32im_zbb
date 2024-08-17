@@ -12,14 +12,30 @@ class bram_driver extends uvm_driver#(bram_seq_item);
  
    function new(string name = "bram_driver", uvm_component parent = null);
       super.new(name,parent);
-      if (!uvm_config_db#(virtual bram_if)::get(this, "", "bram_if", vif))
-        `uvm_fatal("NOVIF",{"virtual interface must be set:",get_full_name(),".vif"})
+      
+     if (get_full_name() == "uvm_test_top.m_env.data_bram_agt.drv") begin
+        if (!uvm_config_db#(virtual bram_if)::get(this, "", "data_bram_if", vif))
+            `uvm_fatal("NOVIF",{"[CONSTRUCTOR]virtual interface in agent must be set:",get_full_name(),".vif"})
+            $display("Setting [DRIVER][constructor] data_bram_vif: %p", vif);
+   end else if(get_full_name() == "uvm_test_top.m_env.instr_bram_agt.drv") begin
+           if (!uvm_config_db#(virtual bram_if)::get(this, "", "instr_bram_if", vif))
+            `uvm_fatal("NOVIF",{"[CONSTRUCTOR]virtual interface in agent must be set:",get_full_name(),".vif"})
+           $display("Setting [DRIVER][constructor] instr_bram_vif: %p", vif);
+    end
    endfunction
 
    function void connect_phase(uvm_phase phase);
       super.connect_phase(phase);
-      if (!uvm_config_db#(virtual bram_if)::get(this, "", "bram_if", vif))
-        `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"})
+      
+       if (get_full_name() == "uvm_test_top.m_env.data_bram_agt.drv") begin
+            if (!uvm_config_db#(virtual bram_if)::get(this, "", "data_bram_if", vif))
+                `uvm_fatal("NOVIF",{"virtual interface in agent must be set:",get_full_name(),".vif"})
+             $display("Setting [DRIVER][connect] data_bram_vif: %p", vif);
+       end else if(get_full_name() == "uvm_test_top.m_env.instr_bram_agt.drv") begin
+            if (!uvm_config_db#(virtual bram_if)::get(this, "", "instr_bram_if", vif))
+                `uvm_fatal("NOVIF",{"virtual interface in agent must be set:",get_full_name(),".vif"})
+             $display("Setting [DRIVER][connect] instr_bram_vif: %p", vif);
+    end
    endfunction : connect_phase
 
     task main_phase(uvm_phase phase);

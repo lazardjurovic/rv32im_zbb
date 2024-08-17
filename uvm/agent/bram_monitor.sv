@@ -15,11 +15,20 @@ class bram_monitor extends uvm_monitor;
     ap = new("ap", this);
   endfunction
 
-function void connect_phase(uvm_phase phase);
-  super.connect_phase(phase);
-  if (!uvm_config_db#(virtual bram_if)::get(this, "*", "bram_if", vif))
-    `uvm_fatal("NO_VIF", {"virtual interface must be set for: ", get_full_name(), ".vif"})
-endfunction
+    function void connect_phase(uvm_phase phase);
+        super.connect_phase(phase);
+        
+        if (get_full_name() == "uvm_test_top.m_env.data_bram_agt.mon") begin
+            if (!uvm_config_db#(virtual bram_if)::get(this, "", "data_bram_if", vif))
+                `uvm_fatal("NOVIF",{"interface in monitor must be set:",get_full_name(),".vif"})
+                $display("Setting [MONITOR][constructor] data_bram_vif: %p", vif);
+            end else if(get_full_name() == "uvm_test_top.m_env.instr_bram_agt.mon") begin
+                if (!uvm_config_db#(virtual bram_if)::get(this, "", "instr_bram_if", vif))
+                `uvm_fatal("NOVIF",{"virtual interface in agent must be set:",get_full_name(),".vif"})
+                $display("Setting [MONITOR] instr_bram_vif: %p", vif);
+            end
+  
+    endfunction
 
   task main_phase(uvm_phase phase);
     bram_seq_item tx;

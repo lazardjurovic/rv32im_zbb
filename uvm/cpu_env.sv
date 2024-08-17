@@ -39,9 +39,9 @@ class cpu_env extends uvm_env;
     // Get the virtual interfaces first
     if (!uvm_config_db#(virtual axi_lite_if)::get(this, "", "axi_lite_if", axi_lite_vif))
         `uvm_fatal("NO_VIF", "Virtual interface axi_lite_vif not found")
-    if (!uvm_config_db#(virtual bram_if)::get(this, "", "bram_if", instr_bram_vif))
+    if (!uvm_config_db#(virtual bram_if)::get(this, "", "instr_bram_if", instr_bram_vif))
         `uvm_fatal("NO_VIF", "Virtual interface instr_bram_vif not found")
-    if (!uvm_config_db#(virtual bram_if)::get(this, "", "bram_if", data_bram_vif))
+    if (!uvm_config_db#(virtual bram_if)::get(this, "", "data_bram_if", data_bram_vif))
         `uvm_fatal("NO_VIF", "Virtual interface data_bram_vif not found")
 
     // Set the configuration object for the agent
@@ -57,11 +57,11 @@ class cpu_env extends uvm_env;
     
     // Set the virtual interfaces in the config database
     $display("Setting instr_bram_vif: %p", instr_bram_vif);
-    uvm_config_db#(virtual bram_if)::set(this, "instr_bram_agt", "bram_if", instr_bram_vif);
+    uvm_config_db#(virtual bram_if)::set(this, "instr_bram_agt", "instr_bram_if", instr_bram_vif);
     $display("Setting data_bram_vif: %p", data_bram_vif);
-    uvm_config_db#(virtual bram_if)::set(this, "data_bram_agt", "bram_if", data_bram_vif);
+    uvm_config_db#(virtual bram_if)::set(this, "data_bram_agt", "data_bram_if", data_bram_vif);
     $display("Setting axi_lite_vif: %p", axi_lite_vif);
-    uvm_config_db#(virtual axi_lite_if)::set(this, "axi_agt", "bram_if", axi_lite_vif);
+    uvm_config_db#(virtual axi_lite_if)::set(this, "axi_agt", "axi_lite_if", axi_lite_vif);
     
     // Now instantiate agents
     axi_agt = axi_agent::type_id::create("axi_agt", this);

@@ -56,22 +56,11 @@ module cpu_verif_top;
     
         // run test
         initial begin      
-        
-        /*
-         cpu_config my_cfg;
-         my_cfg = cpu_config::type_id::create("my_cfg");
-         my_cfg.is_active = UVM_ACTIVE;
-         uvm_config_db#(cpu_config)::set(null, "uvm_test_top.m_env", "cfg", my_cfg);
-         */
-        
+      
          uvm_config_db#(virtual axi_lite_if)::set(null, "uvm_test_top.m_env", "axi_lite_if", axi_lite_vif);
-         uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.m_env", "bram_iif", instr_bram_vif);
-         uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.m_env", "bram_if", data_bram_vif);
-        
-         //uvm_config_db#(virtual axi_lite_if)::set(null, "uvm_test_top.m_env.axi_agt.mon", "vif", axi_lite_vif);          
-         //uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.m_env.instr_bram_agt.mon", "vif", instr_bram_vif); 
-         //uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.m_env.data_bram_agt.mon", "vif", data_bram_vif);
-       
+         uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.m_env", "instr_bram_if", instr_bram_vif);
+         uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.m_env", "data_bram_if", data_bram_vif);
+              
            $display("Simulation starting...");
            run_test("cpu_test");
            $display("Simulation finished.");
@@ -82,7 +71,7 @@ module cpu_verif_top;
             clk <= 0;
             reset <= 1;
             #50 reset <= 0;
-            #200 $finish;
+            #20000 $finish;
         end
 
         // clock generation

@@ -17,11 +17,11 @@ class instr_bram_transaction extends bram_base_seq;
         bram_seq_item bram_it;
         int file;
         string line;
-        int din;
+        logic [31:0] din;  // 32-bit wide binary number
         int addr = 0;
 
         // Open the file for reading
-        file = $fopen("../../esl/vp/instr_mem.txt", "r");
+        file = $fopen("/home/lazar/Desktop/y24-g05/esl/vp/instr_mem.txt", "r");
         if (file == 0) begin
             `uvm_fatal("FILE_ERROR", "Unable to open file!")
         end
@@ -29,10 +29,11 @@ class instr_bram_transaction extends bram_base_seq;
         // Read the file line by line
         while (!$feof(file)) begin
             // Read a line from the file
-             $fgets(line,file);
+            $fgets(line,file);
             
-            // Parse the line
-            if ($sscanf(line, "%x", din) == 1) begin
+            // Parse the line as a 32-bit binary number
+            if ($sscanf(line, "%32b", din) == 1) begin
+                $display("Scanned 32-bit line %b in instr BRAM", din);
                 // Create and configure the sequence item
                 bram_it = bram_seq_item::type_id::create("bram_it");
                 bram_it.addr = addr;
@@ -57,4 +58,4 @@ class instr_bram_transaction extends bram_base_seq;
 
 endclass : instr_bram_transaction
 
-`endif;
+`endif

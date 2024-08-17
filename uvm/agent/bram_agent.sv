@@ -38,13 +38,27 @@ class bram_agent extends uvm_agent;
     // Get configuration object from the database
     $display("Building bram_agent...");
 
-    if (!uvm_config_db#(virtual bram_if)::get(this, "", "bram_if", bram_vif))
-        `uvm_fatal("NOVIF",{"virtual interface in agent must be set:",get_full_name(),".vif"})
+    if (get_full_name() == "uvm_test_top.m_env.data_bram_agt") begin
+        if (!uvm_config_db#(virtual bram_if)::get(this, "", "data_bram_if", bram_vif))
+            `uvm_fatal("NOVIF",{"virtual interface in agent must be set:",get_full_name(),".vif"})
+        $display("Setting [AGENT] data_bram_vif: %p", bram_vif);
+   end else if(get_full_name() == "uvm_test_top.m_env.instr_bram_agt") begin
+           if (!uvm_config_db#(virtual bram_if)::get(this, "", "instr_bram_if", bram_vif))
+            `uvm_fatal("NOVIF",{"virtual interface in agent must be set:",get_full_name(),".vif"})
+           $display("Setting [AGENT] instr_bram_vif: %p", bram_vif);
+   end
       
       if(!uvm_config_db#(cpu_config)::get(this, "", "cpu_config", cfg))
         `uvm_fatal("NOCONFIG",{"Config object in agent must be set for: ",get_full_name(),".cfg"})
-    
-    uvm_config_db#(virtual bram_if)::set(this,"*","bram_if",bram_vif);
+        
+        
+   // Setting interfaces for lower hierarchy components
+   if (get_full_name() == "uvm_test_top.m_env.data_bram_agt") begin
+        uvm_config_db#(virtual bram_if)::set(this, "*", "data_bram_if", bram_vif);
+   end else if(get_full_name() == "uvm_test_top.m_env.instr_bram_agt") begin
+        uvm_config_db#(virtual bram_if)::set(this, "*", "instr_bram_if", bram_vif);
+   end
+  
     mon = bram_monitor::type_id::create("mon", this);
     
     if (cfg.is_active == UVM_ACTIVE) begin
