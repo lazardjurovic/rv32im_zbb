@@ -21,5 +21,5 @@ class vp : public sc_module{
         generator gen;
 
         void print_result(string fileName);
-        void vp::print_result_for_checker(string fileName);
+        void print_result_for_checker(string fileName);
 };
