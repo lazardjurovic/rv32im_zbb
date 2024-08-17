@@ -6,21 +6,39 @@ import bram_agent_pkg::*;
 class bram_driver extends uvm_driver#(bram_seq_item);
     `uvm_component_utils(bram_driver)
 
-    virtual bram_if vif;
+    virtual interface bram_if vif;
+    bram_seq_item req;
 
-    function new(string name = "bram_driver", uvm_component parent = null);
-        super.new(name,parent);
-    endfunction
+ 
+   function new(string name = "bram_driver", uvm_component parent = null);
+      super.new(name,parent);
+      
+     if (get_full_name() == "uvm_test_top.m_env.data_bram_agt.drv") begin
+        if (!uvm_config_db#(virtual bram_if)::get(this, "", "data_bram_if", vif))
+            `uvm_fatal("NOVIF",{"[CONSTRUCTOR]virtual interface in agent must be set:",get_full_name(),".vif"})
+            $display("Setting [DRIVER][constructor] data_bram_vif: %p", vif);
+   end else if(get_full_name() == "uvm_test_top.m_env.instr_bram_agt.drv") begin
+           if (!uvm_config_db#(virtual bram_if)::get(this, "", "instr_bram_if", vif))
+            `uvm_fatal("NOVIF",{"[CONSTRUCTOR]virtual interface in agent must be set:",get_full_name(),".vif"})
+           $display("Setting [DRIVER][constructor] instr_bram_vif: %p", vif);
+    end
+   endfunction
 
-    function void connect_phase(uvm_phase phase);
-        super.connect_phase(phase);
-        if (! uvm_config_db#(virtual bram_if)::get(this, "*", "bram_if", vif))
-            uvm_config_db#(virtual bram_if)::set(this, "bram_agt.drv", "vif", vif);
-        //`uvm_fatal("NO_IF",{"virtual interface must be set for: ",get_full_name(),".vif"})
-    endfunction : connect_phase
+   function void connect_phase(uvm_phase phase);
+      super.connect_phase(phase);
+      
+       if (get_full_name() == "uvm_test_top.m_env.data_bram_agt.drv") begin
+            if (!uvm_config_db#(virtual bram_if)::get(this, "", "data_bram_if", vif))
+                `uvm_fatal("NOVIF",{"virtual interface in agent must be set:",get_full_name(),".vif"})
+             $display("Setting [DRIVER][connect] data_bram_vif: %p", vif);
+       end else if(get_full_name() == "uvm_test_top.m_env.instr_bram_agt.drv") begin
+            if (!uvm_config_db#(virtual bram_if)::get(this, "", "instr_bram_if", vif))
+                `uvm_fatal("NOVIF",{"virtual interface in agent must be set:",get_full_name(),".vif"})
+             $display("Setting [DRIVER][connect] instr_bram_vif: %p", vif);
+    end
+   endfunction : connect_phase
 
     task main_phase(uvm_phase phase);
-        bram_seq_item req;
 
         forever begin
         seq_item_port.get_next_item(req);
@@ -33,6 +51,11 @@ class bram_driver extends uvm_driver#(bram_seq_item);
 
     task drive_tr();
     
+     if (req == null) begin
+        `uvm_fatal("NULL_REQ", "Received a null request item in drive_tr task")
+    end
+    
+        @(posedge vif.clk);
         vif.bram_din = req.din;
         vif.bram_addr = req.addr;
         vif.bram_en = 1'b1;

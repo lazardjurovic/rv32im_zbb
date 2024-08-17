@@ -8,6 +8,7 @@ import uvm_pkg::*;
 import configurations_pkg::*;
 import bram_agent_pkg::*;
 
+
 class bram_agent extends uvm_agent;
 
   // Configuration object
@@ -17,36 +18,58 @@ class bram_agent extends uvm_agent;
   bram_driver drv;
   bram_sequencer seqr;
   bram_monitor mon;
-
+  
+  virtual interface bram_if bram_vif;
+ 
   // UVM factory registration
   `uvm_component_utils_begin(bram_agent)
-    `uvm_field_object(cfg, UVM_DEFAULT | UVM_REFERENCE)
+    `uvm_field_object(cfg, UVM_DEFAULT)
   `uvm_component_utils_end
 
   // Constructor
-  function new(string name = "bram_agent", uvm_component parent = null);
+  function new(string name, uvm_component parent = null);
     super.new(name, parent);
   endfunction : new
 
   // UVM build_phase
-  function void build_phase(uvm_phase phase);
+ function void build_phase(uvm_phase phase);
     super.build_phase(phase);
 
     // Get configuration object from the database
-      
-      if (!uvm_config_db#(cpu_config)::get(this, "", "cpu_config", cfg)) begin
-            cfg = cpu_config::type_id::create("cfg", this);
-            uvm_config_db#(cpu_config)::set(this, "", "cpu_config", cfg);
-        end
+    $display("Building bram_agent...");
 
-    // Create driver and sequencer if agent is active
-    if (cfg.is_active == UVM_ACTIVE) begin
-      seqr = bram_sequencer::type_id::create("seqr", this);
-      drv = bram_driver::type_id::create("drv", this);
-    end
-    // Always create monitor
+    if (get_full_name() == "uvm_test_top.m_env.data_bram_agt") begin
+        if (!uvm_config_db#(virtual bram_if)::get(this, "", "data_bram_if", bram_vif))
+            `uvm_fatal("NOVIF",{"virtual interface in agent must be set:",get_full_name(),".vif"})
+        $display("Setting [AGENT] data_bram_vif: %p", bram_vif);
+   end else if(get_full_name() == "uvm_test_top.m_env.instr_bram_agt") begin
+           if (!uvm_config_db#(virtual bram_if)::get(this, "", "instr_bram_if", bram_vif))
+            `uvm_fatal("NOVIF",{"virtual interface in agent must be set:",get_full_name(),".vif"})
+           $display("Setting [AGENT] instr_bram_vif: %p", bram_vif);
+   end
+      
+      if(!uvm_config_db#(cpu_config)::get(this, "", "cpu_config", cfg))
+        `uvm_fatal("NOCONFIG",{"Config object in agent must be set for: ",get_full_name(),".cfg"})
+        
+        
+   // Setting interfaces for lower hierarchy components
+   if (get_full_name() == "uvm_test_top.m_env.data_bram_agt") begin
+        uvm_config_db#(virtual bram_if)::set(this, "*", "data_bram_if", bram_vif);
+   end else if(get_full_name() == "uvm_test_top.m_env.instr_bram_agt") begin
+        uvm_config_db#(virtual bram_if)::set(this, "*", "instr_bram_if", bram_vif);
+   end
+  
     mon = bram_monitor::type_id::create("mon", this);
-  endfunction : build_phase
+    
+    if (cfg.is_active == UVM_ACTIVE) begin
+        $display("Building BRAM sequancer and driver...");
+        seqr = bram_sequencer::type_id::create("seqr", this);
+        drv = bram_driver::type_id::create("drv", this);
+    end
+
+    $display("Finished building bram_agent.");
+endfunction : build_phase
+
 
   // UVM connect_phase
   function void connect_phase(uvm_phase phase);

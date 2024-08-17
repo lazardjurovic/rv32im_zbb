@@ -13,9 +13,11 @@ package bram_agent_pkg;
    `include "bram_sequencer.sv"
    `include "bram_driver.sv"
    `include "bram_monitor.sv"
+   `include "bram_agent.sv"
 
 endpackage
 
 `endif
+
 
 

@@ -14,22 +14,13 @@ class axi_monitor extends uvm_monitor;
     super.new(name, parent);
     ap = new("ap", this);
   endfunction
-
-/*    function void build_phase(uvm_phase phase);
-      super.build_phase(phase);
-      if (!uvm_config_db#(virtual axi_lite_if)::get(this, "*", "vif", vif))
-         //uvm_config_db#(virtual axi_lite_if)::set(this, "axi_agt.mon", "vif", vif);
-          uvm_config_db#(virtual axi_lite_if)::set(this, "*", "vif", vif);
-        //`uvm_fatal("NO_VIF", {"virtual interface must be set for: ", get_full_name(), ".vif"})
-    endfunction
-    */
     
-    function void build_phase(uvm_phase phase);
-    super.build_phase(phase);
-    if (!uvm_config_db#(virtual axi_lite_if)::get(this, "", "vif", vif))
-        `uvm_fatal("NO_VIF", {"virtual interface must be set for: ", get_full_name(), ".vif"})
-endfunction
-
+    function void connect_phase(uvm_phase phase);
+        super.connect_phase(phase);
+        if (!uvm_config_db#(virtual axi_lite_if)::get(this, "*", "axi_lite_if", vif))
+            `uvm_fatal("NO_VIF", {"virtual interface must be set for: ", get_full_name(), ".vif"})
+    endfunction
+    
 
   task run_phase(uvm_phase phase);
     axi_seq_item tx;

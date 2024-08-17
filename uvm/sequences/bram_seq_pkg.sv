@@ -8,6 +8,7 @@ package bram_seq_pkg;
     import bram_agent_pkg::bram_seq_item;
     import bram_agent_pkg::bram_sequencer;
     `include "bram_base_seq.sv"
-    `include "bram_transaction.sv"
+    `include "data_bram_transaction.sv"
+    `include "instr_bram_transaction.sv"
 endpackage 
 `endif
