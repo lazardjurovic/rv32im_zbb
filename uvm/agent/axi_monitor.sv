@@ -10,9 +10,13 @@ class axi_monitor extends uvm_monitor;
   // Analysis port to send observed transactions to a scoreboard
   uvm_analysis_port #(axi_seq_item) ap;
 
+  // UVM event to notify when stop_flag is read
+  uvm_event stop_flag_event;
+
   function new(string name = "axi_monitor", uvm_component parent = null);
     super.new(name, parent);
     ap = new("ap", this);
+    stop_flag_event = new("stop_flag_event"); // Initialize the event
   endfunction
   
   function void build_phase(uvm_phase phase);
@@ -48,8 +52,13 @@ class axi_monitor extends uvm_monitor;
       // Check if the read is for the stop_flag at address 0xC
       if (tx.addr == 32'h0000_000C) begin
         `uvm_info("AXI_MONITOR", $sformatf("Stop flag read detected: data = %b", tx.data), UVM_MEDIUM)
+        
         // Notify the scoreboard via the analysis port
         ap.write(tx);
+
+         // Trigger the event to notify that stop_flag was read
+        stop_flag_event.trigger();
+
       end
     end
   endtask : monitor_read
