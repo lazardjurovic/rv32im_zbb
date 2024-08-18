@@ -4,7 +4,9 @@
 import uvm_pkg::*;
 `include "uvm_macros.svh"
 
-import cpu_verif_pkg::*;
+import test_pkg::*;
+import axi_agent_pkg::*;
+import bram_agent_pkg::*;
 
 class cpu_scoreboard extends uvm_scoreboard;
 
@@ -21,6 +23,7 @@ class cpu_scoreboard extends uvm_scoreboard;
     // Queues for storing the received transactions
     protected axi_seq_item axi_trans_q[$];
     protected bram_seq_item data_bram_trans_q[$];
+    protected bram_seq_item expected_data_q[$];
 
     function new(string name = "cpu_scoreboard", uvm_component parent);
         super.new(name,parent);
@@ -32,10 +35,10 @@ class cpu_scoreboard extends uvm_scoreboard;
         super.build_phase(phase);
 
         // Initialize queues
-        axi_trans_q = new();
-        data_bram_trans_q = new();
-        expected_data_q = new();
-        start_data_check = 0;
+        axi_trans_q = {};
+        data_bram_trans_q ={};
+        expected_data_q = {};
+        start_check = 0;
         
         // Load golden vectors from a file
         load_golden_vectors("../../esl/vp/golden_vector.txt");
@@ -47,7 +50,7 @@ class cpu_scoreboard extends uvm_scoreboard;
         
         // Check if stop_flag is high in the transaction
         if (t.addr == 32'h0000_000C && t.data == 1) begin
-            start_data_check = 1;
+            start_check = 1;
             $display("Stop flag detected. Preparing to check data in data BRAM.");
         end
     endfunction
@@ -57,13 +60,13 @@ class cpu_scoreboard extends uvm_scoreboard;
         data_bram_trans_q.push_back(t);
 
         // Check data if stop_flag is set
-        if (start_data_check) begin
+        if (start_check) begin
             compare_data_bram_with_golden(t);
         end
     endfunction
 
      // Task to load golden vectors from a file
-    task load_golden_vectors(string file_path);
+    function load_golden_vectors(string file_path);
         int file, r;
         bit [31:0] data;
         bram_seq_item golden_item;
@@ -87,10 +90,10 @@ class cpu_scoreboard extends uvm_scoreboard;
 
         $fclose(file);
         `uvm_info("GOLDEN_VECTOR_LOAD", $sformatf("Loaded %0d golden vectors", expected_data_q.size()), UVM_LOW);
-    endtask : load_golden_vectors
+    endfunction : load_golden_vectors
 
      // Comparison function for data BRAM transactions
-    task compare_data_bram_with_golden(bram_seq_item t);
+    function compare_data_bram_with_golden(bram_seq_item t);
         // Fetch the expected transaction
         bram_seq_item expected = expected_data_q.pop_front();
 
@@ -101,7 +104,7 @@ class cpu_scoreboard extends uvm_scoreboard;
         else begin
             `uvm_info("MATCH", $sformatf("Data BRAM match: %0h", t.data), UVM_LOW);
         end
-    endtask
+    endfunction
 
 endclass : cpu_scoreboard
 

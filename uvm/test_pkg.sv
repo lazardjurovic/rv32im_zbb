@@ -11,6 +11,7 @@ package test_pkg;
    import configurations_pkg::*;   
 `include "cpu_env.sv"   
 `include "cpu_test.sv"
+`include "cpu_scoreboard.sv"
 
 
 endpackage :test_pkg

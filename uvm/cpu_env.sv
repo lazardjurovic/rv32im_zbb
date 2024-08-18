@@ -6,6 +6,7 @@ import uvm_pkg::*;
 
 import axi_agent_pkg::*;
 import bram_agent_pkg::*;
+`include "cpu_scoreboard.sv"
        
 class cpu_env extends uvm_env;
     
