@@ -81,8 +81,6 @@ class cpu_env extends uvm_env;
         axi_agt.mon.axi_ap.connect(sb.axi_ap_collect);
         data_bram_agt.mon.bram_ap.connect(sb.data_bram_ap_collect);
 
-        // Monitor stop_flag from AXI Lite and start data_bram sequence
-        //axi_agt.mon.stop_flag_ap.connect(new("stop_flag_listener", this));
     endfunction
 
 endclass
