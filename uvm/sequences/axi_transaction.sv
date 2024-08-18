@@ -1,3 +1,6 @@
+`ifndef AXI_TRANSACTION_SV
+`define AXI_TRANSACTION_SV
+
 class axi_transaction extends axi_base_seq;
 
     `uvm_object_utils(axi_transaction)
@@ -14,21 +17,15 @@ class axi_transaction extends axi_base_seq;
         // Create the sequence item
         req = axi_seq_item::type_id::create("req");
 
-        // Generate specific transactions
-        // Transaction 1: Write
-        req.addr = 32'h0000_0000; // Address for the first transaction
-        req.data = 32'hFFFF_FFFF; // Data for the first transaction
+        // Set the reset of the CPU
+        req.addr = 32'h0000_0000; // Address for reset
+        req.data = 32'hFFFF_FFFF; // Data for the reset
         req.write = 1; // Write transaction
         start_item(req);
         finish_item(req);
 
-        /*
-        // Transaction 2: Read
-        req.addr = 32'h0000_0004; // Address for the second transaction
-        req.write = 0; // Read transaction
-        start_item(req);
-        finish_item(req);
-        */
     endtask
 
 endclass
+
+`endif
