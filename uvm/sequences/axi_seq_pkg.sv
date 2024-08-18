@@ -9,5 +9,6 @@ package axi_seq_pkg;
     import axi_agent_pkg::axi_sequencer;
     `include "axi_base_seq.sv"
     `include "axi_transaction.sv"
+    `include "axi_read_stop_flag.sv"
 endpackage 
 `endif

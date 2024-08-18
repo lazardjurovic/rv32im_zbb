@@ -10,5 +10,6 @@ package bram_seq_pkg;
     `include "bram_base_seq.sv"
     `include "data_bram_transaction.sv"
     `include "instr_bram_transaction.sv"
+    `include "cpu_check_seq.sv"
 endpackage 
 `endif
