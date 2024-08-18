@@ -5,7 +5,7 @@ class axi_monitor extends uvm_monitor;
 
   `uvm_component_utils(axi_monitor)
 
-  virtual axi_lite_if vif;
+  virtual interface axi_lite_if vif;
 
   // Analysis port to send observed transactions to a scoreboard
   uvm_analysis_port #(axi_seq_item) ap;
@@ -14,27 +14,27 @@ class axi_monitor extends uvm_monitor;
     super.new(name, parent);
     ap = new("ap", this);
   endfunction
-    
-    function void connect_phase(uvm_phase phase);
-        super.connect_phase(phase);
-        if (!uvm_config_db#(virtual axi_lite_if)::get(this, "*", "axi_lite_if", vif))
-            `uvm_fatal("NO_VIF", {"virtual interface must be set for: ", get_full_name(), ".vif"})
-    endfunction
-    
+  
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+
+    // Get the virtual interface
+    if (!uvm_config_db#(virtual axi_lite_if)::get(this, "", "axi_lite_if", vif))
+        `uvm_fatal("NO_VIF", "Virtual interface must be set for AXI monitor.")
+  endfunction : build_phase
 
   task run_phase(uvm_phase phase);
     axi_seq_item tx;
 
     // Monitor read transactions
-    fork
-      monitor_read();
-      monitor_write();
-    join
+    monitor_read();
+
   endtask : run_phase
 
   task monitor_read();
     axi_seq_item tx;
     while (1) begin
+      // Wait for a valid read transaction
       wait(vif.ARVALID && vif.ARREADY);
       tx = axi_seq_item::type_id::create("tx");
       tx.addr = vif.ARADDR;
@@ -45,31 +45,14 @@ class axi_monitor extends uvm_monitor;
       tx.data = vif.RDATA;
       tx.resp = vif.RRESP;
 
-      // Send the observed transaction via the analysis port
-      ap.write(tx);
+      // Check if the read is for the stop_flag at address 0xC
+      if (tx.addr == 32'h0000_000C) begin
+        `uvm_info("AXI_MONITOR", $sformatf("Stop flag read detected: data = %b", tx.data), UVM_MEDIUM)
+        // Notify the scoreboard via the analysis port
+        ap.write(tx);
+      end
     end
   endtask : monitor_read
-
-  task monitor_write();
-    axi_seq_item tx;
-    while (1) begin
-      wait(vif.AWVALID && vif.AWREADY);
-      tx = axi_seq_item::type_id::create("tx");
-      tx.addr = vif.AWADDR;
-      tx.write = 1;
-
-      // Wait for the write data handshake
-      wait(vif.WVALID && vif.WREADY);
-      tx.data = vif.WDATA;
-
-      // Wait for the write response
-      wait(vif.BVALID);
-      tx.resp = vif.BRESP;
-
-      // Send the observed transaction via the analysis port
-      ap.write(tx);
-    end
-  endtask : monitor_write
 
 endclass : axi_monitor
 
