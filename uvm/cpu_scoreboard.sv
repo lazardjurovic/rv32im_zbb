@@ -46,7 +46,7 @@ class cpu_scoreboard extends uvm_scoreboard;
         axi_trans_q.push_back(t);
         
         // Check if stop_flag is high in the transaction
-        if (t.addr == 0x0000000C && t.data == 1) begin
+        if (t.addr == 32'h0000_000C && t.data == 1) begin
             start_data_check = 1;
             $display("Stop flag detected. Preparing to check data in data BRAM.");
         end
