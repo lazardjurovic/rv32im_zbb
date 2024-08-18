@@ -17,39 +17,41 @@ set_property vendor FTN [ipx::current_core]
 set_property name risc_v_cpu [ipx::current_core]
 set_property display_name risc_v_cpu [ipx::current_core]
 ipx::add_bus_interface instr_bram [ipx::current_core]
-set_property abstraction_type_vlnv xilinx.com:interface:bram_rtl:1.0 [ipx::get_bus_interfaces instr_bram -of_objects [ipx::current_core]]
-set_property bus_type_vlnv xilinx.com:interface:bram:1.0 [ipx::get_bus_interfaces instr_bram -of_objects [ipx::current_core]]
-ipx::add_port_map RST [ipx::get_bus_interfaces instr_bram -of_objects [ipx::current_core]]
-set_property physical_name instr_mem_reset [ipx::get_port_maps RST -of_objects [ipx::get_bus_interfaces instr_bram -of_objects [ipx::current_core]]]
-ipx::add_port_map CLK [ipx::get_bus_interfaces instr_bram -of_objects [ipx::current_core]]
-set_property physical_name instr_mem_clk [ipx::get_port_maps CLK -of_objects [ipx::get_bus_interfaces instr_bram -of_objects [ipx::current_core]]]
-ipx::add_port_map DIN [ipx::get_bus_interfaces instr_bram -of_objects [ipx::current_core]]
-set_property physical_name instr_mem_init_data_in [ipx::get_port_maps DIN -of_objects [ipx::get_bus_interfaces instr_bram -of_objects [ipx::current_core]]]
-ipx::add_port_map EN [ipx::get_bus_interfaces instr_bram -of_objects [ipx::current_core]]
-set_property physical_name instr_mem_init_enable [ipx::get_port_maps EN -of_objects [ipx::get_bus_interfaces instr_bram -of_objects [ipx::current_core]]]
-ipx::add_port_map DOUT [ipx::get_bus_interfaces instr_bram -of_objects [ipx::current_core]]
-set_property physical_name instr_mem_init_data_out [ipx::get_port_maps DOUT -of_objects [ipx::get_bus_interfaces instr_bram -of_objects [ipx::current_core]]]
-ipx::add_port_map WE [ipx::get_bus_interfaces instr_bram -of_objects [ipx::current_core]]
-set_property physical_name instr_mem_init_we [ipx::get_port_maps WE -of_objects [ipx::get_bus_interfaces instr_bram -of_objects [ipx::current_core]]]
-ipx::add_port_map ADDR [ipx::get_bus_interfaces instr_bram -of_objects [ipx::current_core]]
-set_property physical_name instr_mem_init_addr [ipx::get_port_maps ADDR -of_objects [ipx::get_bus_interfaces instr_bram -of_objects [ipx::current_core]]]
+set_property abstraction_type_vlnv xilinx.com:interface:bram_rtl:1.0 [ipx::get_bus_interfaces instr_mem -of_objects [ipx::current_core]]
+set_property bus_type_vlnv xilinx.com:interface:bram:1.0 [ipx::get_bus_interfaces instr_mem -of_objects [ipx::current_core]]
+ipx::add_port_map RST [ipx::get_bus_interfaces instr_mem -of_objects [ipx::current_core]]
+set_property physical_name instr_mem_init_reset [ipx::get_port_maps RST -of_objects [ipx::get_bus_interfaces instr_mem -of_objects [ipx::current_core]]]
+ipx::add_port_map CLK [ipx::get_bus_interfaces instr_mem -of_objects [ipx::current_core]]
+set_property physical_name instr_mem_init_clk [ipx::get_port_maps CLK -of_objects [ipx::get_bus_interfaces instr_mem -of_objects [ipx::current_core]]]
+ipx::add_port_map DIN [ipx::get_bus_interfaces instr_mem -of_objects [ipx::current_core]]
+set_property physical_name instr_mem_init_data_in [ipx::get_port_maps DIN -of_objects [ipx::get_bus_interfaces instr_mem -of_objects [ipx::current_core]]]
+ipx::add_port_map EN [ipx::get_bus_interfaces instr_mem -of_objects [ipx::current_core]]
+set_property physical_name instr_mem_init_enable [ipx::get_port_maps EN -of_objects [ipx::get_bus_interfaces instr_mem -of_objects [ipx::current_core]]]
+ipx::add_port_map DOUT [ipx::get_bus_interfaces instr_mem -of_objects [ipx::current_core]]
+set_property physical_name instr_mem_init_data_out [ipx::get_port_maps DOUT -of_objects [ipx::get_bus_interfaces instr_mem -of_objects [ipx::current_core]]]
+ipx::add_port_map WE [ipx::get_bus_interfaces instr_mem -of_objects [ipx::current_core]]
+set_property physical_name instr_mem_init_we [ipx::get_port_maps WE -of_objects [ipx::get_bus_interfaces instr_mem -of_objects [ipx::current_core]]]
+ipx::add_port_map ADDR [ipx::get_bus_interfaces instr_mem -of_objects [ipx::current_core]]
+set_property physical_name instr_mem_init_addr [ipx::get_port_maps ADDR -of_objects [ipx::get_bus_interfaces instr_mem -of_objects [ipx::current_core]]]
+
 ipx::add_bus_interface data_bram [ipx::current_core]
-set_property abstraction_type_vlnv xilinx.com:interface:bram_rtl:1.0 [ipx::get_bus_interfaces data_bram -of_objects [ipx::current_core]]
-set_property bus_type_vlnv xilinx.com:interface:bram:1.0 [ipx::get_bus_interfaces data_bram -of_objects [ipx::current_core]]
-ipx::add_port_map RST [ipx::get_bus_interfaces data_bram -of_objects [ipx::current_core]]
-set_property physical_name data_mem_reset [ipx::get_port_maps RST -of_objects [ipx::get_bus_interfaces data_bram -of_objects [ipx::current_core]]]
-ipx::add_port_map CLK [ipx::get_bus_interfaces data_bram -of_objects [ipx::current_core]]
-set_property physical_name data_mem_clk [ipx::get_port_maps CLK -of_objects [ipx::get_bus_interfaces data_bram -of_objects [ipx::current_core]]]
-ipx::add_port_map DIN [ipx::get_bus_interfaces data_bram -of_objects [ipx::current_core]]
-set_property physical_name data_mem_init_data_in [ipx::get_port_maps DIN -of_objects [ipx::get_bus_interfaces data_bram -of_objects [ipx::current_core]]]
-ipx::add_port_map EN [ipx::get_bus_interfaces data_bram -of_objects [ipx::current_core]]
-set_property physical_name data_mem_init_enable [ipx::get_port_maps EN -of_objects [ipx::get_bus_interfaces data_bram -of_objects [ipx::current_core]]]
-ipx::add_port_map DOUT [ipx::get_bus_interfaces data_bram -of_objects [ipx::current_core]]
-set_property physical_name data_mem_init_data_out [ipx::get_port_maps DOUT -of_objects [ipx::get_bus_interfaces data_bram -of_objects [ipx::current_core]]]
-ipx::add_port_map WE [ipx::get_bus_interfaces data_bram -of_objects [ipx::current_core]]
-set_property physical_name data_mem_init_we [ipx::get_port_maps WE -of_objects [ipx::get_bus_interfaces data_bram -of_objects [ipx::current_core]]]
-ipx::add_port_map ADDR [ipx::get_bus_interfaces data_bram -of_objects [ipx::current_core]]
-set_property physical_name data_mem_init_addr [ipx::get_port_maps ADDR -of_objects [ipx::get_bus_interfaces data_bram -of_objects [ipx::current_core]]]
+set_property abstraction_type_vlnv xilinx.com:interface:bram_rtl:1.0 [ipx::get_bus_interfaces data_mem -of_objects [ipx::current_core]]
+set_property bus_type_vlnv xilinx.com:interface:bram:1.0 [ipx::get_bus_interfaces data_mem -of_objects [ipx::current_core]]
+ipx::add_port_map RST [ipx::get_bus_interfaces data_mem -of_objects [ipx::current_core]]
+set_property physical_name data_mem_init_reset [ipx::get_port_maps RST -of_objects [ipx::get_bus_interfaces data_mem -of_objects [ipx::current_core]]]
+ipx::add_port_map CLK [ipx::get_bus_interfaces data_mem -of_objects [ipx::current_core]]
+set_property physical_name data_mem_init_clk [ipx::get_port_maps CLK -of_objects [ipx::get_bus_interfaces data_mem -of_objects [ipx::current_core]]]
+ipx::add_port_map DIN [ipx::get_bus_interfaces data_mem -of_objects [ipx::current_core]]
+set_property physical_name data_mem_init_data_in [ipx::get_port_maps DIN -of_objects [ipx::get_bus_interfaces data_mem -of_objects [ipx::current_core]]]
+ipx::add_port_map EN [ipx::get_bus_interfaces data_mem -of_objects [ipx::current_core]]
+set_property physical_name data_mem_init_enable [ipx::get_port_maps EN -of_objects [ipx::get_bus_interfaces data_mem -of_objects [ipx::current_core]]]
+ipx::add_port_map DOUT [ipx::get_bus_interfaces data_mem -of_objects [ipx::current_core]]
+set_property physical_name data_mem_init_data_out [ipx::get_port_maps DOUT -of_objects [ipx::get_bus_interfaces data_mem -of_objects [ipx::current_core]]]
+ipx::add_port_map WE [ipx::get_bus_interfaces data_mem -of_objects [ipx::current_core]]
+set_property physical_name data_mem_init_we [ipx::get_port_maps WE -of_objects [ipx::get_bus_interfaces data_mem -of_objects [ipx::current_core]]]
+ipx::add_port_map ADDR [ipx::get_bus_interfaces data_mem -of_objects [ipx::current_core]]
+set_property physical_name data_mem_init_addr [ipx::get_port_maps ADDR -of_objects [ipx::get_bus_interfaces data_mem -of_objects [ipx::current_core]]]
+
 
 ipx::add_bus_parameter MASTER_TYPE [ipx::get_bus_interfaces instr_bram -of_objects [ipx::current_core]]
 set_property value BRAM_CTRL [ipx::get_bus_parameters MASTER_TYPE -of_objects [ipx::get_bus_interfaces instr_bram -of_objects [ipx::current_core]]]
@@ -103,22 +105,10 @@ INFO: [xilinx.co
 regenerate_bd_layout
 validate_bd_design
 
-# GENERATE BLOCK DESIGN
-
-ipx::create_xgui_files [ipx::current_core]
-ipx::update_checksums [ipx::current_core]
-ipx::check_integrity [ipx::current_core]
-ipx::save_core [ipx::current_core]
-update_ip_catalog -rebuild -repo_path /home/lazar/Desktop/tests/synth_test_2/synth_test_2.srcs
-upgrade_ip -vlnv FTN:user:risc_v_cpu:1.0 [get_ips project_design_risc_v_cpu_0_1] -log ip_upgrade.log
-export_ip_user_files -of_objects [get_ips project_design_risc_v_cpu_0_1] -no_script -sync -force -quiet
-generate_target all [get_files /home/lazar/Desktop/tests/synth_test_2/synth_test_2.srcs/sources_1/bd/project_design/project_design.bd]
-catch { config_ip_cache -export [get_ips -all project_design_axi_bram_ctrl_0_0] }
-catch { config_ip_cache -export [get_ips -all project_design_axi_smc_0] }
-catch { config_ip_cache -export [get_ips -all project_design_rst_ps7_0_100M_0] }
-catch { config_ip_cache -export [get_ips -all project_design_risc_v_cpu_0_1] }
-export_ip_user_files -of_objects [get_files /home/lazar/Desktop/tests/synth_test_2/synth_test_2.srcs/sources_1/bd/project_design/project_design.bd] -no_script -sync -force -quiet
-create_ip_run [get_files -of_objects [get_fileset sources_1] /home/lazar/Desktop/tests/synth_test_2/synth_test_2.srcs/sources_1/bd/project_design/project_design.bd]
-launch_runs project_design_processing_system7_0_0_synth_1 project_design_axi_bram_ctrl_0_0_synth_1 project_design_axi_smc_0_synth_1 project_design_rst_ps7_0_100M_0_synth_1 project_design_risc_v_cpu_0_1_synth_1 -jobs 6
-export_simulation -of_objects [get_files /home/lazar/Desktop/tests/synth_test_2/synth_test_2.srcs/sources_1/bd/project_design/project_design.bd] -directory /home/lazar/Desktop/tests/synth_test_2/synth_test_2.ip_user_files/sim_scripts -ip_user_files_dir /home/lazar/Desktop/tests/synth_test_2/synth_test_2.ip_user_files -ipstatic_source_dir /home/lazar/Desktop/tests/synth_test_2/synth_test_2.ip_user_files/ipstatic -lib_map_path [list {modelsim=/home/lazar/Desktop/tests/synth_test_2/synth_test_2.cache/compile_simlib/modelsim} {questa=/home/lazar/Desktop/tests/synth_test_2/synth_test_2.cache/compile_simlib/questa} {xcelium=/home/lazar/Desktop/tests/synth_test_2/synth_test_2.cache/compile_simlib/xcelium} {vcs=/home/lazar/Desktop/tests/synth_test_2/synth_test_2.cache/compile_simlib/vcs} {riviera=/home/lazar/Desktop/tests/synth_test_2/synth_test_2.cache/compile_simlib/riviera}] -use_ip_compiled_libs -force -quiet
+# GENERATE WRAPPER
+make_wrapper -files [get_files /home/lazar/Desktop/tests/synth_test_2/synth_test_2.srcs/sources_1/bd/project_packed/project_packed.bd] -top
+import_files -force -norecurse /home/lazar/Desktop/tests/synth_test_2/synth_test_2.gen/sources_1/bd/project_packed/hdl/project_packed_wrapper.v
+update_compile_order -fileset sources_1
+set_property top project_packed_wrapper [current_fileset]
+update_compile_order -fileset sources_1
 

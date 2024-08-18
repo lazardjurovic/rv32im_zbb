@@ -19,6 +19,8 @@ module top(
         output wire [31:0] instr_mem_init_data_out,
         input wire instr_mem_init_enable,
         input wire [3:0] instr_mem_init_we,
+        input wire instr_mem_init_reset,
+        input wire instr_mem_init_clk,
         
         // data memory interface
         
@@ -26,7 +28,9 @@ module top(
         input wire [31:0] data_mem_init_data_in,
         output wire [31:0] data_mem_init_data_out,
         input wire data_mem_init_enable,
-        input wire [3:0] data_mem_init_we
+        input wire [3:0] data_mem_init_we,
+        input wire data_mem_init_reset,
+        input wire data_mem_init_clk
         
     );
     
@@ -81,7 +85,7 @@ module top(
     .ena(if_id_en_s),       // Port A RAM Enable, for additional power savings, disable port when not in use
     .enb(instr_mem_init_enable),       // Port B RAM Enable, for additional power savings, disable port when not in use
     .rsta(reset),     // Port A output reset (does not affect memory contents)
-    .rstb(reset),     // Port B output reset (does not affect memory contents)
+    .rstb(instr_mem_init_reset),     // Port B output reset (does not affect memory contents)
     .regcea(1'b1), // Port A output register enable
     .regceb(1'b1), // Port B output register enable
     .douta(instr_mem_read_s),   // Port A RAM output data, width determined from RAM_WIDTH
@@ -102,7 +106,7 @@ module top(
     .ena(1'b1),       // Port A RAM Enable, for additional power savings, disable port when not in use
     .enb(data_mem_init_enable),       // Port B RAM Enable, for additional power savings, disable port when not in use
     .rsta(reset),     // Port A output reset (does not affect memory contents)
-    .rstb(reset),     // Port B output reset (does not affect memory contents)
+    .rstb(data_mem_init_reset),     // Port B output reset (does not affect memory contents)
     .regcea(1'b1), // Port A output register enable
     .regceb(1'b0), // Port B output register enable
     .douta(data_mem_read_s),   // Port A RAM output data, width determined from RAM_WIDTH

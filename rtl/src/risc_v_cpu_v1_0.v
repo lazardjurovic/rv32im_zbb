@@ -21,8 +21,8 @@
         output wire [31:0] instr_mem_init_data_out,
         input wire instr_mem_init_enable,
         input wire [3:0] instr_mem_init_we,
-        input wire instr_mem_reset,
-        input wire instr_mem_clk,
+        input wire instr_mem_init_reset,
+        input wire instr_mem_init_clk,
         
         // data memory interface
         
@@ -31,8 +31,8 @@
         output wire [31:0] data_mem_init_data_out,
         input wire data_mem_init_enable,
         input wire [3:0] data_mem_init_we,
-        input wire data_mem_reset,
-        input wire data_mem_clk,
+        input wire data_mem_init_reset,
+        input wire data_mem_init_clk,
 		
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -117,6 +117,8 @@
         .instr_mem_init_data_out(instr_mem_init_data_out),
         .instr_mem_init_enable(instr_mem_init_enable),
         .instr_mem_init_we(instr_mem_init_we),
+        .instr_mem_init_reset(instr_mem_init_reset),
+        .instr_mem_init_clk(instr_mem_init_clk),
         
         // data memory interface
         
@@ -124,7 +126,9 @@
         .data_mem_init_data_in(data_mem_init_data_in),
         .data_mem_init_data_out(data_mem_init_data_out),
         .data_mem_init_enable(data_mem_init_enable),
-        .data_mem_init_we(data_mem_init_we)
+        .data_mem_init_we(data_mem_init_we),
+        .data_mem_init_reset(data_mem_init_reset),
+        .data_mem_init_clk(data_mem_init_clk)
 
     );
 
