@@ -2,12 +2,13 @@
  `define AXI_LITE_IF_SV
 
 interface axi_lite_if (
-    input  logic clk,
-    input  logic reset_n
+    input  logic clk
 );
     parameter integer AXI_DATA_WIDTH = 32;
     parameter integer AXI_ADDR_WIDTH = 4;
-
+    
+    logic ARESETN;
+    
     // Write Address Channel
     logic [AXI_ADDR_WIDTH-1:0] AWADDR;
     logic        AWVALID;

@@ -38,15 +38,19 @@ class axi_lite_driver extends uvm_driver#(axi_seq_item);
     endtask
 
     task drive_write(logic [32-1:0] addr, logic [32-1:0] data);
-        // Write Address Channel
+        
+        vif.WDATA <= data;
         vif.AWADDR <= addr;
+    
+        vif.ARESETN <= 1'b1;
+        // Write Address Channel
         vif.AWVALID <= 1;
+        vif.WVALID <= 1;
         @(posedge vif.clk);
         while (!vif.AWREADY) @(posedge vif.clk);
         vif.AWVALID <= 0;
 
         // Write Data Channel
-        vif.WDATA <= data;
         vif.WVALID <= 1;
         vif.WSTRB <= 4'b1111; // Assuming full write strobes
         @(posedge vif.clk);
@@ -62,6 +66,7 @@ class axi_lite_driver extends uvm_driver#(axi_seq_item);
     endtask
 
     task drive_read(logic [32-1:0] addr, output logic [32-1:0] data);
+        vif.ARESETN <= 1'b1;
         // Read Address Channel
         vif.ARADDR <= addr;
         vif.ARVALID <= 1;
@@ -70,7 +75,6 @@ class axi_lite_driver extends uvm_driver#(axi_seq_item);
         vif.ARVALID <= 0;
 
         // Read Data Channel
-        vif.RREADY <= 1;
         @(posedge vif.clk);
         while (!vif.RVALID) @(posedge vif.clk);
         data = vif.RDATA;

@@ -13,11 +13,12 @@ module cpu_verif_top;
 
         uvm_event stop_flag_event;
 
-        logic clk,reset,overflow,zero,stop;
+        logic clk,reset,overflow,zero,stop,reset_n;
+        logic axi_reset_port;
 
          bram_if instr_bram_vif(clk,reset);
          bram_if data_bram_vif(clk,reset);
-         axi_lite_if axi_lite_vif(clk,reset);
+         axi_lite_if axi_lite_vif(clk);
 
         risc_v_cpu_v1_0 DUT(
                 .instr_mem_init_addr(instr_bram_vif.bram_addr),
@@ -33,7 +34,7 @@ module cpu_verif_top;
                 .data_mem_init_we(data_bram_vif.bram_we),
 
                 .s00_axi_aclk(clk),
-	        .s00_axi_aresetn(reset),
+		        .s00_axi_aresetn(axi_reset_port),
                 .s00_axi_awaddr(axi_lite_vif.AWADDR),
                 .s00_axi_awprot(axi_lite_vif.AWPROT),
                 .s00_axi_awvalid(axi_lite_vif.AWVALID),
@@ -73,9 +74,11 @@ module cpu_verif_top;
 
         // clock and reset init.
         initial begin
+            axi_reset_port <= 0;
             clk <= 0;
             reset <= 1;
             #50 reset <= 0;
+            axi_reset_port <= 1;
             #20000 $finish;
         end
 

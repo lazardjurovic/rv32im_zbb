@@ -57,7 +57,9 @@ class cpu_test extends uvm_test;
     
     task main_phase(uvm_phase phase);
         phase.raise_objection(this);
-
+        
+        #50ns
+        
         fork
             axi_test_seq.start(m_env.axi_agt.seqr);                 // Hold reset of CPU high
             data_bram_test_seq.start(m_env.data_bram_agt.seqr);     // Initialize data memory
