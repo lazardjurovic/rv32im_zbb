@@ -33,7 +33,7 @@ module cpu_verif_top;
                 .data_mem_init_we(data_bram_vif.bram_we),
 
                 .s00_axi_aclk(clk),
-		        .s00_axi_aresetn(reset),
+	        .s00_axi_aresetn(reset),
                 .s00_axi_awaddr(axi_lite_vif.AWADDR),
                 .s00_axi_awprot(axi_lite_vif.AWPROT),
                 .s00_axi_awvalid(axi_lite_vif.AWVALID),

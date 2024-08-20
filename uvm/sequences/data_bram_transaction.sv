@@ -21,7 +21,7 @@ class data_bram_transaction extends bram_base_seq;
         int addr = 0;
 
         // Open the file for reading
-        file = $fopen("../../esl/vp/data_mem.txt", "r");
+        file = $fopen("/home/lazar/Desktop/y24-g05/esl/vp/data_mem.txt", "r");
         if (file == 0) begin
             `uvm_fatal("FILE_ERROR", "Unable to open file!")
         end
