@@ -8,6 +8,9 @@ import test_pkg::*;
 import axi_agent_pkg::*;
 import bram_agent_pkg::*;
 
+`uvm_analysis_imp_decl(_1)
+`uvm_analysis_imp_decl(_2)
+
 class cpu_scoreboard extends uvm_scoreboard;
 
     `uvm_component_utils_begin(cpu_scoreboard)
@@ -17,8 +20,8 @@ class cpu_scoreboard extends uvm_scoreboard;
     // Flag indicating when to check data in the data BRAM
     bit start_check = 1'b0;
 
-    uvm_analysis_imp #(axi_seq_item, cpu_scoreboard) axi_ap_collect;
-    uvm_analysis_imp #(bram_seq_item, cpu_scoreboard) data_bram_ap_collect;
+    uvm_analysis_imp_1 #(axi_seq_item, cpu_scoreboard) axi_ap_collect;
+    uvm_analysis_imp_2 #(bram_seq_item, cpu_scoreboard) data_bram_ap_collect;
 
     // Queues for storing the received transactions
     protected axi_seq_item axi_trans_q[$];
@@ -45,7 +48,7 @@ class cpu_scoreboard extends uvm_scoreboard;
     endfunction
 
     // Receive AXI transactions and monitor stop_flag
-    virtual function void write(axi_seq_item t);
+    virtual function void write_1(axi_seq_item t);
         axi_trans_q.push_back(t);
         
         // Check if stop_flag is high in the transaction
@@ -53,6 +56,10 @@ class cpu_scoreboard extends uvm_scoreboard;
             start_check = 1;
             $display("Stop flag detected. Preparing to check data in data BRAM.");
         end
+    endfunction
+    
+    virtual function void write_2(bram_seq_item t);
+    
     endfunction
 
     // Receive data BRAM transactions
@@ -84,7 +91,7 @@ class cpu_scoreboard extends uvm_scoreboard;
             end
 
             golden_item = bram_seq_item::type_id::create("golden_item");
-            golden_item.data = data;
+            golden_item.dout = data;
             expected_data_q.push_back(golden_item);
         end
 
@@ -98,14 +105,16 @@ class cpu_scoreboard extends uvm_scoreboard;
         bram_seq_item expected = expected_data_q.pop_front();
 
         // Simple comparison
-        if (t.data !== expected.data) begin
-            `uvm_error("MISMATCH", $sformatf("Mismatch in data BRAM. Expected: %0h, Got: %0h", expected.data, t.data));
+        if (t.dout !== expected.dout) begin
+            `uvm_error("MISMATCH", $sformatf("Mismatch in data BRAM. Expected: %0h, Got: %0h", expected.dout, t.dout));
         end 
         else begin
-            `uvm_info("MATCH", $sformatf("Data BRAM match: %0h", t.data), UVM_LOW);
+            `uvm_info("MATCH", $sformatf("Data BRAM match: %0h", t.dout), UVM_LOW);
         end
     endfunction
 
 endclass : cpu_scoreboard
+
+
 
 `endif

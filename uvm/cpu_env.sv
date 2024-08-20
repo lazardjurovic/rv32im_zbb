@@ -66,7 +66,7 @@ class cpu_env extends uvm_env;
         uvm_config_db#(virtual axi_lite_if)::set(this, "axi_agt", "axi_lite_if", axi_lite_vif);
         
         // Scoreboard instance
-        sb = cpu_scoreboard::type_id::create("sb", this);
+       sb = cpu_scoreboard::type_id::create("sb", this);
 
         // Now instantiate agents
         axi_agt = axi_agent::type_id::create("axi_agt", this);
@@ -79,8 +79,8 @@ class cpu_env extends uvm_env;
         super.connect_phase(phase);
 
         // Connect analysis ports to the scoreboard
-        axi_agt.mon.axi_ap.connect(sb.axi_ap_collect);
-        data_bram_agt.mon.bram_ap.connect(sb.data_bram_ap_collect);
+        axi_agt.mon.ap.connect(sb.axi_ap_collect);
+        data_bram_agt.mon.ap.connect(sb.data_bram_ap_collect);
 
     endfunction
 
