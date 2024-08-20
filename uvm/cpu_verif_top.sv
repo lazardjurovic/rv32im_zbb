@@ -11,6 +11,8 @@ import configurations_pkg::*;
 
 module cpu_verif_top;
 
+        uvm_event stop_flag_event;
+
         logic clk,reset,overflow,zero,stop;
 
          bram_if instr_bram_vif(clk,reset);
@@ -60,6 +62,9 @@ module cpu_verif_top;
          uvm_config_db#(virtual axi_lite_if)::set(null, "uvm_test_top.m_env", "axi_lite_if", axi_lite_vif);
          uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.m_env", "instr_bram_if", instr_bram_vif);
          uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.m_env", "data_bram_if", data_bram_vif);
+         
+        //Setting stop event to database
+        uvm_config_db#(uvm_event)::set(null, "uvm_test_top.m_env","stop_flag_event",stop_flag_event);
               
            $display("Simulation starting...");
            run_test("cpu_test");

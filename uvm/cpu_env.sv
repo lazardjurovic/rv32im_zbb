@@ -20,6 +20,8 @@ class cpu_env extends uvm_env;
     axi_agent axi_agt;
     bram_agent instr_bram_agt;
     bram_agent data_bram_agt;
+    
+    uvm_event stop_flag_event;
 
     // Analysis ports (you can define scoreboards later to connect to these ports)
     uvm_analysis_port #(axi_seq_item) axi_ap;
@@ -52,6 +54,7 @@ class cpu_env extends uvm_env;
             cfg = cpu_config::type_id::create("cfg", this);
             uvm_config_db#(cpu_config)::set(this, "", "cpu_config", cfg);
         end
+       
         
         uvm_config_db#(cpu_config)::set(this, "axi_agt", "cpu_config", cfg);
         uvm_config_db#(cpu_config)::set(this, "instr_bram_agt", "cpu_config", cfg);

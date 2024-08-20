@@ -67,7 +67,7 @@ class cpu_test extends uvm_test;
         axi_read_test_seq.start(m_env.axi_agt.seqr);                // Release reset of CPU and read stop_flag          
 
          // Wait for the stop flag event
-        wait(stop_flag_event.triggered);
+        stop_flag_event.wait_trigger();
 
         // Start the sequence for reading data memory on port B
         cpu_test_seq.start(m_env.data_bram_agt.seqr);
