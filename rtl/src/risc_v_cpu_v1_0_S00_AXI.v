@@ -17,9 +17,10 @@
 		// Users to add ports here
                     
         output reg reset,
-        input wire overflow_o,
-        input wire zero_o,
-        input wire stop_o,    
+        input wire overflow_i,
+        input wire zero_i,
+        input wire stop_i,    
+        
         
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -240,9 +241,10 @@
 	              //if ( S_AXI_WSTRB[byte_index] == 1 ) begin
 	                // Respective byte enables are asserted as per write strobes 
 	                // Slave register 0
-	                reset_reg <= {32{S_AXI_WDATA[0]}};
+	                reset <= {32{S_AXI_WDATA[0]}};
 	                //reset <= S_AXI_WDATA[0];
 	              //end  
+	          /* CASES NOT NEEDED SINCE ONLY RESET_REG WILL BE WRITTEN TO
 	          2'h1:
 	            for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
 	              if ( S_AXI_WSTRB[byte_index] == 1 ) begin
@@ -264,11 +266,12 @@
 	                // Slave register 3
 	                stop_reg[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
 	              end  
+	           */
 	          default : begin
 	                      reset_reg <= reset_reg;
-	                      overflow_reg <= overflow_reg;
-	                      zero_reg <= zero_reg;
-	                      stop_reg <= stop_reg;
+	                      //overflow_reg <= overflow_reg;
+	                      //zero_reg <= zero_reg;
+	                      //stop_reg <= stop_reg;
 	                    end
 	        endcase
 	      end
@@ -377,10 +380,10 @@
 	begin
 	      // Address decoding for reading registers
 	      case ( axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] )
-	        2'h0   : reg_data_out <= reset_reg;
-	        2'h1   : reg_data_out <= overflow_reg;
-	        2'h2   : reg_data_out <= zero_reg;
-	        2'h3   : reg_data_out <= stop_reg;
+	        2'h0   : reg_data_out <= {32{reset_reg}};
+	        2'h1   : reg_data_out <= {32{overflow_reg}};
+	        2'h2   : reg_data_out <= {32{zero_reg}};
+	        2'h3   : reg_data_out <= {32{stop_reg}};
 	        default : reg_data_out <= 0;
 	      endcase
 	end
@@ -404,22 +407,15 @@
 	    end
 	end    
 
-	// Add user logic here
-    /*
-    always @(posedge S_AXI_ACLK)
-    begin
-    
-        reg_data_out <= S_AXI_WDATA[31:0];
-    
-    end
-    */
-    
-   /*
+	// Add user logic here    
+   
    always@(posedge S_AXI_ACLK)
    begin
-        reset <= reset_reg;
+        overflow_reg <= {32{overflow_i}};
+        zero_reg <= {32{zero_i}};
+        stop_reg <= {32{stop_i}};
    end
-   */
+   
 
 	// User logic ends
 

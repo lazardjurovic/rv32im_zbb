@@ -92,9 +92,9 @@
 		.S_AXI_RREADY(s00_axi_rready),
 		
 		.reset(reset_s),
-        .overflow_o(overflow_s),
-        .zero_o(zero_s),
-        .stop_o(stop_s)
+        .overflow_i(overflow_s),
+        .zero_i(zero_s),
+        .stop_i(stop_s)
 		
 	);
 
