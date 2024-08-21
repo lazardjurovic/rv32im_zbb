@@ -46,6 +46,7 @@ class instr_bram_transaction extends bram_base_seq;
             end
             else begin
                 `uvm_warning("PARSE_ERROR", {"Unable to parse line: ", line})
+                break;
             end
 
             addr = addr + 4;

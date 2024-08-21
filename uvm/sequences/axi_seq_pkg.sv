@@ -10,5 +10,6 @@ package axi_seq_pkg;
     `include "axi_base_seq.sv"
     `include "axi_transaction.sv"
     `include "axi_read_stop_flag.sv"
+    `include "axi_reset_low_seq.sv"
 endpackage 
 `endif

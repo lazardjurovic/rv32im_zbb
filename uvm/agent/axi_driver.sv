@@ -26,8 +26,12 @@ class axi_lite_driver extends uvm_driver#(axi_seq_item);
 
         forever begin
             seq_item_port.get_next_item(req);
-
-            if (req.write) begin
+                
+            if (req == null) begin
+                `uvm_fatal("NULL_REQ", "Received a null request item in drive_tr task")
+            end    
+               
+            if (req.write == 1'b1) begin
                 drive_write(req.addr, req.data);
             end else begin
                 drive_read(req.addr, req.data);
@@ -38,6 +42,8 @@ class axi_lite_driver extends uvm_driver#(axi_seq_item);
     endtask
 
     task drive_write(logic [32-1:0] addr, logic [32-1:0] data);
+        
+        $display("Writing %d to %d", data,addr);
         
         vif.WDATA <= data;
         vif.AWADDR <= addr;

@@ -45,7 +45,8 @@ class data_bram_transaction extends bram_base_seq;
                 finish_item(bram_it);
             end
             else begin
-                `uvm_warning("PARSE_ERROR", {"Unable to parse line: ", line})
+                `uvm_warning("PARSE_ERROR", {"Unable to parse line: ", line, "@ ", $time})
+                break;
             end
 
             addr = addr + 4;

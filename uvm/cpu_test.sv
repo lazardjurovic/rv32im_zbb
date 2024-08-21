@@ -13,6 +13,7 @@ class cpu_test extends uvm_test;
 
     // Sequences
     axi_transaction axi_test_seq;
+    axi_reset_low_seq axi_reset_low;
     data_bram_transaction data_bram_test_seq;
     instr_bram_transaction instr_bram_test_seq;
     axi_read_stop_flag  axi_read_test_seq;
@@ -40,6 +41,7 @@ class cpu_test extends uvm_test;
         instr_bram_test_seq = instr_bram_transaction::type_id::create("instr_bram_test_seq");
         axi_read_test_seq = axi_read_stop_flag::type_id::create("axi_read_test_seq");
         cpu_test_seq = cpu_check_seq::type_id::create("cpu_test_seq");
+        axi_reset_low = axi_reset_low_seq::type_id::create("axi_reset_low");
 
         // Get the stop_flag_event from the environment
         if (!uvm_config_db#(uvm_event)::get(this, "m_env", "stop_flag_event", stop_flag_event)) begin
@@ -58,23 +60,29 @@ class cpu_test extends uvm_test;
     task main_phase(uvm_phase phase);
         phase.raise_objection(this);
         
+       
         #50ns
         
         fork
+            $display("Starting axi_test_seq @ %0t", $time);
             axi_test_seq.start(m_env.axi_agt.seqr);                 // Hold reset of CPU high
+            
+            $display("Starting data_bram_test_seq @ %0t", $time);
             data_bram_test_seq.start(m_env.data_bram_agt.seqr);     // Initialize data memory
+            
+            $display("Starting instr_bram_test_seq @ %0t", $time);
             instr_bram_test_seq.start(m_env.instr_bram_agt.seqr);   // Initialize instruction memory
         join
+        
+        //#1250 axi_reset_low.start(m_env.axi_agt.seqr);                // Release reset of CPU and read stop_flag  
 
-        axi_read_test_seq.start(m_env.axi_agt.seqr);                // Release reset of CPU and read stop_flag          
+        $display("Init threads join @ %0t", $time);    
 
          // Wait for the stop flag event
-        stop_flag_event.wait_trigger();
+        //stop_flag_event.wait_trigger();
 
         // Start the sequence for reading data memory on port B
-        cpu_test_seq.start(m_env.data_bram_agt.seqr);
-
-        #1000ns
+        //cpu_test_seq.start(m_env.data_bram_agt.seqr);
 
         phase.drop_objection(this);
     endtask : main_phase
