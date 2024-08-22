@@ -83,6 +83,9 @@ class cpu_test extends uvm_test;
 
         // Start the sequence for reading data memory on port B
         //cpu_test_seq.start(m_env.data_bram_agt.seqr);
+        
+        #5000ns
+        $display("Reached 5000ns");
 
         phase.drop_objection(this);
     endtask : main_phase

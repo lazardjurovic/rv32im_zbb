@@ -60,7 +60,7 @@ class axi_lite_driver extends uvm_driver#(axi_seq_item);
         vif.WVALID <= 1;
         vif.WSTRB <= 4'b1111; // Assuming full write strobes
         @(posedge vif.clk);
-        while (!vif.WREADY) @(posedge vif.clk);
+        //while (!vif.WREADY) @(posedge vif.clk);
         vif.WVALID <= 0;
 
         // Write Response Channel

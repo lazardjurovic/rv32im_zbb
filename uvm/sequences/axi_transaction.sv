@@ -12,10 +12,12 @@ class axi_transaction extends axi_base_seq;
 
     // Main sequence task
     virtual task body();
-        axi_seq_item req;
+        axi_seq_item req,req2;
 
         // Create the sequence item
         req = axi_seq_item::type_id::create("req");
+        req2 = axi_seq_item::type_id::create("re2");
+
 
         // Set the reset of the CPU
         req.addr = 32'h0000_0000; // Address for reset
@@ -23,6 +25,15 @@ class axi_transaction extends axi_base_seq;
         req.write = 1; // Write transaction
         start_item(req);
         finish_item(req);
+        
+        #1250ns
+        $display("Reset signal goes to 0");
+        // Set the reset of the CPU
+        req2.addr = 32'h0000_0000; // Address for reset
+        req2.data = 32'h0000_0000; // Data for the reset
+        req2.write = 1; // Write transaction
+        start_item(req2);
+        finish_item(req2);
 
     endtask
 

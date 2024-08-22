@@ -79,7 +79,7 @@ module cpu_verif_top;
             reset <= 1;
             #50 reset <= 0;
             axi_reset_port <= 1;
-            #20000 $finish;
+            #6000ns $finish;
         end
 
         // clock generation
