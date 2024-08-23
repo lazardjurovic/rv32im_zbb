@@ -55,11 +55,12 @@ class cpu_env extends uvm_env;
             uvm_config_db#(cpu_config)::set(this, "", "cpu_config", cfg);
         end
        
+        uvm_config_db#(uvm_event)::get(this,"","stop_flag_event",stop_flag_event);
         
         uvm_config_db#(cpu_config)::set(this, "axi_agt", "cpu_config", cfg);
         uvm_config_db#(cpu_config)::set(this, "instr_bram_agt", "cpu_config", cfg);
         uvm_config_db#(cpu_config)::set(this, "data_bram_agt", "cpu_config", cfg);
-        
+              
         // Set the virtual interfaces in the config database
         $display("Setting instr_bram_vif: %p", instr_bram_vif);
         uvm_config_db#(virtual bram_if)::set(this, "instr_bram_agt", "instr_bram_if", instr_bram_vif);

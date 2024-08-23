@@ -13,7 +13,7 @@ module cpu_verif_top;
 
         uvm_event stop_flag_event;
 
-        logic clk,reset,overflow,zero,stop,reset_n;
+        logic clk,reset,overflow,zero,stop;
         logic axi_reset_port;
 
          bram_if instr_bram_vif(clk,reset);
@@ -59,6 +59,7 @@ module cpu_verif_top;
     
         // run test
         initial begin      
+        stop_flag_event = new("stop_flag_event");
       
          uvm_config_db#(virtual axi_lite_if)::set(null, "uvm_test_top.m_env", "axi_lite_if", axi_lite_vif);
          uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.m_env", "instr_bram_if", instr_bram_vif);

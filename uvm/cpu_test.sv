@@ -48,6 +48,7 @@ class cpu_test extends uvm_test;
             `uvm_fatal("NO_STOP_FLAG_EVENT", "Stop flag event not found in uvm_config_db.")
         end
         
+        $display("STOP_FLAG_EVENT set to %p" , stop_flag_event);
         $display("Finished building sequences.");
 
     endfunction
@@ -72,6 +73,8 @@ class cpu_test extends uvm_test;
             
             $display("Starting instr_bram_test_seq @ %0t", $time);
             instr_bram_test_seq.start(m_env.instr_bram_agt.seqr);   // Initialize instruction memory
+            
+            //#200ns axi_read_test_seq.start(m_env.instr_bram_agt.seqr);
         join
         
         //#1250 axi_reset_low.start(m_env.axi_agt.seqr);                // Release reset of CPU and read stop_flag  
@@ -79,10 +82,11 @@ class cpu_test extends uvm_test;
         $display("Init threads join @ %0t", $time);    
 
          // Wait for the stop flag event
-        //stop_flag_event.wait_trigger();
+        stop_flag_event.wait_trigger();
 
         // Start the sequence for reading data memory on port B
-        //cpu_test_seq.start(m_env.data_bram_agt.seqr);
+        cpu_test_seq.start(m_env.data_bram_agt.seqr);
+        $display("[SCOREBOARD] Retreiving data from CPU registers.");
         
         #5000ns
         $display("Reached 5000ns");

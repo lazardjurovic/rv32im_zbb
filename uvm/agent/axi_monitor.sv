@@ -49,8 +49,8 @@ class axi_monitor extends uvm_monitor;
       tx.data = vif.RDATA;
       tx.resp = vif.RRESP;
 
-      // Check if the read is for the stop_flag at address 0xC
-      if (tx.addr == 32'h0000_000C) begin
+      // Check if the read is for the stop_flag at address 0x3
+      if (tx.addr == 32'h0000_0003) begin
         `uvm_info("AXI_MONITOR", $sformatf("Stop flag read detected: data = %b", tx.data), UVM_MEDIUM)
         
         // Notify the scoreboard via the analysis port

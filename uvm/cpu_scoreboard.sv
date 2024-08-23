@@ -44,7 +44,8 @@ class cpu_scoreboard extends uvm_scoreboard;
         start_check = 0;
         
         // Load golden vectors from a file
-        load_golden_vectors("../../esl/vp/golden_vector.txt");
+        load_golden_vectors("/home/lazar/Desktop/y24-g05/esl/vp/golden_vector.txt");
+        $display("[SCOREBOARD] Loaded golden vetors.");
     endfunction
 
     // Receive AXI transactions and monitor stop_flag
@@ -52,7 +53,7 @@ class cpu_scoreboard extends uvm_scoreboard;
         axi_trans_q.push_back(t);
         
         // Check if stop_flag is high in the transaction
-        if (t.addr == 32'h0000_000C && t.data == 1) begin
+        if (t.addr == 32'h0000_0003 && t.data == 1) begin
             start_check = 1;
             $display("Stop flag detected. Preparing to check data in data BRAM.");
         end
