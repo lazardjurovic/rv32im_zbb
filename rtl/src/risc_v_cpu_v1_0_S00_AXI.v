@@ -241,7 +241,7 @@
 	              //if ( S_AXI_WSTRB[byte_index] == 1 ) begin
 	                // Respective byte enables are asserted as per write strobes 
 	                // Slave register 0
-	                reset <= {32{S_AXI_WDATA[0]}};
+	                reset_reg <= {32{S_AXI_WDATA[0]}};
 	                //reset <= S_AXI_WDATA[0];
 	              //end  
 	          /* CASES NOT NEEDED SINCE ONLY RESET_REG WILL BE WRITTEN TO
