@@ -16,7 +16,7 @@
 	(
 		// Users to add ports here
                     
-        output reg reset,
+        output wire reset,
         input wire overflow_i,
         input wire zero_i,
         input wire stop_i,    
