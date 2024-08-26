@@ -13,6 +13,7 @@ class axi_read_stop_flag extends axi_base_seq;
     // Main sequence task
     virtual task body();
         axi_seq_item req;
+        bit [31:0] read_data;
 
         // Create the sequence item
         req = axi_seq_item::type_id::create("req");
@@ -28,7 +29,7 @@ class axi_read_stop_flag extends axi_base_seq;
         #50ns;
 
         // Continuous Read from address 0xC
-        forever begin
+        do begin
             req.addr = 32'h0000_000C; // Address of stop_flag
             req.data = 'x; // Don't care
             req.write = 0; // Read transaction
@@ -36,10 +37,14 @@ class axi_read_stop_flag extends axi_base_seq;
             finish_item(req);
 
             #10ns;
-        end
+            
+            read_data = req.data;
+            
+        end while (read_data != 32'hFFFF_FFFF);
 
     endtask
 
 endclass
 
 `endif
+

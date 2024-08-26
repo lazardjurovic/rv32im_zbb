@@ -13,7 +13,7 @@ class axi_reset_low_seq extends axi_base_seq;
     // Main sequence task
     virtual task body();
         axi_seq_item req;
-
+        
         // Create the sequence item
         req = axi_seq_item::type_id::create("req");
 
@@ -24,22 +24,9 @@ class axi_reset_low_seq extends axi_base_seq;
         start_item(req);
         finish_item(req);
         
-        // Wait
-        #50ns;
-
-        // Continuous Read from address 0xC
-        forever begin
-            req.addr = 32'h0000_000C; // Address of stop_flag
-            req.data = 'x; // Don't care
-            req.write = 0; // Read transaction
-            start_item(req);
-            finish_item(req);
-
-            #10ns;
-        end
-
     endtask
 
 endclass
 
 `endif
+

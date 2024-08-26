@@ -61,7 +61,6 @@ class cpu_test extends uvm_test;
     task main_phase(uvm_phase phase);
         phase.raise_objection(this);
         
-       
         #50ns
         
         fork
@@ -74,15 +73,23 @@ class cpu_test extends uvm_test;
             $display("Starting instr_bram_test_seq @ %0t", $time);
             instr_bram_test_seq.start(m_env.instr_bram_agt.seqr);   // Initialize instruction memory
             
-            //#200ns axi_read_test_seq.start(m_env.instr_bram_agt.seqr);
         join
         
-        //#1250 axi_reset_low.start(m_env.axi_agt.seqr);                // Release reset of CPU and read stop_flag  
+        $display("Init threads join @ %0t", $time);   
+        
+        #50ns
+        
+        axi_reset_low.start(m_env.axi_agt.seqr);                // Release reset of CPU and read stop_flag  
+        $display("Reset set to 0 @ %0t", $time);   
 
-        $display("Init threads join @ %0t", $time);    
+
+        axi_read_test_seq.start(m_env.axi_agt.seqr);
+
 
          // Wait for the stop flag event
-        stop_flag_event.wait_trigger();
+        //stop_flag_event.wait_trigger();
+        
+        $display("Stop flag triggered @ %0t", $time);    
 
         // Start the sequence for reading data memory on port B
         cpu_test_seq.start(m_env.data_bram_agt.seqr);
@@ -97,3 +104,4 @@ class cpu_test extends uvm_test;
 endclass
 
 `endif
+

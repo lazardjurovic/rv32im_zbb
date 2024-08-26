@@ -32,7 +32,8 @@ class cpu_check_seq extends bram_base_seq;
 
             // Wait for a response from the memory
             // maybe change
-            @(bram_it.clk);
+            //@(bram_it.dout);
+            #50;
             
             addr = addr + 4;
         end
