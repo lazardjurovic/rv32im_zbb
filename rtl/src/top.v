@@ -89,7 +89,7 @@ module top(
     .regcea(1'b1), // Port A output register enable
     .regceb(1'b1), // Port B output register enable
     .douta(instr_mem_read_s),   // Port A RAM output data, width determined from RAM_WIDTH
-    .doutb()    // Port B RAM output data, width determined from RAM_WIDTH
+    .doutb(instr_mem_init_data_out)    // Port B RAM output data, width determined from RAM_WIDTH
   );
   
     bram_module #(
@@ -108,7 +108,7 @@ module top(
     .rsta(reset),     // Port A output reset (does not affect memory contents)
     .rstb(data_mem_init_reset),     // Port B output reset (does not affect memory contents)
     .regcea(1'b1), // Port A output register enable
-    .regceb(1'b0), // Port B output register enable
+    .regceb(1'b1), // Port B output register enable
     .douta(data_mem_read_s),   // Port A RAM output data, width determined from RAM_WIDTH
     .doutb(data_mem_init_data_out)    // Port B RAM output data, width determined from RAM_WIDTH
   );

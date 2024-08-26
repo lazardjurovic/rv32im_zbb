@@ -227,9 +227,9 @@
 	  if ( S_AXI_ARESETN == 1'b0 )
 	    begin
 	      reset_reg <= 0;
-	      overflow_reg <= 0;
-	      zero_reg <= 0;
-	      stop_reg <= 0;
+	      //overflow_reg <= 0;
+	      //zero_reg <= 0;
+	      //stop_reg <= 0;
 	      
 	    end 
 	  else begin
@@ -415,7 +415,8 @@
         zero_reg <= {32{zero_i}};
         stop_reg <= {32{stop_i}};
    end
-   
+	
+	assign reset = reset_reg;
 
 	// User logic ends
 
