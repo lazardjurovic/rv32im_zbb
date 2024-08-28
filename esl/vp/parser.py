@@ -21,7 +21,7 @@ def reverse_endian(s):
     return merged_string
 
 # opening .txt section
-with open("mul_text.dump", "r") as file:
+with open("text.dump", "r") as file:
     for line in file:
         parsed_program.append(line)
 
@@ -36,10 +36,15 @@ parsed_program = [s[0] for s in parsed_program]
 parsed_program = [s.split(':')[1] for s in parsed_program]
 parsed_program = [bin(int(s, 16))[2:].zfill(32) for s in parsed_program] # convert to 32 bit binary string
 parsed_program = parsed_program[:-2] # remove last two elements (sustitute li and ret)
+parsed_program.pop(0) # Remove the first line
+parsed_program.insert(0, "00000000000000000000011000110111") # Align data memory to address 0
+parsed_program.append("00000000000100000010000000100011") # sw x1, 0(x0)
+parsed_program.append("00000000000100000010000010100011") # sw x1, 1(x0)
+parsed_program.append("00000000000100000010000100100011") # sw x1, 2(x0)
 parsed_program.append("00000000000000000000000001110011") # insert ECALL
 
 # opening .data section
-with open("mul_data.dump", 'r') as file:
+with open("data.dump", 'r') as file:
     for line in file:
         parsed_data.append(line)
 
@@ -57,9 +62,9 @@ parsed_data = [reverse_endian(s) for s in parsed_data]
 with open("data_mem.txt", 'w') as file:
 
     # write zeros before start of .data specifide by linker
-    for i in range(8192):
-        file.write('00000000000000000000000000000000')
-        file.write('\n')
+    #for i in range(8192):
+    #    file.write('00000000000000000000000000000000')
+    #    file.write('\n')
 
     for line in parsed_data:
         file.write(line)
@@ -67,6 +72,7 @@ with open("data_mem.txt", 'w') as file:
 
 # writing to instruction memory file
 with open("instr_mem.txt", "w") as file:
+    file.write("00000000000000000000000000000000")
     for line in parsed_program:
         file.write(line)
         file.write('\n')
