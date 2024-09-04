@@ -18,16 +18,6 @@ class axi_read_stop_flag extends axi_base_seq;
         // Create the sequence item
         req = axi_seq_item::type_id::create("req");
 
-        // Release reset of the CPU
-        req.addr = 32'h0000_0000; // Address for reset
-        req.data = 32'h0; // Data for the reset
-        req.write = 1; // Write transaction
-        start_item(req);
-        finish_item(req);
-        
-        // Wait
-        #50ns;
-
         // Continuous Read from address 0xC
         do begin
             req.addr = 32'h0000_000C; // Address of stop_flag
@@ -36,7 +26,7 @@ class axi_read_stop_flag extends axi_base_seq;
             start_item(req);
             finish_item(req);
 
-            #10ns;
+            wait(10ns);
             
             read_data = req.data;
             

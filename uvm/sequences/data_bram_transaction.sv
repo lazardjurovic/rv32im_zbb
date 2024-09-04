@@ -49,7 +49,7 @@ class data_bram_transaction extends bram_base_seq;
                 break;
             end
 
-            addr = addr + 4;
+            addr = addr + 1;
         end
 
         // Close the file
