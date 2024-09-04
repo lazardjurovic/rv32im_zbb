@@ -15,7 +15,7 @@ puts "New directory created at: $dirPath"
 start_gui
 create_project skripta_pakovanje $dirPath/skripta_pakovanje -part xc7z010clg400-1
 #current_project skripta_pakovanje
-set_property board_part digilentinc.com:zybo-z7-10:part0:1.2 [current_project]
+set_property board_part digilentinc.com:zybo-z7-10:part0:1.0 [current_project]
 set_property simulator_language Verilog [current_project]
 add_files -norecurse -scan_for_includes {src/control_path.v src/register_file.v src/risc_v_cpu_v1_0.v src/alu.v src/cpu.v src/data_path.v src/risc_v_cpu_v1_0_S00_AXI.v src/bram.v src/alu_decoder.v src/branch_module.v src/clz_module.v src/signed_mul.v src/control_decoder.v src/cpop_module.v src/forwarding_unit.v src/top.v src/unsigned_mul.v src/hazard_unit.v src/immediate.v}
 import_files -force -norecurse
@@ -70,8 +70,7 @@ ipx::update_checksums [ipx::current_core]
 ipx::check_integrity [ipx::current_core]
 
 ipx::save_core [ipx::current_core]
-#set_property  ip_repo_paths  $dirPath/skripta_pakovanje/skripta_pakovanje.srcs/sources_1/imports [current_project]
-set_property  ip_repo_paths  {/home/lazar/Desktop/y24-g05/rtl/tmp/skripta_pakovanje.srcs/sources_1/imports} [current_project]
+set_property  ip_repo_paths  {tmp/skripta_pakovanje.srcs/sources_1/imports} [current_project]
 update_ip_catalog
 
 create_bd_design "design_1"
