@@ -54,40 +54,37 @@ class axi_lite_driver extends uvm_driver#(axi_seq_item);
         vif.BREADY <= 0;
         vif.WVALID <= 1;
         vif.WSTRB <= 4'b1111; // Assuming full write strobes
-        @(posedge vif.clk);
-        wait(vif.AWREADY);
+        fork
+            @(posedge vif.AWREADY);
+            @(posedge vif.WREADY);
+        join
+        
         @(posedge vif.clk);
         vif.AWVALID <= 0;
-
-        // Write Data Channel
-        //vif.WVALID <= 1;
-        @(posedge vif.clk);
-        wait(vif.WREADY);
-        @(posedge vif.clk);
         vif.WVALID <= 0;
 
         // Write Response Channel
         vif.BREADY <= 1;
-        @(posedge vif.clk);
-        wait(vif.BVALID);
+        @(posedge vif.BVALID);
         @(posedge vif.clk);
         assert(vif.BRESP == 2'b00) else $fatal("Write response error: %0b", vif.BRESP); // Check for OKAY response
         vif.BREADY <= 0;
     endtask
 
     task drive_read(logic [32-1:0] addr, output logic [32-1:0] data);
+    
         vif.ARESETN <= 1'b1;
         // Read Address Channel
         vif.ARADDR <= addr;
         vif.ARVALID <= 1;
+        vif.RREADY <= 0;
+        @(posedge vif.ARREADY);
         @(posedge vif.clk);
-        wait(vif.ARREADY);
-        @(posedge vif.clk);
+        
         vif.ARVALID <= 0;
-
-        // Read Data Channel
-        @(posedge vif.clk);
-        wait(vif.RVALID);
+        vif.RREADY <= 1;
+        
+        @(posedge vif.RVALID);
         @(posedge vif.clk);
         data = vif.RDATA;
         assert(vif.RRESP == 2'b00) else $fatal(1,"Read response error: %0b", vif.RRESP); // Check for OKAY response
