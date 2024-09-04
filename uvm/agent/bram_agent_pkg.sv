@@ -17,6 +17,9 @@ package bram_agent_pkg;
 
 endpackage
 
+   `include "../interfaces/bram_if.sv"
+
+
 `endif
 
 

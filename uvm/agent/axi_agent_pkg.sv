@@ -17,6 +17,9 @@ package axi_agent_pkg;
 
 endpackage
 
+   `include "../interfaces/axi_if.sv"
+
+
 `endif
 
 
