@@ -109,3 +109,16 @@ update_compile_order -fileset sources_1
 set_property top design_1_wrapper [current_fileset]
 make_wrapper -files [get_files $dirPath/skripta_pakovanje/skripta_pakovanje.srcs/sources_1/bd/design_1/design_1.bd] -top
 update_compile_order -fileset sources_1
+
+launch_runs synth_1 -jobs 6
+wait_on_run synth_1
+launch_runs impl_1 -jobs 6
+wait_on_run impl_1
+launch_runs impl_1 -to_step write_bitstream -jobs 6
+wait_on_run impl_1
+
+
+set xsaPath "xsa_file"
+file mkdir $xsaPath
+
+write_hw_platform -fixed -include_bit -force -file $xsaPath/projekat_xsa.xsa
