@@ -36,6 +36,8 @@ parsed_program = [s[0] for s in parsed_program]
 parsed_program = [s.split(':')[1] for s in parsed_program]
 parsed_program = [bin(int(s, 16))[2:].zfill(32) for s in parsed_program] # convert to 32 bit binary string
 parsed_program = parsed_program[:-2] # remove last two elements (sustitute li and ret)
+parsed_program.append("00000000000000001010000000100011") # insert SW
+parsed_program.append("00001000000000010010001000100011") # insert SW
 parsed_program.append("00000000000000000000000001110011") # insert ECALL
 
 # opening .data section
