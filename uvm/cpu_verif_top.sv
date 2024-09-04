@@ -21,17 +21,22 @@ module cpu_verif_top;
          axi_lite_if axi_lite_vif(clk);
 
         risc_v_cpu_v1_0 DUT(
+
                 .instr_mem_init_addr(instr_bram_vif.bram_addr),
                 .instr_mem_init_data_in(instr_bram_vif.bram_din),
                 .instr_mem_init_data_out(instr_bram_vif.bram_dout),
                 .instr_mem_init_enable(instr_bram_vif.bram_en),
                 .instr_mem_init_we(instr_bram_vif.bram_we),
+                .instr_mem_init_reset(),
+                .instr_mem_init_clk(clk),
 
                 .data_mem_init_addr(data_bram_vif.bram_addr),
                 .data_mem_init_data_in(data_bram_vif.bram_din),
                 .data_mem_init_data_out(data_bram_vif.bram_dout),
                 .data_mem_init_enable(data_bram_vif.bram_en),
                 .data_mem_init_we(data_bram_vif.bram_we),
+                .data_mem_init_reset(),
+                .data_mem_init_clk(clk),
 
                 .s00_axi_aclk(clk),
 		        .s00_axi_aresetn(axi_reset_port),

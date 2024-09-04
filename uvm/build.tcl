@@ -26,4 +26,3 @@ update_compile_order -fileset sim_1
 set_property -name {xsim.elaborate.xelab.more_options} -value {-L uvm} -objects [get_filesets sim_1]
 set_property -name {xsim.compile.xvlog.more_options} -value {-L uvm} -objects [get_filesets sim_1]
 set_property -name {xsim.simulate.xsim.more_options} -value {-testplusarg UVM_TETSNAME=cpu_test -testplusarg UVM_VERBOSITY=UVM_LOW} -objects [get_filesets sim_1]
-set_property dataflow_viewer_settings "min_width=16"   [current_fileset]

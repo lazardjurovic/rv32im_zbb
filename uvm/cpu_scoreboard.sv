@@ -44,7 +44,7 @@ class cpu_scoreboard extends uvm_scoreboard;
         start_check = 0;
         
         // Load golden vectors from a file
-        load_golden_vectors("/home/lazar/Desktop/y24-g05/esl/vp/golden_vector.txt");
+        load_golden_vectors("../../../../../../../esl/vp/golden_vector.txt");
         $display("[SCOREBOARD] Loaded golden vetors.");
     endfunction
 
