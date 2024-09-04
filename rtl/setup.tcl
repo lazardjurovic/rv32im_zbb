@@ -13,7 +13,7 @@ file mkdir $dirPath
 puts "New directory created at: $dirPath"
 
 start_gui
-create_project skripta_pakovanje $dirPath/skripta_pakovanje -part xc7z010clg400-1
+create_project skripta_pakovanje $dirPath/skripta_pakovanje 
 #current_project skripta_pakovanje
 set_property board_part digilentinc.com:zybo-z7-10:part0:1.0 [current_project]
 set_property simulator_language Verilog [current_project]
