@@ -15,7 +15,7 @@ puts "New directory created at: $dirPath"
 start_gui
 create_project skripta_pakovanje $dirPath/skripta_pakovanje 
 #current_project skripta_pakovanje
-set_property board_part digilentinc.com:zybo-z7-10:part0:1.2 [current_project]
+set_property board_part digilentinc.com:zybo-z7-10:part0:1.0 [current_project]
 set_property simulator_language Verilog [current_project]
 add_files -norecurse -scan_for_includes {src/control_path.v src/register_file.v src/risc_v_cpu_v1_0.v src/alu.v src/cpu.v src/data_path.v src/risc_v_cpu_v1_0_S00_AXI.v src/bram.v src/alu_decoder.v src/branch_module.v src/clz_module.v src/signed_mul.v src/control_decoder.v src/cpop_module.v src/forwarding_unit.v src/top.v src/unsigned_mul.v src/hazard_unit.v src/immediate.v}
 import_files -force -norecurse
@@ -100,6 +100,11 @@ endgroup
 startgroup
 set_property CONFIG.PCW_FPGA0_PERIPHERAL_FREQMHZ {45} [get_bd_cells processing_system7_0]
 endgroup
+
+startgroup
+set_property -dict [list CONFIG.PCW_UART0_PERIPHERAL_ENABLE {1}] [get_bd_cells processing_system7_0]
+endgroup
+
 regenerate_bd_layout
 validate_bd_design
 startgroup
