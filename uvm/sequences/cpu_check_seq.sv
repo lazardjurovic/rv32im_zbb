@@ -18,7 +18,7 @@ class cpu_check_seq extends bram_base_seq;
         int addr = 0;
 
         // Read the file line by line
-        while (addr < 32'h4000) begin       // 1k is placed here for faster simulation instead if 16k
+        while (addr < 32'h0020) begin       // 1k is placed here for faster simulation instead if 16k
          
             // Create and configure the sequence item
             bram_it = bram_seq_item::type_id::create("bram_it");

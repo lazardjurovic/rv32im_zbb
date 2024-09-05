@@ -97,10 +97,10 @@ class cpu_scoreboard extends uvm_scoreboard;
         bram_seq_item expected = expected_data_q.pop_front();
 
         // Simple comparison
-        $display("Got: %0h", t.dout);
         if (t.dout !== 0) begin
             if (t.dout !== expected.dout) begin
                 `uvm_error("MISMATCH", $sformatf("Mismatch in data BRAM. Expected: %0h, Got: %0h", expected.dout, t.dout));
+                $display("MISMATCH. Expected: %0h, Got: %0h", expected.dout, t.dout);
             end 
             else begin
                 `uvm_info("MATCH", $sformatf("Data BRAM match: %0h", t.dout), UVM_LOW);

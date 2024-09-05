@@ -82,18 +82,13 @@ class cpu_test extends uvm_test;
         axi_reset_low.start(m_env.axi_agt.seqr);                // Release reset of CPU and read stop_flag  
         $display("Reset set to 0 @ %0t", $time);   
 
-
         axi_read_test_seq.start(m_env.axi_agt.seqr);
-
-
-         // Wait for the stop flag event
-        //stop_flag_event.wait_trigger();
         
         $display("Stop flag triggered @ %0t", $time);    
 
         // Start the sequence for reading data memory on port B
+        $display("Retreiving data from CPU registers.");
         cpu_test_seq.start(m_env.data_bram_agt.seqr);
-        $display("[SCOREBOARD] Retreiving data from CPU registers.");
         
         #5000ns
         $display("Reached 5000ns");

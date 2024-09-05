@@ -55,11 +55,13 @@ class bram_driver extends uvm_driver#(bram_seq_item);
         `uvm_fatal("NULL_REQ", "Received a null request item in drive_tr task")
     end
     
-        @(posedge vif.clk);
         vif.bram_din = req.din;
         vif.bram_addr = req.addr;
         vif.bram_en = 1'b1;
         vif.bram_we = req.we;
+
+        @(posedge vif.clk);
+        
         req.dout = vif.bram_dout;
 
     endtask : drive_tr
