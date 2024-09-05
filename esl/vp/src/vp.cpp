@@ -108,11 +108,11 @@ void vp::print_result(string fileName) {
 	{
 		ram_word = data_mem.ram[i];
 		ram_word <<= 8;
-		ram_word = data_mem.ram[i+1];
+		ram_word |= data_mem.ram[i+1];
 		ram_word <<= 8;
-		ram_word = data_mem.ram[i+2];
+		ram_word |= data_mem.ram[i+2];
 		ram_word <<= 8;
-		ram_word = data_mem.ram[i+3];		
+		ram_word |= data_mem.ram[i+3];		
 		
 		if (ram_word != 0x0)
 		{
@@ -136,11 +136,11 @@ void vp::print_result_for_checker(string fileName) {
 	{
 		ram_word = data_mem.ram[i];
 		ram_word <<= 8;
-		ram_word = data_mem.ram[i+1];
+		ram_word |= data_mem.ram[i+1];
 		ram_word <<= 8;
-		ram_word = data_mem.ram[i+2];
+		ram_word |= data_mem.ram[i+2];
 		ram_word <<= 8;
-		ram_word = data_mem.ram[i+3];		
+		ram_word |= data_mem.ram[i+3];		
 		
 		if (ram_word != 0x0)
 		{

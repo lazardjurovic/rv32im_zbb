@@ -68,20 +68,20 @@ void memory::data_memory_dump(){
 	cout << endl
 		 << "============== DATA MEMORY DUMP ==============" << endl;
 	
-	sc_dt::sc_int<32> ram_word;
+	sc_dt::sc_bv<32> ram_word;
 	for (int i = 0; i < RAM_SIZE; i += 4)
 	{
 		ram_word = ram[i];
 		ram_word <<= 8;
-		ram_word = ram[i+1];
+		ram_word |= ram[i+1];
 		ram_word <<= 8;
-		ram_word = ram[i+2];
+		ram_word |= ram[i+2];
 		ram_word <<= 8;
-		ram_word = ram[i+3];		
+		ram_word |= ram[i+3];		
 		
 		if (ram_word != 0x0)
 		{
-			cout << dec << "@Address " << i << ":\t" << (int)ram_word << endl;
+			cout << dec << "@Address " << i << ":\t" << ram_word << endl;
 		}
 	}
 	cout << endl;
