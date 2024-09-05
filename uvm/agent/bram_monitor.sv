@@ -35,8 +35,6 @@ class bram_monitor extends uvm_monitor;
 
     // Monitor BRAM transactions
     forever begin
-      // Wait for BRAM enable signal
-      @(posedge vif.bram_en);
 
       // Capture the transaction
       tx = bram_seq_item::type_id::create("tx");

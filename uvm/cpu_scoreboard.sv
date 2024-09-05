@@ -51,7 +51,7 @@ class cpu_scoreboard extends uvm_scoreboard;
     // Receive AXI transactions and monitor stop_flag
     virtual function void write_1(axi_seq_item t);
         axi_trans_q.push_back(t);
-        $display("[SCOREBOARD] addr = %h, data = %h.", t.addr, t.data);
+        $display("[SCOREBOARD]: AXI -- addr = %h, data = %h.", t.addr, t.data);
         // Check if stop_flag is high in the transaction
         if (t.addr == 32'h0000_000C && t.data == 32'hFFFF_FFFF) begin
             start_check = 1;
@@ -61,6 +61,7 @@ class cpu_scoreboard extends uvm_scoreboard;
     
     virtual function void write_2(bram_seq_item t);
         data_bram_trans_q.push_back(t);
+        $display("[SCOREBOARD]: BRAM -- addr = %h, data = %h.", t.addr, t.dout);
     endfunction
 
      // Task to load golden vectors from a file
@@ -96,12 +97,17 @@ class cpu_scoreboard extends uvm_scoreboard;
         bram_seq_item expected = expected_data_q.pop_front();
 
         // Simple comparison
-        if (t.dout !== expected.dout) begin
-            `uvm_error("MISMATCH", $sformatf("Mismatch in data BRAM. Expected: %0h, Got: %0h", expected.dout, t.dout));
-        end 
-        else begin
-            `uvm_info("MATCH", $sformatf("Data BRAM match: %0h", t.dout), UVM_LOW);
+        $display("Got: %0h", t.dout);
+        if (t.dout !== 0) begin
+            if (t.dout !== expected.dout) begin
+                `uvm_error("MISMATCH", $sformatf("Mismatch in data BRAM. Expected: %0h, Got: %0h", expected.dout, t.dout));
+            end 
+            else begin
+                `uvm_info("MATCH", $sformatf("Data BRAM match: %0h", t.dout), UVM_LOW);
+                $display("MATCH. Expected: %0h, Got: %0h", expected.dout, t.dout);
+            end
         end
+
     endfunction
 
     // Main phase to drive the checking process
