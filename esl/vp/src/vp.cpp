@@ -148,10 +148,6 @@ void vp::print_result_for_checker(string fileName) {
 		}
 	}
 
-    for(int i = 0; i< 32; i++){
-        dumpFile << cpu.registers[i] << endl;
-    }
-
     dumpFile.close();
 }
 
