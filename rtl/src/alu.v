@@ -124,22 +124,22 @@ module alu #(
                 end
             5'b10000:   //rem
                 begin
-                    res_o = a_signed / b_signed;        //NIJE URADJENO
+                    res_o = a_signed / b_signed;
                 end
             5'b10001:   //remu
                 begin
-                    res_o = a_signed / b_signed;        //NIJE URADJENO
+                    res_o = a_signed / b_signed;
                 end
                 
             */    
                 
             5'b10010:   //rol
                 begin
-                    res_o = (a_i << b_i[4:0]) | (a_i >> ((DATA_WIDTH - b_i[4:0]))); // & (DATA_WIDTH - 1))); //PROVERI I OPTIMIZUJ
+                    res_o = (a_i << b_i[4:0]) | (a_i >> ((DATA_WIDTH - b_i[4:0]))); // & (DATA_WIDTH - 1)));
                 end
             5'b10011:   //ror
                 begin
-                    res_o = (a_i >> b_i[4:0]) | (a_i << ((DATA_WIDTH - b_i[4:0]))); // & (DATA_WIDTH - 1))); //PROVERI I OPTIMIZUJ
+                    res_o = (a_i >> b_i[4:0]) | (a_i << ((DATA_WIDTH - b_i[4:0]))); // & (DATA_WIDTH - 1)));
                 end
             
             /*
@@ -157,7 +157,7 @@ module alu #(
                         res_o = b_i;
                     end
                 end
-            5'b10101:   //maxu
+            5'b10111:   //maxu
                 begin
                     if (a_i > b_i) begin
                         res_o = a_i;
@@ -166,7 +166,7 @@ module alu #(
                         res_o = b_i;
                     end
                 end
-            5'b10110:   //min
+            5'b10101:   //min
                 begin
                     if (a_signed < b_signed) begin
                         res_o = a_i;
@@ -175,7 +175,7 @@ module alu #(
                         res_o = b_i;
                     end
                 end
-            5'b10111:   //minu
+            5'b10110:   //minu
                 begin
                     if (a_i < b_i) begin
                         res_o = a_i;
