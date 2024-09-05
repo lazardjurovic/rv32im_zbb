@@ -21,7 +21,7 @@ def reverse_endian(s):
     return merged_string
 
 # opening .txt section
-with open("mul_text.dump", "r") as file:
+with open("bit_text.dump", "r") as file:
     for line in file:
         parsed_program.append(line)
 
@@ -73,8 +73,12 @@ parsed_program.append("00000111111100000010110000100011") # insert SW
 # Adding ECALL to signal the end of the program
 parsed_program.append("00000000000000000000000001110011") # insert ECALL
 
+# Insert '0' at the beginning and shift the rest
+parsed_program = ['00000000000000000000000000000000'] + parsed_program
+
+
 # opening .data section
-with open("mul_data.dump", 'r') as file:
+with open("bit_data.dump", 'r') as file:
     for line in file:
         parsed_data.append(line)
 
