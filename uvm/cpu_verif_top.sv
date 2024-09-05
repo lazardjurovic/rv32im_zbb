@@ -71,7 +71,7 @@ module cpu_verif_top;
          uvm_config_db#(virtual bram_if)::set(null, "uvm_test_top.m_env", "data_bram_if", data_bram_vif);
          
         //Setting stop event to database
-        uvm_config_db#(uvm_event)::set(null, "uvm_test_top.m_env","stop_flag_event",stop_flag_event);
+        uvm_config_db#(uvm_event)::set(null, "uvm_test_top.*","stop_flag_event",stop_flag_event);
               
            $display("Simulation starting...");
            run_test("cpu_test");

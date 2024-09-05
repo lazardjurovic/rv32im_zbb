@@ -44,7 +44,7 @@ class cpu_test extends uvm_test;
         axi_reset_low = axi_reset_low_seq::type_id::create("axi_reset_low");
 
         // Get the stop_flag_event from the environment
-        if (!uvm_config_db#(uvm_event)::get(this, "m_env", "stop_flag_event", stop_flag_event)) begin
+        if (!uvm_config_db#(uvm_event)::get(this, "*", "stop_flag_event", stop_flag_event)) begin
             `uvm_fatal("NO_STOP_FLAG_EVENT", "Stop flag event not found in uvm_config_db.")
         end
         
@@ -89,6 +89,8 @@ class cpu_test extends uvm_test;
         // Start the sequence for reading data memory on port B
         $display("Retreiving data from CPU registers.");
         cpu_test_seq.start(m_env.data_bram_agt.seqr);
+        
+        stop_flag_event.trigger;
         
         #5000ns
         $display("Reached 5000ns");

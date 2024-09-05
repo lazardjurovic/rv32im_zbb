@@ -55,7 +55,7 @@ class cpu_env extends uvm_env;
             uvm_config_db#(cpu_config)::set(this, "", "cpu_config", cfg);
         end
        
-        uvm_config_db#(uvm_event)::get(this,"","stop_flag_event",stop_flag_event);
+        uvm_config_db#(uvm_event)::get(this,"*","stop_flag_event",stop_flag_event);
         
         uvm_config_db#(cpu_config)::set(this, "axi_agt", "cpu_config", cfg);
         uvm_config_db#(cpu_config)::set(this, "instr_bram_agt", "cpu_config", cfg);

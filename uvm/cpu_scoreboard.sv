@@ -19,6 +19,7 @@ class cpu_scoreboard extends uvm_scoreboard;
 
     // Flag indicating when to check data in the data BRAM
     bit start_check = 1'b0;
+    uvm_event stop_flag_event;
 
     uvm_analysis_imp_1 #(axi_seq_item, cpu_scoreboard) axi_ap_collect;
     uvm_analysis_imp_2 #(bram_seq_item, cpu_scoreboard) data_bram_ap_collect;
@@ -42,6 +43,13 @@ class cpu_scoreboard extends uvm_scoreboard;
         data_bram_trans_q ={};
         expected_data_q = {};
         start_check = 0;
+
+        // Get the stop_flag_event from the environment
+        if (!uvm_config_db#(uvm_event)::get(this, "*", "stop_flag_event", stop_flag_event)) begin
+            `uvm_fatal("NO_STOP_FLAG_EVENT", "Stop flag event not found in uvm_config_db.")
+        end
+        
+        $display("STOP_FLAG_EVENT set to %p" , stop_flag_event);
         
         // Load golden vectors from a file
         load_golden_vectors("../../../../../../../esl/vp/golden_vector.txt");
@@ -51,7 +59,7 @@ class cpu_scoreboard extends uvm_scoreboard;
     // Receive AXI transactions and monitor stop_flag
     virtual function void write_1(axi_seq_item t);
         axi_trans_q.push_back(t);
-        $display("[SCOREBOARD]: AXI -- addr = %h, data = %h.", t.addr, t.data);
+        //$display("[SCOREBOARD]: AXI -- addr = %h, data = %h.", t.addr, t.data);
         // Check if stop_flag is high in the transaction
         if (t.addr == 32'h0000_000C && t.data == 32'hFFFF_FFFF) begin
             start_check = 1;
@@ -61,7 +69,20 @@ class cpu_scoreboard extends uvm_scoreboard;
     
     virtual function void write_2(bram_seq_item t);
         data_bram_trans_q.push_back(t);
-        $display("[SCOREBOARD]: BRAM -- addr = %h, data = %h.", t.addr, t.dout);
+        //$display("[SCOREBOARD]: BRAM -- addr = %h, data = %h.", t.addr, t.dout);
+            
+        if (t.dout !== 0) begin
+            bram_seq_item expected = expected_data_q.pop_front();
+            
+            if (t.dout !== expected.dout) begin
+                `uvm_error("MISMATCH", $sformatf("Mismatch in data BRAM. Expected: %0h, Got: %0h", expected.dout, t.dout));
+                //$display("MISMATCH. Expected: %0h, Got: %0h", expected.dout, t.dout);
+            end 
+            else begin
+                //`uvm_info("MATCH", $sformatf("Data BRAM match: %0h", t.dout), UVM_LOW);
+                $display("MATCH. Expected: %0h, Got: %0h", expected.dout, t.dout);
+            end
+        end
     endfunction
 
      // Task to load golden vectors from a file
@@ -90,44 +111,6 @@ class cpu_scoreboard extends uvm_scoreboard;
         $fclose(file);
         `uvm_info("GOLDEN_VECTOR_LOAD", $sformatf("Loaded %0d golden vectors", expected_data_q.size()), UVM_LOW);
     endfunction : load_golden_vectors
-
-     // Comparison function for data BRAM transactions
-    function compare_data_bram_with_golden(bram_seq_item t);
-        // Fetch the expected transaction
-        bram_seq_item expected = expected_data_q.pop_front();
-
-        // Simple comparison
-        if (t.dout !== 0) begin
-            if (t.dout !== expected.dout) begin
-                `uvm_error("MISMATCH", $sformatf("Mismatch in data BRAM. Expected: %0h, Got: %0h", expected.dout, t.dout));
-                $display("MISMATCH. Expected: %0h, Got: %0h", expected.dout, t.dout);
-            end 
-            else begin
-                `uvm_info("MATCH", $sformatf("Data BRAM match: %0h", t.dout), UVM_LOW);
-                $display("MATCH. Expected: %0h, Got: %0h", expected.dout, t.dout);
-            end
-        end
-
-    endfunction
-
-    // Main phase to drive the checking process
-    task main_phase(uvm_phase phase);
-        phase.raise_objection(this);
-        
-        $display("[SCOREBOARD] Waiting for start_check.");
-
-        // Wait for the stop flag to be set
-        @(posedge start_check);
-
-        $display("[SCOREBOARD] Beginning data BRAM check.");
-
-        // Process and compare all BRAM transactions
-        foreach (data_bram_trans_q[i]) begin
-            compare_data_bram_with_golden(data_bram_trans_q[i]);
-        end
-
-        phase.drop_objection(this);
-    endtask
 
 endclass : cpu_scoreboard
 

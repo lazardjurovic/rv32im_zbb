@@ -13,10 +13,10 @@ class bram_seq_item extends uvm_sequence_item;
 
    
    `uvm_object_utils_begin(bram_seq_item)
-        `uvm_field_int(addr, UVM_DEFAULT)
-        `uvm_field_int(din, UVM_DEFAULT)
-        `uvm_field_int(dout, UVM_DEFAULT)
-        `uvm_field_int(we, UVM_DEFAULT)
+        `uvm_field_int(addr, UVM_ALL_ON)
+        `uvm_field_int(din, UVM_ALL_ON)
+        `uvm_field_int(dout, UVM_ALL_ON)
+        `uvm_field_int(we, UVM_ALL_ON)
    `uvm_object_utils_end
 
    function new (string name = "bram_seq_item");
