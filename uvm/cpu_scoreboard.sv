@@ -113,7 +113,7 @@ class cpu_scoreboard extends uvm_scoreboard;
         // Wait for the stop flag to be set
         @(posedge start_check);
 
-        $display("[SCOREBOARD] Stop flag detected, beginning data BRAM check.");
+        $display("[SCOREBOARD] Beginning data BRAM check.");
 
         // Process and compare all BRAM transactions
         foreach (data_bram_trans_q[i]) begin

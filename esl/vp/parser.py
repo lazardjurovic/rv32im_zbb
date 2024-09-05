@@ -36,8 +36,41 @@ parsed_program = [s[0] for s in parsed_program]
 parsed_program = [s.split(':')[1] for s in parsed_program]
 parsed_program = [bin(int(s, 16))[2:].zfill(32) for s in parsed_program] # convert to 32 bit binary string
 parsed_program = parsed_program[:-2] # remove last two elements (sustitute li and ret)
-parsed_program.append("00000000000000001010000000100011") # insert SW
-parsed_program.append("00001000000000010010001000100011") # insert SW
+
+# Storing whole register file into data memory
+parsed_program.append("00000000000100000010000000100011") # insert SW
+parsed_program.append("00000000001000000010001000100011") # insert SW
+parsed_program.append("00000000001100000010010000100011") # insert SW
+parsed_program.append("00000000010000000010011000100011") # insert SW
+parsed_program.append("00000000010100000010100000100011") # insert SW
+parsed_program.append("00000000011000000010101000100011") # insert SW
+parsed_program.append("00000000011100000010110000100011") # insert SW
+parsed_program.append("00000000100000000010111000100011") # insert SW
+parsed_program.append("00000010100100000010000000100011") # insert SW
+parsed_program.append("00000010101000000010001000100011") # insert SW
+parsed_program.append("00000010101100000010010000100011") # insert SW
+parsed_program.append("00000010110000000010011000100011") # insert SW
+parsed_program.append("00000010110100000010100000100011") # insert SW
+parsed_program.append("00000010111000000010101000100011") # insert SW
+parsed_program.append("00000010111100000010110000100011") # insert SW
+parsed_program.append("00000011000000000010111000100011") # insert SW
+parsed_program.append("00000101000100000010000000100011") # insert SW
+parsed_program.append("00000101001000000010001000100011") # insert SW
+parsed_program.append("00000101001100000010010000100011") # insert SW
+parsed_program.append("00000101010000000010011000100011") # insert SW
+parsed_program.append("00000101010100000010100000100011") # insert SW
+parsed_program.append("00000101011000000010101000100011") # insert SW
+parsed_program.append("00000101011100000010110000100011") # insert SW
+parsed_program.append("00000101100000000010111000100011") # insert SW
+parsed_program.append("00000111100100000010000000100011") # insert SW
+parsed_program.append("00000111101000000010001000100011") # insert SW
+parsed_program.append("00000111101100000010010000100011") # insert SW
+parsed_program.append("00000111110000000010011000100011") # insert SW
+parsed_program.append("00000111110100000010100000100011") # insert SW
+parsed_program.append("00000111111000000010101000100011") # insert SW
+parsed_program.append("00000111111100000010110000100011") # insert SW
+
+# Adding ECALL to signal the end of the program
 parsed_program.append("00000000000000000000000001110011") # insert ECALL
 
 # opening .data section
