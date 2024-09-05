@@ -75,52 +75,31 @@ update_ip_catalog
 
 create_bd_design "design_1"
 update_compile_order -fileset sources_1
-startgroup
 create_bd_cell -type ip -vlnv xilinx.com:ip:processing_system7:5.5 processing_system7_0
-endgroup
-startgroup
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 axi_bram_ctrl_0
-endgroup
-startgroup
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 axi_bram_ctrl_1
-endgroup
-startgroup
+set_property -dict [list CONFIG.SINGLE_PORT_BRAM {1}] [get_bd_cells axi_bram_ctrl_0]
+set_property -dict [list CONFIG.SINGLE_PORT_BRAM {1}] [get_bd_cells axi_bram_ctrl_1]
 create_bd_cell -type ip -vlnv user.org:user:risc_v_cpu:1.0 risc_v_cpu_0
-endgroup
-set_property CONFIG.SINGLE_PORT_BRAM {1} [get_bd_cells axi_bram_ctrl_1]
-set_property CONFIG.SINGLE_PORT_BRAM {1} [get_bd_cells axi_bram_ctrl_0]
 connect_bd_intf_net [get_bd_intf_pins axi_bram_ctrl_0/BRAM_PORTA] [get_bd_intf_pins risc_v_cpu_0/instr_bram]
 connect_bd_intf_net [get_bd_intf_pins axi_bram_ctrl_1/BRAM_PORTA] [get_bd_intf_pins risc_v_cpu_0/data_bram]
-apply_bd_automation -rule xilinx.com:bd_rule:processing_system7 -config {make_external "FIXED_IO, DDR" Master "Disable" Slave "Disable" }  [get_bd_cells processing_system7_0]
-startgroup
+apply_bd_automation -rule xilinx.com:bd_rule:processing_system7 -config {make_external "FIXED_IO, DDR" apply_board_preset "1" Master "Disable" Slave "Disable" }  [get_bd_cells processing_system7_0]
 apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto} Master {/processing_system7_0/M_AXI_GP0} Slave {/axi_bram_ctrl_0/S_AXI} ddr_seg {Auto} intc_ip {New AXI SmartConnect} master_apm {0}}  [get_bd_intf_pins axi_bram_ctrl_0/S_AXI]
 apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto} Master {/processing_system7_0/M_AXI_GP0} Slave {/axi_bram_ctrl_1/S_AXI} ddr_seg {Auto} intc_ip {New AXI SmartConnect} master_apm {0}}  [get_bd_intf_pins axi_bram_ctrl_1/S_AXI]
 apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto} Master {/processing_system7_0/M_AXI_GP0} Slave {/risc_v_cpu_0/s00_axi} ddr_seg {Auto} intc_ip {New AXI Interconnect} master_apm {0}}  [get_bd_intf_pins risc_v_cpu_0/s00_axi]
-endgroup
-startgroup
-set_property CONFIG.PCW_FPGA0_PERIPHERAL_FREQMHZ {45} [get_bd_cells processing_system7_0]
-endgroup
-
-startgroup
-set_property -dict [list CONFIG.PCW_UART0_PERIPHERAL_ENABLE {1}] [get_bd_cells processing_system7_0]
-endgroup
-
+set_property -dict [list CONFIG.PCW_FPGA0_PERIPHERAL_FREQMHZ {45}] [get_bd_cells processing_system7_0]
+set_property range 16K [get_bd_addr_segs {processing_system7_0/Data/SEG_axi_bram_ctrl_0_Mem0}]
+set_property range 16K [get_bd_addr_segs {processing_system7_0/Data/SEG_axi_bram_ctrl_1_Mem0}]
+set_property range 1K [get_bd_addr_segs {processing_system7_0/Data/SEG_risc_v_cpu_0_reg0}]
 regenerate_bd_layout
 validate_bd_design
-startgroup
-set_property range 1K [get_bd_addr_segs {processing_system7_0/Data/SEG_risc_v_cpu_0_reg0}]
-set_property offset 0x43C00000 [get_bd_addr_segs {processing_system7_0/Data/SEG_risc_v_cpu_0_reg0}]
-set_property range 16K [get_bd_addr_segs {processing_system7_0/Data/SEG_axi_bram_ctrl_1_Mem0}]
-set_property range 16K [get_bd_addr_segs {processing_system7_0/Data/SEG_axi_bram_ctrl_0_Mem0}]
-endgroup
 
-
-make_wrapper -files [get_files $dirPath/skripta_pakovanje/skripta_pakovanje.srcs/sources_1/bd/design_1/design_1.bd] -top
-add_files -norecurse $dirPath/skripta_pakovanje/skripta_pakovanje.gen/sources_1/bd/design_1/hdl/design_1_wrapper.v
+make_wrapper -files [get_files /home/student/Desktop/lazar_vitis/y24-g05/rtl/tmp/skripta_pakovanje/skripta_pakovanje.srcs/sources_1/bd/design_1/design_1.bd] -top
+add_files -norecurse /home/student/Desktop/lazar_vitis/y24-g05/rtl/tmp/skripta_pakovanje/skripta_pakovanje.gen/sources_1/bd/design_1/hdl/design_1_wrapper.v
 update_compile_order -fileset sources_1
 set_property top design_1_wrapper [current_fileset]
-make_wrapper -files [get_files $dirPath/skripta_pakovanje/skripta_pakovanje.srcs/sources_1/bd/design_1/design_1.bd] -top
 update_compile_order -fileset sources_1
+
 
 launch_runs synth_1 -jobs 6
 wait_on_run synth_1
