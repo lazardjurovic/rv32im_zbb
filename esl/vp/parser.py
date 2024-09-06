@@ -21,7 +21,7 @@ def reverse_endian(s):
     return merged_string
 
 # opening .txt section
-with open("bit_text.dump", "r") as file:
+with open("text.dump", "r") as file:
     for line in file:
         parsed_program.append(line)
 
@@ -78,7 +78,7 @@ parsed_program = ['00000000000000000000000000000000'] + parsed_program
 
 
 # opening .data section
-with open("bit_data.dump", 'r') as file:
+with open("data.dump", 'r') as file:
     for line in file:
         parsed_data.append(line)
 
@@ -96,9 +96,9 @@ parsed_data = [reverse_endian(s) for s in parsed_data]
 with open("data_mem.txt", 'w') as file:
 
     # write zeros before start of .data specifide by linker
-    for i in range(8192):
-        file.write('00000000000000000000000000000000')
-        file.write('\n')
+    # for i in range(8192):
+    #     file.write('00000000000000000000000000000000')
+    #     file.write('\n')
 
     for line in parsed_data:
         file.write(line)
