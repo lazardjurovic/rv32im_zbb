@@ -18,7 +18,7 @@ class data_bram_transaction extends bram_base_seq;
         int file;
         string line;
         logic[31:0] din;
-        int addr = 0;
+        int addr = 8192;    // Base address of data memory
 
         // Open the file for reading
         file = $fopen("../../../../../../../esl/vp/data_mem.txt", "r");
@@ -43,6 +43,8 @@ class data_bram_transaction extends bram_base_seq;
                 // Start and finish the transaction
                 start_item(bram_it);
                 finish_item(bram_it);
+                
+                bram_it.we = 4'b0000;
             end
             else begin
                 `uvm_warning("PARSE_ERROR", {"Unable to parse line: ", line, "@ ", $time})
@@ -54,7 +56,16 @@ class data_bram_transaction extends bram_base_seq;
 
         // Close the file
         $fclose(file);
+        
+        bram_it = bram_seq_item::type_id::create("bram_it");
+        bram_it.addr = 0;
+        bram_it.din = 0;
+        bram_it.we = 4'b0000;
 
+        // Start and finish the transaction
+        start_item(bram_it);
+        finish_item(bram_it);
+        
     endtask : body
 
 endclass : data_bram_transaction

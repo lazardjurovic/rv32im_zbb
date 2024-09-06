@@ -88,9 +88,11 @@ class cpu_test extends uvm_test;
 
         // Start the sequence for reading data memory on port B
         $display("Retreiving data from CPU registers.");
-        cpu_test_seq.start(m_env.data_bram_agt.seqr);
         
+        fork
         stop_flag_event.trigger;
+        cpu_test_seq.start(m_env.data_bram_agt.seqr);
+        join
         
         #5000ns
         $display("Reached 5000ns");

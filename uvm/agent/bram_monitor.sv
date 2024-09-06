@@ -35,7 +35,8 @@ class bram_monitor extends uvm_monitor;
 
     // Monitor BRAM transactions
     forever begin
-
+        
+      //@(vif.bram_addr);
       // Capture the transaction
       tx = bram_seq_item::type_id::create("tx");
       tx.addr = vif.bram_addr;
@@ -47,7 +48,9 @@ class bram_monitor extends uvm_monitor;
       tx.dout = vif.bram_dout;
 
       // Send the observed transaction via the analysis port
-      ap.write(tx);
+      if (tx.we == 4'b0000) begin
+        ap.write(tx);
+      end
     end
   endtask : main_phase
 

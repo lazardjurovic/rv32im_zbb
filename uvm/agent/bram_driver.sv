@@ -62,7 +62,7 @@ class bram_driver extends uvm_driver#(bram_seq_item);
 
         @(posedge vif.clk);
         
-        req.dout = vif.bram_dout;
+        //req.dout = vif.bram_dout;
 
     endtask : drive_tr
 

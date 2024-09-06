@@ -57,7 +57,7 @@ class axi_monitor extends uvm_monitor;
         ap.write(tx);
 
          // Trigger the event to notify that stop_flag was read
-        stop_flag_event.trigger();
+        //stop_flag_event.trigger();
 
       end
     end

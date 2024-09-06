@@ -62,7 +62,7 @@ class cpu_scoreboard extends uvm_scoreboard;
         //$display("[SCOREBOARD]: AXI -- addr = %h, data = %h.", t.addr, t.data);
         // Check if stop_flag is high in the transaction
         if (t.addr == 32'h0000_000C && t.data == 32'hFFFF_FFFF) begin
-            start_check = 1;
+            //start_check = 1;
             $display("[SCOREBOARD] Stop flag detected. Preparing to check data in data BRAM.");
         end
     endfunction
@@ -71,7 +71,7 @@ class cpu_scoreboard extends uvm_scoreboard;
         data_bram_trans_q.push_back(t);
         //$display("[SCOREBOARD]: BRAM -- addr = %h, data = %h.", t.addr, t.dout);
             
-        if (t.dout !== 0) begin
+        if (t.dout !== 0 && start_check == 1) begin
             bram_seq_item expected = expected_data_q.pop_front();
             
             if (t.dout !== expected.dout) begin
@@ -111,6 +111,21 @@ class cpu_scoreboard extends uvm_scoreboard;
         $fclose(file);
         `uvm_info("GOLDEN_VECTOR_LOAD", $sformatf("Loaded %0d golden vectors", expected_data_q.size()), UVM_LOW);
     endfunction : load_golden_vectors
+
+      // Main phase to drive the checking process
+    task main_phase(uvm_phase phase);
+        phase.raise_objection(this);
+        
+        $display("[SCOREBOARD] Waiting for start_check.");
+
+        // Wait for the stop flag to be set
+        stop_flag_event.wait_trigger;
+        
+        start_check = 1;
+        $display("[SCOREBOARD] Beginning data BRAM check.");
+
+        phase.drop_objection(this);
+    endtask
 
 endclass : cpu_scoreboard
 
