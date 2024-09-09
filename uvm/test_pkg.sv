@@ -12,6 +12,7 @@ package test_pkg;
 `include "cpu_env.sv"   
 `include "cpu_test.sv"
 `include "cpu_scoreboard.sv"
+`include "cpu_coverage.sv"
 
 
 endpackage :test_pkg

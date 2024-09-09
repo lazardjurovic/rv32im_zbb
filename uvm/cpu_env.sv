@@ -7,6 +7,7 @@ import uvm_pkg::*;
 import axi_agent_pkg::*;
 import bram_agent_pkg::*;
 `include "cpu_scoreboard.sv"
+`include "cpu_coverage.sv"
        
 class cpu_env extends uvm_env;
     
@@ -21,6 +22,7 @@ class cpu_env extends uvm_env;
     bram_agent instr_bram_agt;
     bram_agent data_bram_agt;
     
+    cpu_coverage cov;
     uvm_event stop_flag_event;
 
     // Analysis ports (you can define scoreboards later to connect to these ports)
@@ -70,13 +72,16 @@ class cpu_env extends uvm_env;
         uvm_config_db#(virtual axi_lite_if)::set(this, "axi_agt", "axi_lite_if", axi_lite_vif);
         
         // Scoreboard instance
-       sb = cpu_scoreboard::type_id::create("sb", this);
+        sb = cpu_scoreboard::type_id::create("sb", this);
 
         // Now instantiate agents
         axi_agt = axi_agent::type_id::create("axi_agt", this);
         instr_bram_agt = bram_agent::type_id::create("instr_bram_agt", this);
         data_bram_agt = bram_agent::type_id::create("data_bram_agt", this);
-    
+        
+        // Instance of coverage check
+        cov = cpu_coverage::type_id::create("cov", this);
+
     endfunction
 
     function void connect_phase(uvm_phase phase);
@@ -85,6 +90,7 @@ class cpu_env extends uvm_env;
         // Connect analysis ports to the scoreboard
         axi_agt.mon.ap.connect(sb.axi_ap_collect);
         data_bram_agt.mon.ap.connect(sb.data_bram_ap_collect);
+        instr_bram_agt.mon.ap.connect(cov.instruction_ap_collect);
 
     endfunction
 
