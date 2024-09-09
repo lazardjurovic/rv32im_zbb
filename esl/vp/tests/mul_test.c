@@ -3,13 +3,16 @@ int main(){
     asm volatile(
         "addi x1,x0,5;"
         "addi x2,x0,10;"
+        "lui x8,50;"
+        "lui x9,234;"
+        "add x5,x1,x8;"
+        "add x6,x2,x9;"
         //"add x15,x1,x2;"
         "mul x3, x1,x2;"
         "mulh x4,x1,x2;"
-        "lui x1,50;"
-        "lui x2,234;"
-        "mulhu x5,x1,x2;"
-        "mulhsu x6,x1,x2;"
+        
+        "mulhu x10,x5,x6;"
+        "mulhsu x11,x5,x6;"
         
         "lui x1,0;"
         "lui x2,0;"

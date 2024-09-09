@@ -45,13 +45,11 @@ endmodule
     input wire clk,
     input wire [15:0] a,
     input wire [15:0] b,
-    output reg [31:0] res
+    output wire [31:0] res
     
 );
 
-    always @(posedge clk) begin
-        res <= a*b;
-    end
+   assign res = a*b;
 
 endmodule
 
