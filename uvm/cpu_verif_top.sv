@@ -13,7 +13,7 @@ module cpu_verif_top;
 
         uvm_event stop_flag_event;
 
-        logic clk,reset,overflow,zero,stop;
+        logic clk,reset;
         logic axi_reset_port;
 
          bram_if instr_bram_vif(clk,reset);
