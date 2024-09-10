@@ -48,9 +48,8 @@ class bram_monitor extends uvm_monitor;
       tx.dout = vif.bram_dout;
 
       // Send the observed transaction via the analysis port
-      if (tx.we == 4'b0000) begin
-        ap.write(tx);
-      end
+      ap.write(tx);
+      
     end
   endtask : main_phase
 
