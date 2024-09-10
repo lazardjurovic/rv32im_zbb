@@ -90,7 +90,8 @@ class cpu_env extends uvm_env;
         // Connect analysis ports to the scoreboard
         axi_agt.mon.ap.connect(sb.axi_ap_collect);
         data_bram_agt.mon.ap.connect(sb.data_bram_ap_collect);
-        instr_bram_agt.mon.ap.connect(cov.instruction_ap_collect);
+        instr_bram_agt.mon.ap.connect(cov.analysis_export);
+        //axi_agt.mon.ap.connect(cov.csr_ap_collect);
 
     endfunction
 
