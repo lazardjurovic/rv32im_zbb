@@ -46,6 +46,7 @@ class cpu_coverage extends uvm_subscriber #(bram_seq_item);
         opcode = instruction[6:0];
         
         $display("[COVERAGE]: BRAM -- instr = %b, opcode = %b.", instruction, opcode);
+        $display("[COVERAGE]: %0.2f %%.", opcode_cg.get_inst_coverage());
 
         // Sample the opcode into the covergroup
         opcode_cg.sample();
