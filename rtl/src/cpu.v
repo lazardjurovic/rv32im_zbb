@@ -61,6 +61,7 @@ module cpu(
     .pc_operand_i(pc_operand_s),
     .jalr_operand_i(jalr_operand_s),
     .alu_inverters_i(alu_inverters_s),
+    .stop_flag_i(stop_flag_s),
 
     // Outputs to controlpath
     .instruction_o(instruction_s),
