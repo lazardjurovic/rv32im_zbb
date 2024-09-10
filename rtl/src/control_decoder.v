@@ -2,6 +2,7 @@ module control_decoder(
 
         input wire[6:0] opcode_i, // instruction opcode
         input wire[2:0] funct3_i, // funct3 field in instruction word
+        input wire reset,
 
         output reg mem_to_reg_o, // if register bank will be written by this instruction
         output reg[3:0] data_mem_we_o, // does data_mem need to be written to (enable signal)
@@ -162,7 +163,7 @@ module control_decoder(
             end
         endcase
         
-        stop_flag_o = stop_flag_reg;
+        stop_flag_o = stop_flag_reg & (~reset);
     end
 
 endmodule

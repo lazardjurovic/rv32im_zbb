@@ -413,7 +413,12 @@
    begin
         overflow_reg <= {32{overflow_i}};
         zero_reg <= {32{zero_i}};
-        stop_reg <= {32{stop_i}};
+	    if ( S_AXI_ARESETN == 1'b0 ) begin
+	       stop_reg <= 32'b0;
+	    end
+        else begin
+            stop_reg <= {32{stop_i}};
+         end
    end
 	
 	assign reset = reset_reg;

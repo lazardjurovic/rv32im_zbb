@@ -36,7 +36,7 @@ module control_path(
 
     // control decoder
 
-    reg[37:0] id_ex_reg;
+    reg[37:0] id_ex_reg = 0;
 
     wire mem_to_reg_s;
     wire[1:0] data_mem_we_s;
@@ -52,6 +52,7 @@ module control_path(
     wire control_pass_s;
 
     control_decoder cntrl_dec(
+        .reset(rst_n),
         .opcode_i(instruction_i[6:0]),
         .funct3_i(instruction_i[14:12]),
         .mem_to_reg_o(mem_to_reg_s),
@@ -107,7 +108,7 @@ module control_path(
     assign pc_next_sel_o = branch_condition_i & branch_s;
     assign if_id_flush_o = branch_condition_i & branch_s;
 
-    reg[9:0] ex_mem_reg;
+    reg[9:0] ex_mem_reg = 0;
 
     forwarding_unit fwd_unit(
         .rs1_address_id_i(instruction_i[19:15]),
