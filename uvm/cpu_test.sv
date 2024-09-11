@@ -11,15 +11,6 @@ class cpu_test extends uvm_test;
     
     `uvm_component_utils(cpu_test)
 
-    // Sequences
-    axi_transaction axi_test_seq;
-    axi_reset_low_seq axi_reset_low;
-    data_bram_transaction data_bram_test_seq;
-    instr_bram_transaction instr_bram_test_seq;
-    axi_read_stop_flag  axi_read_test_seq;
-    cpu_check_seq cpu_test_seq;
-    
-
     // Handle to monitor's event for stop flag
     uvm_event stop_flag_event;
     
@@ -33,23 +24,12 @@ class cpu_test extends uvm_test;
         uvm_config_db#(cpu_config)::set(this, "m_env", "cpu_config", cfg);
         m_env = cpu_env::type_id::create("m_env", this);  
         
-        $display("Building sequences...");
-        
-        // Build all sequences
-        axi_test_seq = axi_transaction::type_id::create("axi_test_seq");
-        data_bram_test_seq = data_bram_transaction::type_id::create("data_bram_test_seq");
-        instr_bram_test_seq = instr_bram_transaction::type_id::create("instr_bram_test_seq");
-        axi_read_test_seq = axi_read_stop_flag::type_id::create("axi_read_test_seq");
-        cpu_test_seq = cpu_check_seq::type_id::create("cpu_test_seq");
-        axi_reset_low = axi_reset_low_seq::type_id::create("axi_reset_low");
-
         // Get the stop_flag_event from the environment
         if (!uvm_config_db#(uvm_event)::get(this, "*", "stop_flag_event", stop_flag_event)) begin
             `uvm_fatal("NO_STOP_FLAG_EVENT", "Stop flag event not found in uvm_config_db.")
         end
         
         $display("STOP_FLAG_EVENT set to %p" , stop_flag_event);
-        $display("Finished building sequences.");
 
     endfunction
     
@@ -58,7 +38,16 @@ class cpu_test extends uvm_test;
       uvm_top.print_topology();
    endfunction : end_of_elaboration_phase
     
-    task main_phase(uvm_phase phase);
+    virtual task main_phase(uvm_phase phase);
+        
+        // Build all sequences
+        axi_transaction axi_test_seq = axi_transaction::type_id::create("axi_test_seq");
+        data_bram_transaction data_bram_test_seq = data_bram_transaction::type_id::create("data_bram_test_seq");
+        instr_bram_transaction instr_bram_test_seq = instr_bram_transaction::type_id::create("instr_bram_test_seq");
+        axi_read_stop_flag  axi_read_test_seq = axi_read_stop_flag::type_id::create("axi_read_test_seq");
+        cpu_check_seq cpu_test_seq = cpu_check_seq::type_id::create("cpu_test_seq");
+        axi_reset_low_seq axi_reset_low = axi_reset_low_seq::type_id::create("axi_reset_low");
+        
         phase.raise_objection(this);
         
         #50ns
