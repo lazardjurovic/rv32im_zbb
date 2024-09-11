@@ -82,8 +82,8 @@ class cpu_scoreboard extends uvm_scoreboard;
                     //$display("MISMATCH. Expected: %0h, Got: %0h", expected.dout, t.dout);
                 end 
                 else begin
-                    //`uvm_info("MATCH", $sformatf("Data BRAM match: %0h", t.dout), UVM_LOW);
-                    $display("MATCH. Expected: %0h, Got: %0h", expected.dout, t.dout);
+                    `uvm_info("MATCH", $sformatf("Data BRAM match. Expected: %0h, Got: %0h", expected.dout, t.dout), UVM_LOW);
+                    //$display("MATCH. Expected: %0h, Got: %0h", expected.dout, t.dout);
                 end
             end
             

@@ -16,18 +16,69 @@ class cpu_coverage extends uvm_subscriber #(bram_seq_item);
   bit [6:0] opcode;
   bit [6:0] funct7;
   bit [2:0] funct3;
+  bit [4:0] rs2;
   bit [5:0] opcode_sel;
   int addr_counter = 0;
 
   // Covergroup for opcode coverage
   covergroup opcode_cg;
-    coverpoint opcode {
-      bins load_instructions[]   = {7'b0000011, 7'b0010111, 7'b0110111};  // LW, LH, LB, LUI, AUIPC
-      bins store_instructions[]  = {7'b0100011};                          // SW, SH, SB
-      bins arithmetic_instructions[] = {7'b0010011, 7'b0110011};          // ADD (R-type)
-      bins branch_instructions[] = {7'b1100011};                          // BEQ (branch)
-      bins jump_instructions[]   = {7'b1100111, 7'b1101111};              // JAL (jump)
-      bins system_instructions[] = {7'b1110011};                          // ECALL (system call)
+    coverpoint opcode_sel {
+      bins ADD_i    []      = {6'b000000};
+      bins SLL_i    []      = {6'b000001};
+      bins SLT_i    []      = {6'b000010};
+      bins SLTU_i   []      = {6'b000011};
+      bins XOR_i    []      = {6'b000100};
+      bins SRL_i    []      = {6'b000101};
+      bins OR_i     []      = {6'b000110};
+      bins AND_i    []      = {6'b000111};
+      bins ANDN_i   []      = {6'b001000};
+      bins ORN_i    []      = {6'b001001};
+      bins XNOR_i   []      = {6'b001010};
+      bins SUB_i    []      = {6'b001011};
+      bins SRA_i    []      = {6'b001100};
+      bins MUL_i    []      = {6'b001101};
+      bins MULH_i   []      = {6'b001110};
+      bins MULHSU_i []      = {6'b001111};
+      bins MULHU_i  []      = {6'b010000};
+      bins ROL_i    []      = {6'b010001};
+      bins ROR_i    []      = {6'b010010};
+      bins MAX_i    []      = {6'b010011};
+      bins MIN_i    []      = {6'b010100};
+      bins MINU_i   []      = {6'b010101};
+      bins MAXU_i   []      = {6'b010110};
+      bins ZEXT_H_i []      = {6'b010111};
+      bins CLZ_i    []      = {6'b011000};
+      bins CTZ_i    []      = {6'b011001};
+      bins CPOP_i   []      = {6'b011010};
+      bins SEXT_B_i []      = {6'b011011};
+      bins SEXT_H_i []      = {6'b011100};
+      bins REV8_i   []      = {6'b011101};
+      bins ORC_B_i  []      = {6'b011110};
+      bins ADDI_i   []      = {6'b011111};
+      bins SLLI_i   []      = {6'b100000};
+      bins STLI_i   []      = {6'b100001};
+      bins SLTIU_i  []      = {6'b100010};
+      bins XORI_i   []      = {6'b100011};
+      bins SRLI_i   []      = {6'b100100};
+      bins ORI_i    []      = {6'b100101};
+      bins ANDI_i   []      = {6'b100110};
+      bins LB_i     []      = {6'b100111};
+      bins LH_i     []      = {6'b101000};
+      bins LW_i     []      = {6'b101001};
+      bins BEQ_i    []      = {6'b101010};
+      bins BNE_i    []      = {6'b101011};
+      bins BLT_i    []      = {6'b101100};
+      bins BGE_i    []      = {6'b101101};
+      bins BLTU_i   []      = {6'b101110};
+      bins BGEU_i   []      = {6'b101111};
+      bins SB_i     []      = {6'b110000};
+      bins SH_i     []      = {6'b110001};
+      bins SW_i     []      = {6'b110010};
+      bins JALR_i   []      = {6'b110011};
+      bins JAL_i    []      = {6'b110100};
+      bins AUIPC_i  []      = {6'b110101};
+      bins LUI_i    []      = {6'b110110};
+      bins ECALL_i  []      = {6'b110111};
     }
   endgroup
 
@@ -40,9 +91,11 @@ class cpu_coverage extends uvm_subscriber #(bram_seq_item);
   // Write method to receive the transaction and parse the instruction
   virtual function void write(bram_seq_item t);
       
-    //$display("[COVERAGE]: BRAM -- addr = %h, data = %h.", t.addr, t.dout);
     if (t.addr == addr_counter) begin
       if (t.din != 0) begin
+        
+        `uvm_info("[COVERAGE]", $sformatf("Recieved: %0h.", t.din), UVM_LOW);
+
         instruction = t.din;
 
         // Extract the opcode (7 bits from instruction[6:0])
@@ -57,31 +110,31 @@ class cpu_coverage extends uvm_subscriber #(bram_seq_item);
               case(funct7)
                 7'b0000000:
                   case(funct3)
-                      3'b000: opcode_sel = 6'b000000; // add
-                      3'b001: opcode_sel = 6'b000001; // sll
-                      3'b010: opcode_sel = 6'b000010; // slt
+                      3'b000: opcode_sel = 6'b000000; // add 
+                      3'b001: opcode_sel = 6'b000001; // sll 
+                      3'b010: opcode_sel = 6'b000010; // slt 
                       3'b011: opcode_sel = 6'b000011; // sltu
-                      3'b100: opcode_sel = 6'b000100; // xor
-                      3'b101: opcode_sel = 6'b000101; // srl
-                      3'b110: opcode_sel = 6'b000110; // or
-                      3'b111: opcode_sel = 6'b000111; // and
+                      3'b100: opcode_sel = 6'b000100; // xor 
+                      3'b101: opcode_sel = 6'b000101; // srl 
+                      3'b110: opcode_sel = 6'b000110; // or   
+                      3'b111: opcode_sel = 6'b000111; // and 
                       default: opcode_sel = 6'b000000;
                   endcase
                 7'b0100000:
                   case(funct3) 
                       3'b111: opcode_sel = 6'b001000; // andn
-                      3'b110: opcode_sel = 6'b001001; // orn
+                      3'b110: opcode_sel = 6'b001001; // orn 
                       3'b100: opcode_sel = 6'b001010; // xnor
-                      3'b000: opcode_sel = 6'b001011; // sub
-                      3'b101: opcode_sel = 6'b001100; // sra
+                      3'b000: opcode_sel = 6'b001011; // sub 
+                      3'b101: opcode_sel = 6'b001100; // sra 
                   default: opcode_sel = 6'b000000; 
                   endcase
                 7'b0000001: // MULs
                   case(funct3)
-                      3'b000: opcode_sel = 6'b001101; // mul
-                      3'b001: opcode_sel = 6'b001110; // mulh
+                      3'b000: opcode_sel = 6'b001101; // mul   
+                      3'b001: opcode_sel = 6'b001110; // mulh  
                       3'b010: opcode_sel = 6'b001111; // mulhsu
-                      3'b011: opcode_sel = 6'b010000; // mulhu
+                      3'b011: opcode_sel = 6'b010000; // mulhu 
                   default: opcode_sel = 6'b000000;
                   endcase
                 7'b0110000: // rol, ror
@@ -91,8 +144,8 @@ class cpu_coverage extends uvm_subscriber #(bram_seq_item);
                   endcase
                 7'b0000101: //max, maxu, min, minu
                   case(funct3)
-                      3'b110: opcode_sel = 6'b010011; // max
-                      3'b100: opcode_sel = 6'b010100; // min
+                      3'b110: opcode_sel = 6'b010011; // max 
+                      3'b100: opcode_sel = 6'b010100; // min 
                       3'b101: opcode_sel = 6'b010101; // minu
                       3'b111: opcode_sel = 6'b010110; // maxu
                       default:  opcode_sel = 6'b000000;
@@ -110,9 +163,9 @@ class cpu_coverage extends uvm_subscriber #(bram_seq_item);
                 7'b0110000:
                   if(funct3 == 3'b001) begin
                     case(rs2)
-                        5'b00000: opcode_sel = 6'b011000; // clz
-                        5'b00001: opcode_sel = 6'b011001; // ctz
-                        5'b00010: opcode_sel = 6'b011010; // cpop
+                        5'b00000: opcode_sel = 6'b011000; // clz   
+                        5'b00001: opcode_sel = 6'b011001; // ctz   
+                        5'b00010: opcode_sel = 6'b011010; // cpop  
                         5'b00100: opcode_sel = 6'b011011; // sext.b
                         5'b00101: opcode_sel = 6'b011100; // sext.h
                         default: opcode_sel = 6'b000000;
@@ -134,14 +187,14 @@ class cpu_coverage extends uvm_subscriber #(bram_seq_item);
                   end
                 default:
                   case(funct3) 
-                      3'b000: opcode_sel = 6'b011111; // addi
-                      3'b001: opcode_sel = 6'b100000; // slli
-                      3'b010: opcode_sel = 6'b100001; // stli
+                      3'b000: opcode_sel = 6'b011111; // addi 
+                      3'b001: opcode_sel = 6'b100000; // slli 
+                      3'b010: opcode_sel = 6'b100001; // stli 
                       3'b011: opcode_sel = 6'b100010; // sltiu
-                      3'b100: opcode_sel = 6'b100011; // xori
-                      3'b101: opcode_sel = 6'b100100; // srli
-                      3'b110: opcode_sel = 6'b100101; // ori
-                      3'b111: opcode_sel = 6'b100110; // andi
+                      3'b100: opcode_sel = 6'b100011; // xori 
+                      3'b101: opcode_sel = 6'b100100; // srli 
+                      3'b110: opcode_sel = 6'b100101; // ori  
+                      3'b111: opcode_sel = 6'b100110; // andi 
                       default: opcode_sel = 6'b000000;
                   endcase
               endcase
@@ -158,10 +211,10 @@ class cpu_coverage extends uvm_subscriber #(bram_seq_item);
           7'b1100011: // B type instructions
             begin
               case(funct3)
-                3'b000: opcode_sel = 6'b101010; // beq
-                3'b001: opcode_sel = 6'b101011; // bne
-                3'b100: opcode_sel = 6'b101100; // blt
-                3'b101: opcode_sel = 6'b101101; // bge
+                3'b000: opcode_sel = 6'b101010; // beq 
+                3'b001: opcode_sel = 6'b101011; // bne 
+                3'b100: opcode_sel = 6'b101100; // blt 
+                3'b101: opcode_sel = 6'b101101; // bge 
                 3'b110: opcode_sel = 6'b101110; // bltu
                 3'b111: opcode_sel = 6'b101111; // bgeu
                 default: opcode_sel = 6'b000000;
@@ -197,10 +250,8 @@ class cpu_coverage extends uvm_subscriber #(bram_seq_item);
               opcode_sel = 6'b110111;
             end
           default: 
-            `uvm_warning("UNKNOWN_OPCODE", {"Unknown opcode: ", opcode})
+            `uvm_warning("UNKNOWN_OPCODE", {"Unknown opcode."})
         endcase
-        
-        // $display("[COVERAGE]: BRAM -- instr = %b, opcode = %b.", instruction, opcode);
 
         // Sample the opcode into the covergroup
         opcode_cg.sample();
