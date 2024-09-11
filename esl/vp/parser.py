@@ -29,8 +29,9 @@ def reverse_endian(s):
     return merged_string
 
 def make_dump(filename_dump):
+    global parsed_program, parsed_data
     # opening .txt section
-    with open(filename_dump+".text_dump", "r") as file:
+    with open("tests/"+filename_dump+".text_dump", "r") as file:
         for line in file:
             parsed_program.append(line)
 
@@ -87,7 +88,7 @@ def make_dump(filename_dump):
 
 
     # opening .data section
-    with open(filename_dump+".data_dump", 'r') as file:
+    with open("tests/"+filename_dump+".data_dump", 'r') as file:
         for line in file:
             parsed_data.append(line)
 
@@ -102,6 +103,7 @@ def make_dump(filename_dump):
     parsed_data = [reverse_endian(s) for s in parsed_data]
 
 def make_memories(counter):
+    global parsed_program, parsed_data
 
     # writing to data memory file
     with open("data_mem"+str(counter)+".txt", 'w') as file:
@@ -124,11 +126,13 @@ def make_memories(counter):
     parsed_program = []
     parsed_data = []
 
-elf_lsit = list_elf_files_os(".")
+elf_list = list_elf_files_os("tests/")
 
 file_cntr = 0
+print(elf_list)
 
-for elf in elf_lsit:
+for elf in elf_list:
    make_dump(elf)
    make_memories(file_cntr)
+   file_cntr+=1
    

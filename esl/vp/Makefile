@@ -43,14 +43,17 @@ data.dump: program.elf
 SRC_FILES = $(wildcard tests/*.c)
 
 # Target to build all .elf files
+.PHONY:for_checker
+
 for_checker: $(SRC_FILES:.c=.elf)
 
 # Pattern rule for compiling .c files to .elf files
 %.elf: %.c
 	@echo "Compiling $< to $@"
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $<
-	$(DUMP) -j .data -s $@ > $<.data_dump
 	$(DUMP) -d $@ > $@.text_dump
+	$(DUMP) -j .data -s $@ > $@.data_dump || true
+
 
 clean:
 	rm *.dump *.elf data_mem.txt instr_mem.txt rv32imb
