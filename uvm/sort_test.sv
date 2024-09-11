@@ -30,11 +30,11 @@ class sort_test extends cpu_test;
             $display("Starting axi_test_seq @ %0t", $time);
             axi_test_seq.start(m_env.axi_agt.seqr);                 // Hold reset of CPU high
             
-            $display("Starting sort_data_transaction @ %0t", $time);
-            sort_data_transaction.start(m_env.data_bram_agt.seqr);     // Initialize data memory
+            $display("Starting sort_data_test_seq @ %0t", $time);
+            sort_data_test_seq.start(m_env.data_bram_agt.seqr);     // Initialize data memory
             
-            $display("Starting sort_instr_transaction @ %0t", $time);
-            sort_instr_transaction.start(m_env.instr_bram_agt.seqr);   // Initialize instruction memory
+            $display("Starting sort_instr_test_seq @ %0t", $time);
+            sort_instr_test_seq.start(m_env.instr_bram_agt.seqr);   // Initialize instruction memory
         join
         
         $display("Init threads join @ %0t", $time);   
