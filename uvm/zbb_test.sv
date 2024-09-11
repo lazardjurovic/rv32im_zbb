@@ -1,14 +1,14 @@
-`ifndef SORT_TEST_SV
-`define SORT_TEST_SV
+`ifndef ZBB_TEST_SV
+`define ZBB_TEST_SV
 
 import bram_seq_pkg::*;
 import axi_seq_pkg::*;
 
-class sort_test extends cpu_test;
+class zbb_test extends cpu_test;
     
-    `uvm_component_utils(sort_test)
+    `uvm_component_utils(zbb_test)
     
-    function new(string name = "sort_test", uvm_component parent = null);
+    function new(string name = "zbb_test", uvm_component parent = null);
         super.new(name,parent);
     endfunction : new
     
@@ -16,8 +16,8 @@ class sort_test extends cpu_test;
         
         // Build all sequences
         axi_transaction axi_test_seq = axi_transaction::type_id::create("axi_test_seq");
-        sort_data_transaction sort_data_test_seq = sort_data_transaction::type_id::create("sort_data_test_seq");
-        sort_instr_transaction sort_instr_test_seq = sort_instr_transaction::type_id::create("sort_instr_test_seq");
+        zbb_data_transaction zbb_data_test_seq = zbb_data_transaction::type_id::create("zbb_data_test_seq");
+        zbb_instr_transaction zbb_instr_test_seq = zbb_instr_transaction::type_id::create("zbb_instr_test_seq");
         axi_read_stop_flag  axi_read_test_seq = axi_read_stop_flag::type_id::create("axi_read_test_seq");
         cpu_check_seq cpu_test_seq = cpu_check_seq::type_id::create("cpu_test_seq");
         axi_reset_low_seq axi_reset_low = axi_reset_low_seq::type_id::create("axi_reset_low");
@@ -30,11 +30,11 @@ class sort_test extends cpu_test;
             $display("Starting axi_test_seq @ %0t", $time);
             axi_test_seq.start(m_env.axi_agt.seqr);                 // Hold reset of CPU high
             
-            $display("Starting sort_data_transaction @ %0t", $time);
-            sort_data_transaction.start(m_env.data_bram_agt.seqr);     // Initialize data memory
+            $display("Starting zbb_data_transaction @ %0t", $time);
+            zbb_data_transaction.start(m_env.data_bram_agt.seqr);     // Initialize data memory
             
-            $display("Starting sort_instr_transaction @ %0t", $time);
-            sort_instr_transaction.start(m_env.instr_bram_agt.seqr);   // Initialize instruction memory
+            $display("Starting zbb_instr_transaction @ %0t", $time);
+            zbb_instr_transaction.start(m_env.instr_bram_agt.seqr);   // Initialize instruction memory
         join
         
         $display("Init threads join @ %0t", $time);   
