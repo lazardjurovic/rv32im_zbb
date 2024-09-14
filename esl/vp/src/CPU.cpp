@@ -1334,7 +1334,7 @@ void CPU::executeInstruction()
 				byte_4 = 0x00;
 				}
 				
-				alu_tmp = (byte_4 << 24) | (byte_3 << 16) | (byte_2 << 8) | byte_1;
+				alu_tmp = (byte_1 << 24) | (byte_2 << 16) | (byte_3 << 8) | byte_4;
 				alu_result = alu_tmp;
 			}
 			else if((funct7 >> 2) == 0b01100) //RORI
