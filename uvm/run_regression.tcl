@@ -25,4 +25,4 @@ foreach test $test_list {
     }
 }
 
-exec xcrg -report_format html -dir tmp/verif_skripta_test/verif_skripta_test.sim/sim_1/behav/xsim/ -report_dir /home/lazar/Desktop/y24-g05/uvm/tmp/
+exec xcrg -report_format html -dir tmp/verif_skripta_test/verif_skripta_test.sim/sim_1/behav/xsim/ -report_dir tmp/

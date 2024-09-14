@@ -15,12 +15,16 @@ class cpu_scoreboard extends uvm_scoreboard;
 
     `uvm_component_utils_begin(cpu_scoreboard)
         `uvm_field_int(start_check, UVM_DEFAULT)
+        `uvm_field_string(golden_vector_file, UVM_ALL_ON)
     `uvm_component_utils_end
 
     // Flag indicating when to check data in the data BRAM
     bit start_check = 1'b0;
     int addr_cnt = 0;
     uvm_event stop_flag_event;
+
+    // Golden vector file path
+    string golden_vector_file;
 
     uvm_analysis_imp_1 #(axi_seq_item, cpu_scoreboard) axi_ap_collect;
     uvm_analysis_imp_2 #(bram_seq_item, cpu_scoreboard) data_bram_ap_collect;
@@ -52,8 +56,13 @@ class cpu_scoreboard extends uvm_scoreboard;
         
         $display("STOP_FLAG_EVENT set to %p" , stop_flag_event);
         
-        // Load golden vectors from a file
-        load_golden_vectors("../../../../../../../esl/vp/golden_vector.txt");
+        // Get golden vector file from config
+        if (!uvm_config_db#(string)::get(this, "*", "golden_vector_file", golden_vector_file)) begin
+            `uvm_fatal("NO_GOLDEN_VECTOR_FILE", "Golden vector file path not set.")
+        end
+        
+        // Load golden vectors from the specified file
+        load_golden_vectors(golden_vector_file);
         $display("[SCOREBOARD] Loaded golden vetors.");
     endfunction
 
@@ -73,23 +82,22 @@ class cpu_scoreboard extends uvm_scoreboard;
         //$display("[SCOREBOARD]: BRAM -- addr = %h, data = %h.", t.addr, t.dout);
         
         if (start_check == 1) begin
-            if (t.dout !== 0 && t.addr == addr_cnt) begin
-                bram_seq_item expected = expected_data_q.pop_front();
-                addr_cnt++;
-                
-                if (t.dout !== expected.dout) begin
-                    `uvm_error("MISMATCH", $sformatf("Mismatch in data BRAM. Expected: %0h, Got: %0h", expected.dout, t.dout));
-                    //$display("MISMATCH. Expected: %0h, Got: %0h", expected.dout, t.dout);
+            if (t.addr == addr_cnt) begin
+                if (t.dout !== 0) begin
+                    bram_seq_item expected = expected_data_q.pop_front();
+                    
+                    if (t.dout !== expected.dout) begin
+                        `uvm_error("MISMATCH", $sformatf("Mismatch in data BRAM. Expected: %0h, Got: %0h", expected.dout, t.dout));
+                        //$display("MISMATCH. Expected: %0h, Got: %0h", expected.dout, t.dout);
+                    end 
+                    else begin
+                        `uvm_info("MATCH", $sformatf("Data BRAM match. Expected: %0h, Got: %0h", expected.dout, t.dout), UVM_LOW);
+                        //$display("MATCH. Expected: %0h, Got: %0h", expected.dout, t.dout);
+                    end
                 end 
-                else begin
-                    `uvm_info("MATCH", $sformatf("Data BRAM match. Expected: %0h, Got: %0h", expected.dout, t.dout), UVM_LOW);
-                    //$display("MATCH. Expected: %0h, Got: %0h", expected.dout, t.dout);
-                end
-            end
-            
-            if (t.dout == 0) begin
+                
                 addr_cnt++;
-            end 
+            end
         end
         
     endfunction

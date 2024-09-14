@@ -8,6 +8,8 @@ class cpu_test extends uvm_test;
    
     cpu_env m_env;
     cpu_config  cfg;
+    string golden_vector_file;
+    string test_name;
     
     `uvm_component_utils(cpu_test)
 
@@ -28,6 +30,28 @@ class cpu_test extends uvm_test;
         if (!uvm_config_db#(uvm_event)::get(this, "*", "stop_flag_event", stop_flag_event)) begin
             `uvm_fatal("NO_STOP_FLAG_EVENT", "Stop flag event not found in uvm_config_db.")
         end
+
+        // Use $value$plusargs to retrieve the UVM_TESTNAME argument
+        if ($value$plusargs("UVM_TESTNAME=%s", test_name)) begin
+            `uvm_info("TEST", $sformatf("Running test: %s", test_name), UVM_LOW);
+            if (test_name == "cpu_test") begin
+                golden_vector_file = "../../../../../../../esl/vp/golden_vector.txt";
+            end else if (test_name == "sort_test") begin
+                golden_vector_file = "../../../../../../../esl/vp/for_checker/golden_vector1.txt";
+            end else if (test_name == "zbb_test") begin
+                golden_vector_file = "../../../../../../../esl/vp/for_checker/golden_vector2.txt";
+            end else if (test_name == "mul_test") begin
+                golden_vector_file = "../../../../../../../esl/vp/for_checker/golden_vector0.txt";
+            end else begin
+                `uvm_fatal("UNKNOWN_TEST", "Unknown test name. Cannot determine golden vector file.");
+            end
+
+        end else begin
+             golden_vector_file = "../../../../../../../esl/vp/golden_vector.txt";
+        end
+        
+        // Set the golden vector file path in the UVM configuration database
+        uvm_config_db#(string)::set(this, "*", "golden_vector_file", golden_vector_file);
         
         $display("STOP_FLAG_EVENT set to %p" , stop_flag_event);
 

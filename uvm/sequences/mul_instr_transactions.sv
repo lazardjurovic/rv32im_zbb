@@ -21,7 +21,7 @@ class mul_instr_transaction extends bram_base_seq;
         int addr = 0;
 
         // Open the file for reading
-        file = $fopen("../../../../../../../esl/vp/instr_mem.txt", "r");
+        file = $fopen("../../../../../../../esl/vp/for_checker/instr_mem0.txt", "r");
         if (file == 0) begin
             `uvm_fatal("FILE_ERROR", "Unable to open file!")
         end
