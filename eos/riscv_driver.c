@@ -75,8 +75,8 @@ static irqreturn_t xilaxitimer_isr(int irq, void *dev_id);
 static void setup_and_start_timer(u64 milliseconds);
 static int timer_probe(struct platform_device *pdev);
 static int timer_remove(struct platform_device *pdev);
-int timer_open(struct inode *pinode, struct file *pfile);
-int timer_close(struct inode *pinode, struct file *pfile);
+int riscv_open(struct inode *pinode, struct file *pfile);
+int riscv_close(struct inode *pinode, struct file *pfile);
 ssize_t timer_read(struct file *pfile, char __user *buffer, size_t length, loff_t *offset);
 ssize_t timer_write(struct file *pfile, const char __user *buffer, size_t length, loff_t *offset);
 static int __init timer_init(void);
@@ -85,10 +85,10 @@ static void __exit timer_exit(void);
 struct file_operations my_fops =
 	{
 		.owner = THIS_MODULE,
-		.open = timer_open,
+		.open = riscv_open,
 		.read = timer_read,
 		.write = timer_write,
-		.release = timer_close,
+		.release = riscv_close,
 		.fasync = timer_fasync,
 };
 
@@ -97,7 +97,7 @@ static struct of_device_id timer_of_match[] = {
 	{/* end of list */},
 };
 
-static struct platform_driver timer_driver = {
+static struct platform_driver riscv_driver = {
 	.driver = {
 		.name = DRIVER_NAME,
 		.owner = THIS_MODULE,
@@ -325,15 +325,15 @@ static void start_stop(void)
 	}
 }
 
-int timer_open(struct inode *pinode, struct file *pfile) 
+int riscv_open(struct inode *pinode, struct file *pfile) 
 {
-	// printk(KERN_INFO "Succesfully opened timer\n");
+	printk(KERN_INFO "Succesfully opened RISC-V driver\n");
 	return 0;
 }	
 
-int timer_close(struct inode *pinode, struct file *pfile)
+int riscv_close(struct inode *pinode, struct file *pfile)
 {
-	// printk(KERN_INFO "Succesfully closed timer\n");
+	printk(KERN_INFO "Succesfully closed RISC-V driver\n");
 	return 0;
 }
 
@@ -476,7 +476,7 @@ static int __init timer_init(void)
 	printk(KERN_INFO "xilaxitimer_init: Cdev added\n");
 	printk(KERN_NOTICE "xilaxitimer_init: Hello world\n");
 
-	return platform_driver_register(&timer_driver);
+	return platform_driver_register(&riscv_driver);
 
 fail_2:
 	device_destroy(my_class, my_dev_id);
@@ -489,7 +489,7 @@ fail_0:
 
 static void __exit timer_exit(void)
 {
-	platform_driver_unregister(&timer_driver);
+	platform_driver_unregister(&riscv_driver);
 	cdev_del(my_cdev);
 	device_destroy(my_class, my_dev_id);
 	class_destroy(my_class);
