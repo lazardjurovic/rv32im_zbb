@@ -1,5 +1,5 @@
 # List of tests to run
-set test_list {cpu_test sort_test zbb_test mul_test}
+set test_list {sort_test zbb_test mul_test arith_test branch_test load_store_test}
 
 # Iterate over each test and run it
 foreach test $test_list {

@@ -34,13 +34,17 @@ class cpu_test extends uvm_test;
         // Use $value$plusargs to retrieve the UVM_TESTNAME argument
         if ($value$plusargs("UVM_TESTNAME=%s", test_name)) begin
             `uvm_info("TEST", $sformatf("Running test: %s", test_name), UVM_LOW);
-            if (test_name == "cpu_test") begin
-                golden_vector_file = "../../../../../../../esl/vp/golden_vector.txt";
-            end else if (test_name == "sort_test") begin
+            if (test_name == "sort_test") begin
                 golden_vector_file = "../../../../../../../esl/vp/for_checker/golden_vector1.txt";
             end else if (test_name == "zbb_test") begin
                 golden_vector_file = "../../../../../../../esl/vp/for_checker/golden_vector2.txt";
             end else if (test_name == "mul_test") begin
+                golden_vector_file = "../../../../../../../esl/vp/for_checker/golden_vector0.txt";
+            end else if (test_name == "load_store_test") begin
+                golden_vector_file = "../../../../../../../esl/vp/for_checker/golden_vector0.txt";
+            end else if (test_name == "branch_test") begin
+                golden_vector_file = "../../../../../../../esl/vp/for_checker/golden_vector0.txt";
+            end else if (test_name == "arith_test") begin
                 golden_vector_file = "../../../../../../../esl/vp/for_checker/golden_vector0.txt";
             end else begin
                 `uvm_fatal("UNKNOWN_TEST", "Unknown test name. Cannot determine golden vector file.");
