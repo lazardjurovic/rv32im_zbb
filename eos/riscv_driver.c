@@ -41,9 +41,9 @@
 #define XIL_AXI_TIMER_CSR_DOWN_COUNT_MASK 0x00000002
 #define XIL_AXI_TIMER_CSR_CAPTURE_MODE_MASK 0x00000001
 
-#define BUFF_SIZE 20
-#define DRIVER_NAME "timer"
-#define DEVICE_NAME "xilaxitimer"
+#define BUFF_SIZE 50
+#define DRIVER_NAME "riscv"
+#define DEVICE_NAME "xilaxitimer"   // TODO: PROMENI
 
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("Xilinx");
@@ -72,13 +72,16 @@ u64 alarm_value = 0;
 
 static int timer_fasync(int fd, struct file *file, int mode);
 static irqreturn_t xilaxitimer_isr(int irq, void *dev_id);
+static void instruction_memory_load(unsigned int instruction);
+static void data_memory_load(unsigned int instruction);
 static void setup_and_start_timer(u64 milliseconds);
 static int timer_probe(struct platform_device *pdev);
 static int timer_remove(struct platform_device *pdev);
+static void toggle_cpu_reset(void);
 int riscv_open(struct inode *pinode, struct file *pfile);
 int riscv_close(struct inode *pinode, struct file *pfile);
 ssize_t timer_read(struct file *pfile, char __user *buffer, size_t length, loff_t *offset);
-ssize_t timer_write(struct file *pfile, const char __user *buffer, size_t length, loff_t *offset);
+ssize_t riscv_write(struct file *pfile, const char __user *buffer, size_t length, loff_t *offset);
 static int __init timer_init(void);
 static void __exit timer_exit(void);
 
@@ -87,7 +90,7 @@ struct file_operations my_fops =
 		.owner = THIS_MODULE,
 		.open = riscv_open,
 		.read = timer_read,
-		.write = timer_write,
+		.write = riscv_write,
 		.release = riscv_close,
 		.fasync = timer_fasync,
 };
@@ -136,7 +139,15 @@ static irqreturn_t xilaxitimer_isr(int irq, void *dev_id)
 }
 
 //***************************************************
-// HELPER FUNCTION THAT RESETS AND STARTS TIMER WITH PERIOD IN MILISECONDS
+// FUNCTION FOR WORK WITH MEMORIES
+
+static void instruction_memory_load(unsigned int instruction) {
+    printk(KERN_NOTICE "Loading instruction [%u].", instruction);
+}
+
+static void data_memory_load(unsigned int data) {
+    printk(KERN_NOTICE "Loading data [%u].", data);
+}
 
 static void setup_and_start_timer(u64 milliseconds)
 {
@@ -294,6 +305,10 @@ static int timer_remove(struct platform_device *pdev)
 //***************************************************
 // FILE OPERATION functions
 
+static void toggle_cpu_reset(void) {
+
+}
+
 static void start_stop(void)
 {
 	u32 data;
@@ -367,41 +382,33 @@ ssize_t timer_read(struct file *pfile, char __user *buffer, size_t length, loff_
 	return len;
 }
 
-ssize_t timer_write(struct file *pfile, const char __user *buffer, size_t length, loff_t *offset)
+ssize_t riscv_write(struct file *pfile, const char __user *buffer, size_t length, loff_t *offset)
 {
 	char buff[BUFF_SIZE];
-	unsigned int millis = 0;
-	unsigned int hour = 0;
-	unsigned int sec = 0;
-	unsigned int min = 0;
 	int ret = 0;
-	char command;
+	unsigned int value;
+    char memory_select;
+
 	ret = copy_from_user(buff, buffer, length);
 	if (ret)
 		return -EFAULT;
 	buff[length] = '\0';
 
-	ret = sscanf(buff, "%c %u:%u:%u:%u", &command, &hour, &min, &sec, &millis);
+	ret = sscanf(buff, "%c %u", &memory_select, &value);
 
-	switch (command)
+	switch (memory_select)
 	{
-	case 't':
-		// Loading timer value
-		timer_value = millis + sec * 1000 + min * 60000 + hour * 3600000;
-		printk(KERN_NOTICE "Timer value set at: %u:%u:%u:%u or %llu ms", hour,min,sec,millis,timer_value);
+	case 'i':
+		// Loading into instruction memory
+		instruction_memory_load(value);
 		break;
-	case 'a':
-		// Loading alarm value
-		alarm_value = millis + sec * 1000 + min * 60000 + hour * 3600000;
-		printk(KERN_NOTICE "Alarm value set at: %u:%u:%u:%u or %llu ms", hour,min,sec,millis,alarm_value);
+	case 'd':
+		// Loading into data memory
+		data_memory_load(value);
 		break;
-	case 's':
-		// Starting/Stoping timer
-		start_stop();
-		break;
-	case 'r':
-		// Restarting timer
-		setup_and_start_timer(alarm_value - timer_value);
+    case 's':
+		// Start/Stop the CPU
+		toggle_cpu_reset();
 		break;
 	default:
 		printk(KERN_WARNING "Unknown command!");
