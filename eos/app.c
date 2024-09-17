@@ -58,19 +58,19 @@ int main(int argc, char **argv){
 	
 	cpu_regs = fopen("/dev/cpu_driver","r+"); // read + write
 	if(cpu_regs == NULL){
-		printf("ERROR. File /dev/cpu_driver doesn't exits.");
+		printf("ERROR. File /dev/cpu_driver doesn't exits.\n");
 		exit(1);	
 	}	
 
 	instr_mem = fopen("/dev/instr_mem_driver","r+"); // read + write
         if(instr_mem == NULL){
-                printf("ERROR. File /dev/instr_mem doesn't exits.");
+                printf("ERROR. File /dev/instr_mem doesn't exits.\n");
                 exit(1);
         }
 
         data_mem = fopen("/dev/data_mem_driver","r+"); // read + write
         if(data_mem == NULL){
-                printf("ERROR. File /dev/data_mem_driver doesn't exits.");
+                printf("ERROR. File /dev/data_mem_driver doesn't exits.\n");
                 exit(1);
         }
 
@@ -89,11 +89,10 @@ int main(int argc, char **argv){
         }
 
 	//wait for stop flag to appear
-
-	char status[2] = {'r','\0'};
+	char * status = (char*)malloc(2);	
 
 	while(status[0] != 's'){
-		getline(&status,2,cpu_regs);
+		getline(&status,(size_t)2,cpu_regs);
 	}
 
 	printf("Program has finished executing.\n");
@@ -102,14 +101,14 @@ int main(int argc, char **argv){
 	char line[33] = {0};
 
 	for(i=0;i<32;i++){
-		getline(line,33,data_mem);
+		getline(line,(size_t)33,data_mem);
 		printf("%s\n",line);
 	}
 
 	fclose(cpu_regs);
 	fclose(instr_mem);
 	fclose(data_mem);
-	
+	free(status);
 	  
 
 	return 0;
