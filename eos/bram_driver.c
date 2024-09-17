@@ -274,7 +274,7 @@ ssize_t instr_write(struct file *pfile, const char __user *buffer, size_t length
 		printk(KERN_ERR "Address out of range\n");
 		return -EINVAL;
 	}
-	//:printk("Trying write on device %d\n",device_index);
+	printk("Trying write %d to %d\n",value,addr);
 	iowrite32((u32)value, lp[device_index]->base_addr + addr);
 	printk(KERN_INFO "Successfully wrote value %#x to address %#x on device %d\n", value, addr, device_index);
 	

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 unsigned int program[] = {
 
@@ -65,53 +66,16 @@ int main(int argc, char **argv){
 	int i,j;
 	char command[30] = {0};
 
-	for(i = 0; i<=128; i+=4){
-		    sprintf(command, "echo \"0 %d %ul\" > /dev/bram_0", i,program[i]);
+	for(i = 0; i<=44; i++){
+		    sprintf(command, "echo \"0 %d %ul\" > /dev/bram_0", i*4,program[i]);
 		    system(command);
 		    for(j = 0; j<30; j++){
 			command[j] = 0;
 		    }	
+		usleep(1000000);
 	}
 
 	printf("Transfered some zeros to memory\n");
-
-	// load program into instruction_memory	
-
-	//for(i=0;i<sizeof(program)/4;i=4){
-//		fprintf(instr_mem,"%ul %ul",i,program[i]);
-//	}	
-
-	// load data to data memory
-	
-//        for(i=0;i<DATA_BRAM_SIZE;i+=4){
-//                fprintf(instr_mem,"%ul %ul",i,0);
-//        }
-
-	//wait for stop flag to appear
-/*
-	char * status = (char*)malloc(2);	
-
-	while(status[0] != 's'){
-		getline(&status,(size_t)2,cpu_regs);
-	}
-
-	printf("Program has finished executing.\n");
-	printf("Here is your register dumo: \n\n");
-	
-	char line[33] = {0};
-
-	for(i=0;i<32;i++){
-		getline(line,(size_t)33,data_mem);
-		printf("%s\n",line);
-	}
-
-	fclose(cpu_regs);
-	//fclose(instr_mem);
-	//fclose(data_mem);
-	free(status);
-*/	  
-
-//	fclose(cpu_regs);
 
 	return 0;
 }
