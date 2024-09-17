@@ -23,7 +23,7 @@
 
 #define BUFF_SIZE 40
 #define INSTR_BRAM_SIZE 1024
-#define DRIVER_NAME "instr_bram"
+#define DRIVER_NAME "data_bram"
 MODULE_LICENSE("Dual BSD/GPL");
 
 struct instr_info {
@@ -60,7 +60,8 @@ struct file_operations my_fops =
 
 static struct of_device_id instr_of_match[] = {
   //{ .compatible = "xlnx,axi-bram-ctrl-4.1", },
-    { .compatible = "xlnx,axi-bram-ctrl-4.1", .data = (void *)0x40000000}
+    { .compatible = "xlnx,axi-bram-ctrl-4.1", .data = (void *)0x42000000 },  
+{ /* end of list */ },
 };
 
 static struct platform_driver instr_driver = {
@@ -93,7 +94,7 @@ static int instr_probe(struct platform_device *pdev)
 
   lp->mem_start = r_mem->start;
   lp->mem_end = r_mem->end;
-  //printk(KERN_INFO "Start address:%x \t end address:%x", r_mem->start, r_mem->end);
+  printk(KERN_INFO "Start address:%x \t end address:%x", r_mem->start, r_mem->end);
 
   if (!request_mem_region(lp->mem_start,lp->mem_end - lp->mem_start + 1,        DRIVER_NAME))
   {
@@ -109,8 +110,8 @@ static int instr_probe(struct platform_device *pdev)
     goto error2;
   }
 
-  printk(KERN_WARNING "instr_mem platform driver registered\n");
-  printk(KERN_INFO "Starting address is: %X8", lp->mem_start);
+  printk(KERN_WARNING "data_mem platform driver registered\n");
+  printk(KERN_INFO "Starting address is: %X8 \n", lp->mem_start);
   return 0;//ALL OK
 
 error2:
@@ -121,23 +122,23 @@ error1:
 
 static int instr_remove(struct platform_device *pdev)
 {
-  printk(KERN_WARNING "Instruction bram platform driver removed\n");
+  printk(KERN_WARNING "Data bram platform driver removed\n");
   iowrite32(0, lp->base_addr);
   iounmap(lp->base_addr);
-  release_mem_region(lp->mem_start, lp->mem_end - lp->mem_start + 1);
+  printk(KERN_INFO "Half way removing");
   kfree(lp);
   return 0;
 }
 
 int instr_open(struct inode *pinode, struct file *pfile) 
 {
-	printk(KERN_INFO "Succesfully opened instruction bram\n");
+	printk(KERN_INFO "Succesfully opened data bram\n");
 	return 0;
 }
 
 int instr_close(struct inode *pinode, struct file *pfile) 
 {
-	printk(KERN_INFO "Succesfully closed instruction bram\n");
+	printk(KERN_INFO "Succesfully closed data bram\n");
 	return 0;
 }
 
