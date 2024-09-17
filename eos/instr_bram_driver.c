@@ -59,8 +59,9 @@ struct file_operations my_fops =
 };
 
 static struct of_device_id instr_of_match[] = {
-  { .compatible = "xlnx,axi-bram-ctrl-4.1", },
-  { /* end of list */ },
+  //{ .compatible = "xlnx,axi-bram-ctrl-4.1", },
+    { .compatible = "xlnx,axi-bram-ctrl-4.1", .data = (void *)0x40000000 },  
+{ /* end of list */ },
 };
 
 static struct platform_driver instr_driver = {
@@ -87,7 +88,7 @@ static int instr_probe(struct platform_device *pdev)
   }
   lp = (struct instr_info *) kmalloc(sizeof(struct instr_info), GFP_KERNEL);
   if (!lp) {
-    printk(KERN_ALERT "Could not allocate instruction bram device\n");
+    printk(KERN_ALERT "Could not allocate cpu device\n");
     return -ENOMEM;
   }
 
@@ -95,7 +96,7 @@ static int instr_probe(struct platform_device *pdev)
   lp->mem_end = r_mem->end;
   //printk(KERN_INFO "Start address:%x \t end address:%x", r_mem->start, r_mem->end);
 
-  if (!request_mem_region(lp->mem_start,lp->mem_end - lp->mem_start + 1,	DRIVER_NAME))
+  if (!request_mem_region(lp->mem_start,lp->mem_end - lp->mem_start + 1,        DRIVER_NAME))
   {
     printk(KERN_ALERT "Could not lock memory region at %p\n",(void *)lp->mem_start);
     rc = -EBUSY;
@@ -109,7 +110,8 @@ static int instr_probe(struct platform_device *pdev)
     goto error2;
   }
 
-  printk(KERN_WARNING "Instruction bram platform driver registered\n");
+  printk(KERN_WARNING "instr_mem platform driver registered\n");
+  printk(KERN_INFO "Starting address is: %X8", lp->mem_start);
   return 0;//ALL OK
 
 error2:
@@ -195,7 +197,7 @@ ssize_t instr_write(struct file *pfile, const char __user *buffer, size_t length
     if (ret) {
         return -EFAULT;
     }
-    buff[length] = '\0'; // Null-terminate the buffer
+    //buff[length] = '\0'; // Null-terminate the buffer
 
     ret = sscanf(buff, "%u %u", &addr, &value);
     if (ret != 2) {
