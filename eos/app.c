@@ -56,39 +56,39 @@ int main(int argc, char **argv){
 	FILE *instr_mem;
 	FILE *data_mem;
 	
-	cpu_regs = fopen("/dev/cpu_driver","r+"); // read + write
-	if(cpu_regs == NULL){
-		printf("ERROR. File /dev/cpu_driver doesn't exits.\n");
-		exit(1);	
-	}	
+	//cpu_regs = fopen("/dev/cpu_driver","r+"); // read + write
+	//if(cpu_regs == NULL){
+	//	printf("ERROR. File /dev/cpu_driver doesn't exits.\n");
+	//	exit(1);	
+//	}	
 
-	instr_mem = fopen("/dev/instr_mem_driver","r+"); // read + write
-        if(instr_mem == NULL){
-                printf("ERROR. File /dev/instr_mem doesn't exits.\n");
-                exit(1);
-        }
+	int i,j;
+	char command[30] = {0};
 
-        data_mem = fopen("/dev/data_mem_driver","r+"); // read + write
-        if(data_mem == NULL){
-                printf("ERROR. File /dev/data_mem_driver doesn't exits.\n");
-                exit(1);
-        }
+	for(i = 0; i<=128; i+=4){
+		    sprintf(command, "echo \"0 %d %ul\" > /dev/bram_0", i,program[i]);
+		    system(command);
+		    for(j = 0; j<30; j++){
+			command[j] = 0;
+		    }	
+	}
 
-	int i;
+	printf("Transfered some zeros to memory\n");
 
 	// load program into instruction_memory	
 
-	for(i=0;i<sizeof(program)/4;i=4){
-		fprintf(instr_mem,"%ul %ul",i,program[i]);
-	}	
+	//for(i=0;i<sizeof(program)/4;i=4){
+//		fprintf(instr_mem,"%ul %ul",i,program[i]);
+//	}	
 
 	// load data to data memory
 	
-        for(i=0;i<DATA_BRAM_SIZE;i+=4){
-                fprintf(instr_mem,"%ul %ul",i,0);
-        }
+//        for(i=0;i<DATA_BRAM_SIZE;i+=4){
+//                fprintf(instr_mem,"%ul %ul",i,0);
+//        }
 
 	//wait for stop flag to appear
+/*
 	char * status = (char*)malloc(2);	
 
 	while(status[0] != 's'){
@@ -106,10 +106,12 @@ int main(int argc, char **argv){
 	}
 
 	fclose(cpu_regs);
-	fclose(instr_mem);
-	fclose(data_mem);
+	//fclose(instr_mem);
+	//fclose(data_mem);
 	free(status);
-	  
+*/	  
+
+//	fclose(cpu_regs);
 
 	return 0;
 }

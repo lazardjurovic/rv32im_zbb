@@ -21,7 +21,7 @@
 
 #include <linux/interrupt.h>
 #define MAX_DEVICES 2
-#define BUFF_SIZE 40
+#define BUFF_SIZE 512
 #define INSTR_BRAM_SIZE 1024
 #define DRIVER_NAME "bram"
 MODULE_LICENSE("Dual BSD/GPL");
@@ -171,49 +171,75 @@ static int instr_remove(struct platform_device *pdev)
 
 int instr_open(struct inode *pinode, struct file *pfile)
 {
-	printk(KERN_INFO "Successfully opened instruction BRAM\n");
+	printk(KERN_INFO "Successfully opened BRAM\n");
 	return 0;
 }
 
 int instr_close(struct inode *pinode, struct file *pfile)
 {
-	printk(KERN_INFO "Successfully closed instruction BRAM\n");
+	printk(KERN_INFO "Successfully closed BRAM\n");
 	return 0;
 }
 
 ssize_t instr_read(struct file *pfile, char __user *buffer, size_t length, loff_t *offset)
 {
-	int ret, device_index = iminor(pfile->f_inode); // Use minor number to identify device
-	unsigned int addr = 0;
-	int len = 0;
-	u32 value = 0;
-	int i = 0;
-	char buff[BUFF_SIZE]= {0};
+    int ret, device_index = iminor(pfile->f_inode); // Use minor number to identify device
+    unsigned int addr = *offset; // Start reading from the current offset
+    u32 value = 0;
+    char buff[BUFF_SIZE];
+    size_t len = 0;
+   
+    printk(KERN_INFO "Trying to get %d bytes to user space\n",(int)length);
 
-	if (endRead[device_index]) {
-		endRead[device_index] = 0;
-		return 0;
-	}
+    // Check for valid device index
+    if (device_index < 0 || device_index >= 2) {
+        printk(KERN_ERR "Invalid device index %d\n", device_index);
+        return -ENODEV;
+    }
 
-	while (addr < INSTR_BRAM_SIZE) {
-		value = ioread32(lp[0]->base_addr + addr); // always read data memory
+    // Reset endRead flag if it was set
+    if (endRead[device_index] || addr >= INSTR_BRAM_SIZE) {
+        return 0; // End of file
+    }
 
-		sprintf(buff,"%ul",value);
+    // Initialize buffer
+    memset(buff, 0, BUFF_SIZE);
 
-		buff[32] = '\n';
-		len = 33;
-		ret = copy_to_user(buffer, buff, len);
-		if (ret)
-			return -EFAULT;
+    // Read data from memory and format it
+    while (addr <= 128 && len < length) {
+        value = ioread32(lp[device_index]->base_addr + addr); // Read data from memory
+        // Format value as hexadecimal and append to buffer
+        len += snprintf(buff + len, BUFF_SIZE - len, "%08x\n", value);
 
-		addr += 4;
-	}
+        // Stop if buffer length exceeds user-requested length
+        if (len >= length) {
+            break;
+        }
 
-	printk(KERN_INFO "Successfully read from device %d\n", device_index);
-	endRead[device_index] = 1;
+        addr += 4; // Move to next address (4 bytes)
+    }
 
-	return len;
+    // Update the offset for the next read
+    *offset = addr;
+
+    // Check if we copied any data to user space
+    if (len == 0) {
+        return 0; // No more data to read
+    }
+
+    // Copy data to user space
+    ret = copy_to_user(buffer, buff, len);
+    if (ret) {
+        printk(KERN_ERR "Failed to copy %zu bytes to user space from device %d\n", len, device_index);
+        return -EFAULT;
+    }
+
+    printk(KERN_INFO "Successfully read %zu bytes from device %d\n", len, device_index);
+
+    return len; // Return the number of bytes read
 }
+
+
 
 ssize_t instr_write(struct file *pfile, const char __user *buffer, size_t length, loff_t *offset)
 {
