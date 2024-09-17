@@ -1,5 +1,5 @@
 ifneq ($(KERNELRELEASE),)
-	obj-m :=_bram_driver.o
+	obj-m := bram_driver.o
 else
 
 KERNELDIR ?= /lib/modules/build
