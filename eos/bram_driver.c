@@ -135,13 +135,13 @@ static int instr_probe(struct platform_device *pdev)
             lp[i]->base_addr = base_addr;
 
             printk(KERN_INFO "[PROBE] Device %d registered @ address: %lx\n", i, mem_start);
-
+	   /*
             if (device_data == 0x40000000) {
                 printk(KERN_INFO "INSTRUCTION MEMORY\n");
             } else if (device_data == 0x42000000) {
                 printk(KERN_INFO "DATA MEMORY\n");
             }
-
+	    */
             return 0; // Successful probe
         }
     }
@@ -196,7 +196,7 @@ ssize_t instr_read(struct file *pfile, char __user *buffer, size_t length, loff_
 	}
 
 	while (addr < INSTR_BRAM_SIZE) {
-		value = ioread32(lp[device_index]->base_addr + addr);
+		value = ioread32(lp[0]->base_addr + addr); // always read data memory
 
 		sprintf(buff,"%ul",value);
 
@@ -221,19 +221,25 @@ ssize_t instr_write(struct file *pfile, const char __user *buffer, size_t length
 	int ret, device_index;
 	unsigned int value;
 	unsigned int addr;
+	
+	//printk(KERN_INFO "Step 1 of write \n");
 
 	if (length >= BUFF_SIZE) {
 		printk(KERN_ERR "Input too large\n");
 		return -EINVAL;
 	}
 
+	//printk(KERN_INFO "Step 2 of write \n");
+
 	ret = copy_from_user(buff, buffer, length);
 	if (ret) {
 		return -EFAULT;
 	}
-
+	
+	//printk(KERN_INFO "HALF WAY THROUH WRITE\n");
+	
 	ret = sscanf(buff, "%d %u %u", &device_index,&addr, &value);
-	if (ret != 2) {
+	if (ret != 3) {
 		printk(KERN_ERR "Invalid input format\n");
 		return -EINVAL;
 	}
@@ -242,7 +248,7 @@ ssize_t instr_write(struct file *pfile, const char __user *buffer, size_t length
 		printk(KERN_ERR "Address out of range\n");
 		return -EINVAL;
 	}
-
+	//:printk("Trying write on device %d\n",device_index);
 	iowrite32((u32)value, lp[device_index]->base_addr + addr);
 	printk(KERN_INFO "Successfully wrote value %#x to address %#x on device %d\n", value, addr, device_index);
 	
@@ -253,64 +259,73 @@ ssize_t instr_write(struct file *pfile, const char __user *buffer, size_t length
 
 static int __init instr_init(void)
 {
-	int ret = 0;
-	int i;
+    int ret, i;
 
-	// Initialize char device region for MAX_DEVICES
-	ret = alloc_chrdev_region(&my_dev_id, 0, MAX_DEVICES, DRIVER_NAME);
-	if (ret) {
-		printk(KERN_ERR "Failed to register char device\n");
-		return ret;
-	}
-	printk(KERN_INFO "Char device region allocated\n");
+    // Initialize char device region for MAX_DEVICES
+    ret = alloc_chrdev_region(&my_dev_id, 0, MAX_DEVICES, DRIVER_NAME);
+    if (ret) {
+        printk(KERN_ERR "Failed to register char device\n");
+        return ret;
+    }
+    printk(KERN_INFO "Char device region allocated: %d:%d\n", MAJOR(my_dev_id), MINOR(my_dev_id));
 
-	my_class = class_create(THIS_MODULE, "instr_class");
-	if (my_class == NULL) {
-		printk(KERN_ERR "Failed to create class\n");
-		goto fail_0;
-	}
-	printk(KERN_INFO "Class created\n");
+    // Create class
+    my_class = class_create(THIS_MODULE, "instr_class");
+    if (IS_ERR(my_class)) {
+        printk(KERN_ERR "Failed to create class\n");
+        unregister_chrdev_region(my_dev_id, MAX_DEVICES);
+        return PTR_ERR(my_class);
+    }
 
-	// Create device nodes for each device
-	for (i = 0; i < MAX_DEVICES; i++) {
-		my_device = device_create(my_class, NULL, MKDEV(MAJOR(my_dev_id), i), NULL, DRIVER_NAME "_%d", i);
-		if (my_device == NULL) {
-			printk(KERN_ERR "Failed to create device %d\n", i);
-			goto fail_1;
-		}
-	}
+    // Create device nodes for each device
+    for (i = 0; i < MAX_DEVICES; i++) {
+        my_device = device_create(my_class, NULL, MKDEV(MAJOR(my_dev_id), i), NULL, DRIVER_NAME "_%d", i);
+        if (IS_ERR(my_device)) {
+            printk(KERN_ERR "Failed to create device %d\n", i);
+            ret = PTR_ERR(my_device);
+            goto fail_device_create;
+        }
+    }
 
-	// Initialize cdev
-	my_cdev = cdev_alloc();
-	my_cdev->ops = &my_fops;
-	my_cdev->owner = THIS_MODULE;
-	ret = cdev_add(my_cdev, my_dev_id, MAX_DEVICES);
-	if (ret) {
-		printk(KERN_ERR "Failed to add cdev\n");
-		goto fail_2;
-	}
-	printk(KERN_INFO "Cdev added\n");
-	printk(KERN_INFO "[INIT] Driver loaded\n");
+    // Initialize cdev and add it to the system
+    my_cdev = cdev_alloc();
+    if (!my_cdev) {
+        printk(KERN_ERR "Failed to allocate cdev\n");
+        ret = -ENOMEM;
+        goto fail_cdev_alloc;
+    }
+    my_cdev->ops = &my_fops;
+    my_cdev->owner = THIS_MODULE;
+    ret = cdev_add(my_cdev, my_dev_id, MAX_DEVICES);
+    if (ret) {
+        printk(KERN_ERR "Failed to add cdev\n");
+        goto fail_cdev_add;
+    }
 
-	// Register platform driver
-	ret = platform_driver_register(&instr_driver);
-	if (ret) {
-		printk(KERN_ERR "Failed to register platform driver\n");
-		goto fail_2;
-	}
+    // Register platform driver
+    ret = platform_driver_register(&instr_driver);
+    if (ret) {
+        printk(KERN_ERR "Failed to register platform driver\n");
+        goto fail_driver_register;
+    }
 
-	return 0; // Initialization successful
+    printk(KERN_INFO "[INIT] Driver loaded\n");
+    return 0;
 
-fail_2:
-	for (i = 0; i < MAX_DEVICES; i++)
-		device_destroy(my_class, MKDEV(MAJOR(my_dev_id), i));
-fail_1:
-	class_destroy(my_class);
-fail_0:
-	unregister_chrdev_region(my_dev_id, MAX_DEVICES);
-	return -1;
+fail_driver_register:
+    cdev_del(my_cdev);
+fail_cdev_add:
+    for (i = 0; i < MAX_DEVICES; i++)
+        device_destroy(my_class, MKDEV(MAJOR(my_dev_id), i));
+fail_cdev_alloc:
+fail_device_create:
+    class_destroy(my_class);
+    unregister_chrdev_region(my_dev_id, MAX_DEVICES);
+    return ret;
 }
 
+
+ 
 static void __exit instr_exit(void)
 {
 	int i;
