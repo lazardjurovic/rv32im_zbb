@@ -57,17 +57,16 @@ int main(int argc, char **argv){
 	FILE *instr_mem;
 	FILE *data_mem;
 	
-	//cpu_regs = fopen("/dev/cpu_driver","r+"); // read + write
-	//if(cpu_regs == NULL){
-	//	printf("ERROR. File /dev/cpu_driver doesn't exits.\n");
-	//	exit(1);	
-//	}	
-
-	instr_mem = fopen("/dev/bram_0","r+");
-	if(instr_mem == NULL){
-		printf("ERROR.\n");
-		exit(1);
+	cpu_regs = fopen("/dev/cpu","r+"); // read + write
+	if(cpu_regs == NULL){
+		printf("ERROR. File /dev/cpu_driver doesn't exits.\n");
+		exit(1);	
 	}
+
+	fprintf(cpu_regs,"s"); // rise reset flag
+	fclose(cpu_regs);	
+
+	printf("Reset flag is now 1\n");
 	
 	int i,j;
 	char command[30] = {0};
@@ -85,8 +84,24 @@ int main(int argc, char **argv){
 		fclose(instr_mem);
 	}
 
+        printf("Transfered program to instruction bram\n");
 
-	printf("Transfered some zeros to memory\n");
+
+	cpu_regs = fopen("/dev/cpu","r+"); // read + write
+        if(cpu_regs == NULL){
+                printf("ERROR. File /dev/cpu_driver doesn't exits.\n");
+                exit(1);
+        }
+
+        fprintf(cpu_regs,"r"); // rise reset flag
+        fclose(cpu_regs);
+
+
+	printf("Reset flag is now 0\n");
+
+
+	usleep(1000000);
+	system("cat /dev/bram_1");
 
 	return 0;
 }
