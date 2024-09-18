@@ -21,7 +21,7 @@
 
 #include <linux/interrupt.h>
 #define MAX_DEVICES 2
-#define BUFF_SIZE 512
+#define BUFF_SIZE 768
 #define INSTR_BRAM_SIZE 1024
 #define DRIVER_NAME "bram"
 MODULE_LICENSE("Dual BSD/GPL");
@@ -206,7 +206,7 @@ ssize_t instr_read(struct file *pfile, char __user *buffer, size_t length, loff_
     memset(buff, 0, BUFF_SIZE);
 
     // Read data from memory and format it
-    while (addr <= 128 && len < length) {
+    while (addr <= 256 && len < length) {
         value = ioread32(lp[device_index]->base_addr + addr); // Read data from memory
         // Format value as hexadecimal and append to buffer
         len += snprintf(buff + len, BUFF_SIZE - len, "%08x\n", value);
@@ -274,7 +274,7 @@ ssize_t instr_write(struct file *pfile, const char __user *buffer, size_t length
 		printk(KERN_ERR "Address out of range\n");
 		return -EINVAL;
 	}
-	printk("Trying write %d to %d\n",value,addr);
+	printk(KERN_INFO "Trying to write %#X to %d\n",value,addr);
 	iowrite32((u32)value, lp[device_index]->base_addr + addr);
 	printk(KERN_INFO "Successfully wrote value %#x to address %#x on device %d\n", value, addr, device_index);
 	
