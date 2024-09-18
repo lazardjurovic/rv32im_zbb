@@ -63,17 +63,28 @@ int main(int argc, char **argv){
 	//	exit(1);	
 //	}	
 
+	instr_mem = fopen("/dev/bram_0","r+");
+	if(instr_mem == NULL){
+		printf("ERROR.\n");
+		exit(1);
+	}
+	
 	int i,j;
 	char command[30] = {0};
 
 	for(i = 0; i<=44; i++){
-		    sprintf(command, "echo \"0 %d %ul\" > /dev/bram_0", i*4,program[i]);
-		    system(command);
-		    for(j = 0; j<30; j++){
-			command[j] = 0;
-		    }	
-		usleep(1000000);
+		instr_mem = fopen("/dev/bram_0","r+");
+        	
+		if(instr_mem == NULL){
+                	printf("ERROR.\n");
+               	 	exit(1);
+        	}
+
+		fprintf(instr_mem,"%d %d %u",0,i*4,program[i]);
+		usleep(100000);
+		fclose(instr_mem);
 	}
+
 
 	printf("Transfered some zeros to memory\n");
 
