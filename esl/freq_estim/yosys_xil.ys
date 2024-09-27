@@ -1,0 +1,3 @@
+read_verilog execute_phase.v
+synth_xilinx -flatten -top execute_phase
+

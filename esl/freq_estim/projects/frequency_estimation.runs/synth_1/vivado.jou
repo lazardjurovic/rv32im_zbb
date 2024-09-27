@@ -1,0 +1,13 @@
+#-----------------------------------------------------------
+# Vivado v2022.2 (64-bit)
+# SW Build 3671981 on Fri Oct 14 04:59:54 MDT 2022
+# IP Build 3669848 on Fri Oct 14 08:30:02 MDT 2022
+# Start of session at: Fri Jun 21 15:53:38 2024
+# Process ID: 26398
+# Current directory: /home/lazar/Desktop/y24-g05/esl/freq_estim/projects/frequency_estimation.runs/synth_1
+# Command line: vivado -log execute_phase.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source execute_phase.tcl
+# Log file: /home/lazar/Desktop/y24-g05/esl/freq_estim/projects/frequency_estimation.runs/synth_1/execute_phase.vds
+# Journal file: /home/lazar/Desktop/y24-g05/esl/freq_estim/projects/frequency_estimation.runs/synth_1/vivado.jou
+# Running On: lazar, OS: Linux, CPU Frequency: 3356.154 MHz, CPU Physical cores: 12, Host memory: 14488 MB
+#-----------------------------------------------------------
+source execute_phase.tcl -notrace

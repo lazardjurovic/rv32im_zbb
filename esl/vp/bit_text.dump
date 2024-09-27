@@ -1,0 +1,28 @@
+
+bitmanip_test.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text.startup:
+
+00000000 <main>:
+   0:	12300093          	li	ra,291
+   4:	34700113          	li	sp,839
+   8:	4020f1b3          	andn	gp,ra,sp
+   c:	60019213          	clz	tp,gp
+  10:	60209293          	cpop	t0,ra
+  14:	60111313          	ctz	t1,sp
+  18:	0a5363b3          	max	t2,t1,t0
+  1c:	0a537433          	maxu	s0,t1,t0
+  20:	0a1144b3          	min	s1,sp,ra
+  24:	0a325533          	minu	a0,tp,gp
+  28:	4020e5b3          	orn	a1,ra,sp
+  2c:	6980d613          	rev8	a2,ra
+  30:	604196b3          	rol	a3,gp,tp
+  34:	6020d733          	ror	a4,ra,sp
+  38:	60565793          	ror	a5,a2,0x5
+  3c:	60409813          	sext.b	a6,ra
+  40:	60511893          	sext.h	a7,sp
+  44:	4020c933          	xnor	s2,ra,sp
+  48:	0800c9b3          	zext.h	s3,ra
+  4c:	00000513          	li	a0,0
+  50:	00008067          	ret
